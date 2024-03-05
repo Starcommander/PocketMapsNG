@@ -53,6 +53,10 @@ project(":desktop") {
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "org.mapsforge:vtm-desktop:$vtmVersion"
         api "org.mapsforge:vtm-desktop-lwjgl3:$vtmVersion"
+
+        runtimeOnly 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-linux'
+        runtimeOnly 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-osx'
+        runtimeOnly 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-windows'
     }
 }
 
