@@ -1,4 +1,4 @@
 *PocketMaps*
 
-Build with: gradlew build
+Build with: gradlew desktop:build  
 Run with: gradlew desktop:run

@@ -62,14 +62,14 @@ private Stage guiStage;
     	File cfgDir = new File(System.getProperty("user.dir") +  "/.pm-cfg");
     	cfgDir.mkdir();
     	Cfg.setDirectory(cfgDir);
-String mapFile = "/home/paul/workspace_gdx/pocketmaps/europe_andorra/europe_andorra.map";
-MapList.getInstance().loadMap(mapFile, getMap());
+//String mapFile = "/home/paul/workspace_gdx/pocketmaps/europe_andorra/europe_andorra.map";
+//MapList.getInstance().loadMap(mapFile, getMap());
 
-mapFile = "/home/paul/workspace_gdx/pocketmaps/europe_austria/europe_austria.map";
-String aPath = "/home/paul/workspace_gdx/pocketmaps/europe_austria/";
-GeoPoint mapCenter = MapList.getInstance().loadMap(mapFile, getMap());
+//mapFile = "/home/paul/workspace_gdx/pocketmaps/europe_austria/europe_austria.map";
+//String aPath = "/home/paul/workspace_gdx/pocketmaps/europe_austria/";
+//GeoPoint mapCenter = MapList.getInstance().loadMap(mapFile, getMap());
 
-MapHandler.getInstance().createPathfinder(new File(aPath), (o) -> MapHandler.getInstance().setCurrentPathfinder(o));
+//MapHandler.getInstance().createPathfinder(new File(aPath), (o) -> MapHandler.getInstance().setCurrentPathfinder(o));
 
 //PolyParser.doIt(mMap, "europe/spain.poly");
 //PolyParser.doIt(mMap, "europe/austria.poly");

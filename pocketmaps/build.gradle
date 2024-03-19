@@ -57,6 +57,9 @@ project(":desktop") {
         runtimeOnly 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-linux'
         runtimeOnly 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-osx'
         runtimeOnly 'org.lwjgl.lwjgl:lwjgl-platform:2.9.3:natives-windows'
+        runtimeOnly 'org.mapsforge:vtm-desktop:$vtmVersion:natives-linux'
+        runtimeOnly 'org.mapsforge:vtm-desktop:$vtmVersion:natives-osx'
+        runtimeOnly 'org.mapsforge:vtm-desktop:$vtmVersion:natives-windows'
     }
 }
 

@@ -45,10 +45,10 @@ public class DesktopLauncher extends MyGdxGame {
 
     public static void init() {
         // load native library
-//TODO: Find a better way instead loading a jar from abs dir.
-        SharedLibraryLoader loader = new SharedLibraryLoader("/home/paul/workspace_gdx/pocketmaps/natives/linux.jar");
+
+        SharedLibraryLoader loader = new SharedLibraryLoader(null);
         loader.load("vtm-jni");
-        // init globals
+
         AwtGraphics.init();
         GdxAssets.init("assets/");
         DateTimeAdapter.init(new DateTime());
