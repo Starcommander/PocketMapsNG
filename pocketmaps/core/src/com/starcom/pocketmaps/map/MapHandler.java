@@ -198,11 +198,6 @@ public class MapHandler
 //          }
 //      }.execute();
   }
-  
-  public void onMapLoaded(Map map)
-  {
-	  map.layers().add(new MapEventsReceiver(map));
-  }
 	  
 //public void loadMapx(File areaFolder, Map map) {
 //    // Map events receiver

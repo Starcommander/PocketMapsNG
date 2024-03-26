@@ -67,8 +67,8 @@ public class NavView
 	{
 		bottomPanel.addActor(bottomFromButton);
 		bottomPanel.addActor(bottomToButton);
-		bottomFromButton.addListener(Util.wrapClickListener((x,y) -> onFromToClick(true)));
-		bottomToButton.addListener(Util.wrapClickListener((x,y) -> onFromToClick(false)));
+		bottomFromButton.addListener(Util.wrapClickListener((a,x,y) -> onFromToClick(true)));
+		bottomToButton.addListener(Util.wrapClickListener((a,x,y) -> onFromToClick(false)));
 	}
 	
 	void onFromToClick(final boolean from)

@@ -17,6 +17,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -54,9 +55,16 @@ public class MapList
     {
     	System.out.println("Click f=" + mapFile);
     	MapLayer ml = new MapLayer(mapFile, map);
-    	MapHandler.getInstance().onMapLoaded(map);
+    	ml.initAndAttach();
     	mapLayers.add(ml);
         return ml.getCenter();
+    }
+    
+    public void unloadMap(MapLayer ml)
+    {
+		mapLayers.remove(ml);
+		ml.dispose();
+		    	//MapHandler.getInstance().onMapLoaded(map);
     }
     
 	public void viewMapsSelect(Stage guiStage, Map map)
@@ -80,10 +88,26 @@ public class MapList
 						break;
 					}
 				}
-				ll.addCheckboxElement(f.name(), isVisible, (x,y) ->
+				ll.addCheckboxElement(f.name(), isVisible, (a,x,y) ->
 				{
+					CheckBox box = (CheckBox)a;
 					File mapFile = new File(Gdx.files.getExternalStoragePath(), f.child(f.name() + ".map").path());
-					loadMap(mapFile.getPath(), map);
+					if (box.isChecked())
+					{
+						loadMap(mapFile.getPath(), map);
+					}
+					else
+					{
+						for (MapLayer ml : mapLayers)
+						{
+							if (ml.getMapFile().equals(mapFile.getPath()))
+							{
+								unloadMap(ml);
+								break;
+							}
+						}
+						System.out.println("Todo: Discard map");
+					}
 				});
 			}
 		}
@@ -132,7 +156,7 @@ public class MapList
 			table.add(new Label("Map size: " + msize, Util.getDefaultSkin())).width(w/3);
 			table.add(new Label(mcont, Util.getDefaultSkin())).width(w/3);
 			
-			ll.addElement(table, (x, y) -> Download.downloadMapNow(guiStage, mdate, mname));
+			ll.addElement(table, (a, x, y) -> Download.downloadMapNow(guiStage, mdate, mname));
 		}
 		ll.showAsWindow(guiStage);
 	}
@@ -142,7 +166,7 @@ public class MapList
 		ListSelect ll = new ListSelect("Directions");
 		for (Instruction inst : instL)
 		{
-			ll.addElement(inst.getName(), (x,y) -> {});
+			ll.addElement(inst.getName(), (a,x,y) -> {});
 		}
 //		ll.showAsWindow(guiStage); //TODO: Howto get guiStage
 	}

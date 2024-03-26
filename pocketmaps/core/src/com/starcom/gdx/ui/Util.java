@@ -33,7 +33,7 @@ public class Util
 	{
 		return new ClickListener()
 		{
-			public void clicked (InputEvent event, float x, float y) { l.click(x, y); }
+			public void clicked (InputEvent event, float x, float y) { l.click(event.getListenerActor(), x, y); }
 		};
 	}
 }
