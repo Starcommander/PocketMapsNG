@@ -84,6 +84,7 @@ public class Settings
 				logger.log(Level.SEVERE, "Error reading settings", e);
 			}
 		}
+		prop.put(fname, settings);
 		return settings;
 	}
 

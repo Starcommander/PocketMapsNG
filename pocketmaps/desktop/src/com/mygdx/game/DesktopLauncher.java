@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.starcom.pocketmaps.views.MapList;
+
 import org.oscim.backend.GL;
 import org.oscim.core.Point;
 import org.oscim.gdx.GdxMapApp;
@@ -83,7 +85,7 @@ com.starcom.gdx.system.App.setAppName("PocketMaps", false);
 
     @Override
     public void dispose() {
-        System.exit(0); //TODO: Find a better way.
+    	MapList.getInstance().unloadMaps();
     }
 
     public static void main(String[] args) {

@@ -14,11 +14,15 @@ import com.starcom.pocketmaps.map.MapHandler;
 public class TopPanel
 {
 	static TopPanel instance = new TopPanel();
+	private Stage guiStage;
 	
 	public static TopPanel getInstance() { return instance; }
+	
+	public Stage getGuiStage() { return guiStage; }
 
 	public void show(Stage guiStage, Map map)
 	{
+		this.guiStage = guiStage;
 		int w = Gdx.graphics.getWidth();
 		int h = Gdx.graphics.getHeight()/8;
 		int x = 0;
