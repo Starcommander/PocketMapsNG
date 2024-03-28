@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.starcom.gdx.io.PolyParser;
+import com.starcom.gdx.io.Storage;
 import com.starcom.gdx.system.Threading;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
@@ -48,7 +49,6 @@ import static org.oscim.backend.GLAdapter.gl;
 import java.io.File;
 
 public abstract class MyGdxGame extends GdxMap {
-    private double scale = 1 << 12;
 
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -59,9 +59,8 @@ private Stage guiStage;
 
     @Override
     public void createLayers() {
-    	File cfgDir = new File(System.getProperty("user.dir") +  "/.pm-cfg");
-    	cfgDir.mkdir();
-    	Cfg.setDirectory(cfgDir);
+    	Storage.getFileHandle("config").mkdirs();
+    	Cfg.setDirectory(Storage.getFileHandle("config").file());
 //String mapFile = "/home/paul/workspace_gdx/pocketmaps/europe_andorra/europe_andorra.map";
 //MapList.getInstance().loadMap(mapFile, getMap());
 
@@ -75,7 +74,6 @@ private Stage guiStage;
 //PolyParser.doIt(mMap, "europe/austria.poly");
 PolyParser.doItAll(mMap);
 //    getMap().setMapPosition(mapCenter.getLatitude(), mapCenter.getLongitude(), scale);
-    getMap().setMapPosition(48.271531, 14.574019, scale); //TODO: Use above instead
 
         camera = new OrthographicCamera();
         viewport = new ScreenViewport(camera);
@@ -99,7 +97,7 @@ PolyParser.doItAll(mMap);
 
 
 Threading.getInstance().init();
-Skin uiSkin = Util.getDefaultSkin();
+//Skin uiSkin = Util.getDefaultSkin();
 //Dialog dialog = new Dialog("Warning", uiSkin, "dialog") {
 //    public void result(Object obj) {
 //        System.out.println("result "+obj);
@@ -131,7 +129,7 @@ Gdx.input.setInputProcessor(inputMultiplexer);
 //}
 ////listSel.showAsWindow(guiStage);
 TopPanel.getInstance().show(guiStage, getMap());
-
+MapList.getInstance().loadSettings(mMap);
 //dialog.show(guiStage);
     }
 

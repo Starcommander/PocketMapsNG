@@ -65,7 +65,11 @@ public class MapLayer
 //	public BuildingLayer getBuildingLayer() { return buildingLayer; }
 //	public LabelLayer getLabelLayer() { return labelLayer; }
 //	public MapEventsReceiver getTargetLayer() { return mer; }
-	public GeoPoint getCenter() { return tileSource.getMapInfo().boundingBox.getCenterPoint(); }
+	public GeoPoint getCenter()
+	{
+		if (tileSource.getMapInfo() == null) { throw new NullPointerException("Error getting boundingBox of map: " + getMapFile()); }
+		return tileSource.getMapInfo().boundingBox.getCenterPoint();
+	}
 	public String getMapFile() { return mapFile; }
 	public GraphHopper getPathfinder() { return graphHopper; }
 	public void dispose()

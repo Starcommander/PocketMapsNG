@@ -7,7 +7,7 @@ public class Cfg
 	public final static String TRAVEL_MODE_BIKE = "bike";
 	public final static String TRAVEL_MODE_CAR = "car";
 	public final static String TRAVEL_MODE_FOOT = "foot";
-	public enum NavKey { TravelMode, Weighting, TtsEngine, TtsWantedVoice }
+	public enum NavKey { TravelMode, Weighting, TtsEngine, TtsWantedVoice, MapSelection }
 	public enum NavKeyB { DirectionsOn, IsImperialUnit, ShowingSpeedLimits, SpeakingSpeedLimits, TtsOn }
 	public enum ConfType { Navigation } //TODO: old used 'base' unuseable, better 'SearchHints'
 	
