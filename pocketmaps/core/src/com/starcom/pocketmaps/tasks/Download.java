@@ -28,6 +28,7 @@ public class Download
 		IProgressListener callback = Dialogs.showProgress(guiStage, () ->
 		{
 			getMapsPath(mname + ".part").moveTo(getMapsPath(mname));
+			getMapsPath(mname + ".ghz").delete();
 			toastShort("Got: " + mname);
 		}, (o) ->
 		{

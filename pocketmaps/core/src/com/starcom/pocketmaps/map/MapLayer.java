@@ -2,6 +2,7 @@ package com.starcom.pocketmaps.map;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.File;
 
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.tile.buildings.BuildingLayer;
@@ -35,8 +36,9 @@ public class MapLayer
 	
 	public void initAndAttach()
 	{
+		File mapFileF= new File(mapFile);
 		tileSource = new MapFileTileSource();
-        tileSource.setMapFile(new java.io.File(mapFile).getAbsolutePath());
+        tileSource.setMapFile(mapFileF.getAbsolutePath());
         vtLayer = map.setBaseMap(tileSource);
         map.setTheme(VtmThemes.DEFAULT);
         buildingLayer = new BuildingLayer(map, vtLayer);
@@ -45,9 +47,8 @@ public class MapLayer
         map.layers().add(labelLayer);
         mer = MapHandler.getInstance().new MapEventsReceiver(map);
     	map.layers().add(mer);
-        //TODO: Use real path of this map
-        java.io.File f = new java.io.File("/home/paul/workspace_gdx/pocketmaps/europe_austria/");
-        MapHandler.getInstance().createPathfinder(f, (o) -> //TODO: update mapFolder dynamic in createPathfinder(mapFolder, task)
+        File mapDir = mapFileF.getParentFile().getAbsoluteFile();
+        MapHandler.getInstance().createPathfinder(mapDir, (o) ->
         {
         	if (o instanceof GraphHopper)
         	{
