@@ -5,11 +5,11 @@ import org.oscim.map.Map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.starcom.gdx.io.PolyParser;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.interfaces.IProgressListener.Type;
 import com.starcom.pocketmaps.map.MapHandler;
+import com.starcom.pocketmaps.util.PolyParser;
 
 public class TopPanel
 {
@@ -57,7 +57,7 @@ public class TopPanel
 		else if (action.equals("DoNavigate"))
 		{
 			MapHandler.getInstance().createAdditionalMapLayers(MapList.getInstance().getFocusMap()); // TODO: Not here.
-			PolyParser.addDebugLine(MapList.getInstance().getFocusMap());
+//			PolyParser.addDebugLine(MapList.getInstance().getFocusMap());
 ////			MapHandler.getInstance().calcPath(MapList.getInstance().getFocusMap(), 48.271555f, 14.574171f, 48.247748, 14.627872);
 			MapHandler.getInstance().setStartEndPoint(MapList.getInstance().getFocusMap(), new GeoPoint(48.271555f, 14.574171f), true, false);
 			MapHandler.getInstance().setStartEndPoint(MapList.getInstance().getFocusMap(), new GeoPoint(48.247748, 14.627872), false,true);

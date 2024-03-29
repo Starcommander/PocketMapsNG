@@ -1,4 +1,4 @@
-package com.starcom.gdx.io;
+package com.starcom.pocketmaps.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import com.badlogic.gdx.files.FileHandle;
 
 public class PolyParser
 {
-	public static boolean doItAll(Map map) //TODO: Change package name, should not be in com.starcom.gdx!
+	public static boolean doItAll(Map map)
 	{
 		for (FileHandle polyFile : Gdx.files.internal("polys").list())
 		{
@@ -23,20 +23,7 @@ public class PolyParser
 		}
 		return true;
 	}
-	
-	public static void addDebugLine(Map map) //TODO: clear this 
-	{
-		PathLayer pl = new PathLayer(map, Color.BLACK);
-		map.layers().add(pl);
-		pl.addPoint(new GeoPoint(48.271516,14.574035));
-		pl.addPoint(new GeoPoint(48.274238,14.582121));
-	}
-	public static void addDebugLineX(Map map, ArrayList<GeoPoint> geos) //TODO: clear this 
-	{
-		PathLayer pl = new PathLayer(map, Color.BLACK);
-		map.layers().add(pl);
-		pl.addPoints(geos);
-	}
+
 	public static boolean doIt(Map map, String filePath)
 	{
 		try (BufferedReader in = Gdx.files.internal(filePath).reader(512))
