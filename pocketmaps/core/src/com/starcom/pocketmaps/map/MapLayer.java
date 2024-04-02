@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.File;
 
+import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -15,6 +16,7 @@ import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import com.graphhopper.GraphHopper;
 import com.starcom.LoggerUtil;
 import com.starcom.pocketmaps.map.MapHandler.MapEventsReceiver;
+import com.starcom.pocketmaps.views.TopPanel;
 
 public class MapLayer
 {
@@ -28,10 +30,10 @@ public class MapLayer
 	private Map map;
 	private MapEventsReceiver mer;
 	
-	public MapLayer(String mapFile, Map map)
+	public MapLayer(String mapFile)
 	{
 		this.mapFile = mapFile;
-		this.map = map;
+		this.map = TopPanel.getInstance().getGdxMap();
 	}
 	
 	public void initAndAttach()
@@ -61,7 +63,7 @@ public class MapLayer
         });
 	}
 	
-	public Map getMap() { return map; }
+//	public Map getMap() { return map; }
 //	public VectorTileLayer getVectorTileLayer() { return vtLayer; }
 //	public BuildingLayer getBuildingLayer() { return buildingLayer; }
 //	public LabelLayer getLabelLayer() { return labelLayer; }
@@ -69,13 +71,18 @@ public class MapLayer
 	public GeoPoint getCenter()
 	{
 		if (tileSource.getMapInfo() == null) { throw new NullPointerException("Error getting boundingBox of map: " + getMapFile()); }
-		return tileSource.getMapInfo().boundingBox.getCenterPoint();
+		return tileSource.getMapInfo().mapCenter;
+	}
+	public BoundingBox getBoundingBox()
+	{
+		if (tileSource.getMapInfo() == null) { throw new NullPointerException("Error getting boundingBox of map: " + getMapFile()); }
+		return tileSource.getMapInfo().boundingBox;
 	}
 	public String getMapFile() { return mapFile; }
 	public GraphHopper getPathfinder() { return graphHopper; }
 	public void dispose()
 	{
-		boolean dTL = getMap().layers().remove(mer);
+		boolean dTL = map.layers().remove(mer);
 		if (graphHopper != null)
 		{
 			graphHopper.close();

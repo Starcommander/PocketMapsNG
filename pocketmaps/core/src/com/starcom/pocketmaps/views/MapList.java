@@ -6,6 +6,7 @@ import java.util.Vector;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
+import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
@@ -52,16 +53,35 @@ public class MapList
 		return instance;
 	}
 	
-	/** Throws an Exception when no map is loaded. */
-	public Map getFocusMap()
+	public MapLayer findMapLayerFromLocation(GeoPoint pos)
 	{
-		return mapLayers.get(0).getMap();
+		MapLayer matchingMap = null;
+		for (MapLayer l : mapLayers)
+		{
+			BoundingBox bbox = l.getBoundingBox();
+			if (bbox.contains(pos))
+			{
+				if (matchingMap != null)
+				{
+					if (checkLocationInside(pos, matchingMap)) { return matchingMap; }
+					else { matchingMap = l; }
+				}
+				return l;
+			}
+		}
+		return null;
 	}
 	
+	private boolean checkLocationInside(GeoPoint pos, MapLayer matchingMap)
+	{
+		//TODO: Fine tuning: Check complete path if inside.
+		return true;
+	}
+
 	public boolean hasFocusMap() { return mapLayers.size() > 0; }
 	
 	/** Should only be called on init. */
-	public void loadSettings(Map map)
+	public void loadSettings()
 	{
 		String sel = Cfg.getValue(NavKey.MapSelection, null);
 		System.out.println("--> We got settings: " + sel);
@@ -74,20 +94,20 @@ public class MapList
 				if (sel.contains(f.name()))
 				{
 					File mapFile = new File(Gdx.files.getExternalStoragePath(), f.child(f.name() + ".map").path());
-					GeoPoint mapCenter = loadMap(mapFile.getPath(), map);
+					GeoPoint mapCenter = loadMap(mapFile.getPath());
 					if (!focusDone)
 					{
-						map.setMapPosition(mapCenter.getLatitude(), mapCenter.getLongitude(), SCALE_DEF);
+						TopPanel.getInstance().getGdxMap().setMapPosition(mapCenter.getLatitude(), mapCenter.getLongitude(), SCALE_DEF);
 					}
 				}
 			}
 		}
 	}
     
-    public GeoPoint loadMap(String mapFile, Map map)
+    public GeoPoint loadMap(String mapFile)
     {
 		logger.info("Loading map: " + mapFile);
-    	MapLayer ml = new MapLayer(mapFile, map);
+    	MapLayer ml = new MapLayer(mapFile);
     	ml.initAndAttach();
     	mapLayers.add(ml);
         return ml.getCenter();
@@ -106,11 +126,11 @@ public class MapList
     }
     
     /** A view that shows the list for select or unselect maps. */
-	public void viewMapsSelect(Stage guiStage, Map map)
+	public void viewMapsSelect(Stage guiStage)
 	{
 		if (!Threading.getInstance().isMainThread())
 		{
-			Threading.getInstance().invokeOnMainThread(() -> viewMapsSelect(guiStage, map));
+			Threading.getInstance().invokeOnMainThread(() -> viewMapsSelect(guiStage));
 			return;
 		}
 		ListSelect ll = new ListSelect("SelectMaps");
@@ -133,8 +153,8 @@ public class MapList
 					File mapFile = new File(Gdx.files.getExternalStoragePath(), f.child(f.name() + ".map").path());
 					if (box.isChecked())
 					{
-						GeoPoint mapCenter = loadMap(mapFile.getPath(), map);
-						map.setMapPosition(mapCenter.getLatitude(), mapCenter.getLongitude(), SCALE_DEF);
+						GeoPoint mapCenter = loadMap(mapFile.getPath());
+						TopPanel.getInstance().getGdxMap().setMapPosition(mapCenter.getLatitude(), mapCenter.getLongitude(), SCALE_DEF);
 						updateCfg(mapFile.getName(), true);
 					}
 					else

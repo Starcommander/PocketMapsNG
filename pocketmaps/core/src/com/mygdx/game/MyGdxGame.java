@@ -129,7 +129,7 @@ Gdx.input.setInputProcessor(inputMultiplexer);
 //}
 ////listSel.showAsWindow(guiStage);
 TopPanel.getInstance().show(guiStage, getMap());
-MapList.getInstance().loadSettings(mMap);
+MapList.getInstance().loadSettings();
 //dialog.show(guiStage);
     }
 

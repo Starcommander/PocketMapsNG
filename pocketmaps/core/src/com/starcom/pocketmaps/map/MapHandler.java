@@ -33,6 +33,7 @@ import com.starcom.pocketmaps.Cfg.NavKeyB;
 import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.starcom.pocketmaps.navigator.Navigator;
 import com.starcom.pocketmaps.Icons;
+import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.VtmBitmap;
 import com.starcom.pocketmaps.util.TargetDirComputer;
 import com.graphhopper.util.Parameters.Algorithms;
@@ -52,7 +53,6 @@ public class MapHandler
   private ItemizedLayer customLayer;
   private PathLayer pathLayer;
 //  private PathLayer polylineTrack;
-  private GraphHopper hopper;
   private MapHandlerListener mapHandlerListener = null;
 //  private String currentArea;
 //  File mapsFolder;
@@ -109,23 +109,6 @@ public class MapHandler
 	    map.layers().add(itemizedLayer);
 	    customLayer = new ItemizedLayer(map, (MarkerSymbol) null);
 	    map.layers().add(customLayer);
-  }
-  
-  /** Use this as result function of createPathfinder(f,l) */
-  public void setCurrentPathfinder(Object ohopper)
-  {
-	  if (ohopper instanceof Exception)
-	  {
-		  logger.severe("Error setting pathfinder: " + ohopper);
-	  }
-	  else if (!(ohopper instanceof GraphHopper))
-	  {
-		  logger.severe("Error instance pathfinder: " + ohopper);
-	  }
-	  else
-	  {
-		  this.hopper = (GraphHopper)ohopper;
-	  }
   }
   
   /** Creates a graphhopper instance.
@@ -422,13 +405,6 @@ public class MapHandler
     }
   }
 
-    /**
-     * Get the hopper object, that may be null while loading map.
-     * @return GraphHopper object
-     */
-    public GraphHopper getHopper() {
-        return hopper;
-    }
 //
 //    /**
 //     * assign a new GraphHopper
@@ -463,9 +439,14 @@ public class MapHandler
             req.getPathDetails().add(com.graphhopper.util.Parameters.Details.AVERAGE_SPEED);
         }
         GHResponse resp = null;
-        if (hopper != null)
+        MapLayer ml = MapList.getInstance().findMapLayerFromLocation(new GeoPoint(toLat, toLon));
+        if (ml != null)
         {
-          resp = hopper.route(req);
+        	GraphHopper hopper = ml.getPathfinder();
+        	if (hopper != null)
+        	{
+        		resp = hopper.route(req);
+        	}
         }
         if (resp==null || resp.hasErrors())
         {
