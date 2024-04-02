@@ -41,6 +41,8 @@ import com.starcom.pocketmaps.map.MapLayer;
 
 public class MapList
 {
+	public enum MapAction {ShowHide, Delete}
+	
 	static Logger logger = LoggerUtil.get(MapList.class);
     private final static double SCALE_DEF = 1 << 12;
 	private static MapList instance = new MapList();
@@ -126,11 +128,11 @@ public class MapList
     }
     
     /** A view that shows the list for select or unselect maps. */
-	public void viewMapsSelect(Stage guiStage)
+	public void viewMapsSelect(Stage guiStage, MapAction atype)
 	{
 		if (!Threading.getInstance().isMainThread())
 		{
-			Threading.getInstance().invokeOnMainThread(() -> viewMapsSelect(guiStage));
+			Threading.getInstance().invokeOnMainThread(() -> viewMapsSelect(guiStage, atype));
 			return;
 		}
 		ListSelect ll = new ListSelect("SelectMaps");
@@ -152,13 +154,16 @@ public class MapList
 					CheckBox box = (CheckBox)a;
 					File mapFile = new File(Gdx.files.getExternalStoragePath(), f.child(f.name() + ".map").path());
 					if (box.isChecked())
-					{
-						GeoPoint mapCenter = loadMap(mapFile.getPath());
-						TopPanel.getInstance().getGdxMap().setMapPosition(mapCenter.getLatitude(), mapCenter.getLongitude(), SCALE_DEF);
-						updateCfg(mapFile.getName(), true);
+					{ //Show map.
+						if (atype != MapAction.Delete)
+						{
+							GeoPoint mapCenter = loadMap(mapFile.getPath());
+							TopPanel.getInstance().getGdxMap().setMapPosition(mapCenter.getLatitude(), mapCenter.getLongitude(), SCALE_DEF);
+							updateCfg(mapFile.getName(), true);
+						}
 					}
 					else
-					{
+					{ //Hide and clear map.
 						for (MapLayer ml : mapLayers)
 						{
 							if (ml.getMapFile().equals(mapFile.getPath()))
@@ -168,6 +173,11 @@ public class MapList
 								break;
 							}
 						}
+					}
+					if (atype == MapAction.Delete)
+					{ //Clear map directory.
+						f.deleteDirectory();
+						ToastMsg.getInstance().toastShort("Deleted: " + f.name());
 					}
 				});
 			}
