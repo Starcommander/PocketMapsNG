@@ -6,10 +6,12 @@ import org.oscim.map.Map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.starcom.gdx.ui.Dialogs;
+import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.interfaces.IProgressListener.Type;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.util.PolyParser;
+import com.starcom.pocketmaps.views.MapList.MapAction;
 
 public class TopPanel
 {
@@ -33,13 +35,21 @@ public class TopPanel
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
 		Dialogs.showPanel(guiStage,x,y,w,h);
-		Dialogs.showDropDown(guiStage, (o) -> doMenuAction(guiStage, o.toString()),30, y + 30, "AAA", "Download Maps", "Show/Hide Maps", "CCC", "DoNavigate");
+		Dialogs.showDropDown(guiStage, (o) -> doMenuAction(guiStage, o.toString()),30, y + 30, "AAA", "Maps...", "CCC", "DoNavigate");
 	}
 	
 	private static void doMenuAction(Stage guiStage, String action)
 	{
 		System.out.println("Menu: " + action);
-		if (action.equals("Download Maps"))
+		if (action.equals("Maps..."))
+		{
+			ListSelect ll = new ListSelect("Maps");
+			ll.addElement("Download Maps", (a,x,y) -> doMenuAction(guiStage, "Download Maps"));
+			ll.addElement("Show/Hide Maps", (a,x,y) -> doMenuAction(guiStage, "Show/Hide Maps"));
+			ll.addElement("Delete Maps", (a,x,y) -> doMenuAction(guiStage, "Delete Maps"));
+			ll.showAsWindow(guiStage);
+		}
+		else if (action.equals("Download Maps"))
 		{
 			String url = "http://vsrv15044.customer.xenway.de/maps/map_url-0.13.0_0.json";
 
@@ -57,7 +67,11 @@ public class TopPanel
 		}
 		else if (action.equals("Show/Hide Maps"))
 		{
-			MapList.getInstance().viewMapsSelect(guiStage);
+			MapList.getInstance().viewMapsSelect(guiStage, MapAction.ShowHide);
+		}
+		else if (action.equals("Delete Maps"))
+		{
+			MapList.getInstance().viewMapsSelect(guiStage, MapAction.Delete);
 		}
 		else if (action.equals("DoNavigate"))
 		{
