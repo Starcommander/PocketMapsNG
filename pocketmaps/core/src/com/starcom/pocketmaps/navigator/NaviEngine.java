@@ -2,6 +2,7 @@ package com.starcom.pocketmaps.navigator;
 
 import org.oscim.core.GeoPoint;
 
+import com.graphhopper.GraphHopper;
 import com.graphhopper.routing.util.EdgeFilter;
 import com.graphhopper.storage.NodeAccess;
 import com.graphhopper.storage.index.QueryResult;
@@ -15,6 +16,7 @@ import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.map.MapHandler;
+import com.starcom.pocketmaps.map.MapLayer;
 import com.starcom.pocketmaps.navigator.Navigator;
 import com.starcom.pocketmaps.text.Text;
 import com.starcom.pocketmaps.util.GeoMath;
@@ -22,6 +24,7 @@ import com.starcom.pocketmaps.util.GeoMath;
 import com.starcom.pocketmaps.util.UnitCalculator;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.NavView;
+import com.starcom.pocketmaps.views.TopPanel;
 
 import org.oscim.utils.async.AsyncExecutor;
 //import android.app.Activity;
@@ -155,7 +158,7 @@ public class NaviEngine
       if (pos != null)
       {
         GeoPoint curPos = new GeoPoint(pos.getLatitude(), pos.getLongitude());
-        MapHandler.getInstance().centerPointOnMap(MapList.getInstance().getFocusMap(), curPos, BEST_NAVI_ZOOM, 0, 0);
+        MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), curPos, BEST_NAVI_ZOOM, 0, 0);
       }
       NaviDebugSimulator.getSimu().setSimuRun(false);
       return;
@@ -201,10 +204,13 @@ public class NaviEngine
 
   private GeoPoint findClosestStreet(GeoPoint fromPos)
   {
-    if (MapHandler.getInstance().getHopper() == null) { return fromPos; } // Not loaded yet!
-    QueryResult pos = MapHandler.getInstance().getHopper().getLocationIndex().findClosest(fromPos.getLatitude(), fromPos.getLongitude(), EdgeFilter.ALL_EDGES);
+    MapLayer ml = MapList.getInstance().findMapLayerFromLocation(fromPos);
+    if (ml == null) { return fromPos; } // No matching map loaded yet!
+    GraphHopper hopper = ml.getPathfinder();
+    if (hopper == null) { return fromPos; } // Not loaded yet!
+    QueryResult pos = hopper.getLocationIndex().findClosest(fromPos.getLatitude(), fromPos.getLongitude(), EdgeFilter.ALL_EDGES);
     int n = pos.getClosestEdge().getBaseNode();
-    NodeAccess nodeAccess = MapHandler.getInstance().getHopper().getGraphHopperStorage().getNodeAccess();
+    NodeAccess nodeAccess = hopper.getGraphHopperStorage().getNodeAccess();
     GeoPoint gp = new GeoPoint(nodeAccess.getLat(n), nodeAccess.getLon(n));
     return gp;
   }
@@ -228,12 +234,12 @@ public class NaviEngine
         NavView.getInstance().showNaviCenterButton(!allowed);
         if (allowed)
         {
-          MapHandler.getInstance().centerPointOnMap(MapList.getInstance().getFocusMap(), new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
+          MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
           MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_navigation_black_24dp));
         }
         else
         {
-          MapHandler.getInstance().resetTilt(MapList.getInstance().getFocusMap(), 0);
+          MapHandler.getInstance().resetTilt(TopPanel.getInstance().getGdxMap(), 0);
           MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_my_location_dark_24dp));
         }
       }
@@ -249,7 +255,7 @@ public class NaviEngine
     GeoPoint newCenter = curPos.destinationPoint(70.0 * tiltMultPos, pos.getBearing());
     if (mapUpdatesAllowed)
     {
-      MapHandler.getInstance().centerPointOnMap(MapList.getInstance().getFocusMap(), newCenter, BEST_NAVI_ZOOM, 360.0f - pos.getBearing(), 45.0f * tiltMult);
+      MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), newCenter, BEST_NAVI_ZOOM, 360.0f - pos.getBearing(), 45.0f * tiltMult);
     }
     
     calculatePositionAsync(curPos);
@@ -296,7 +302,7 @@ public class NaviEngine
           if (instructions != null)
           {
             instructions = null;
-            MapHandler.getInstance().calcPath(MapList.getInstance().getFocusMap(), recalcFrom.getLatitude(), recalcFrom.getLongitude(), recalcTo.getLatitude(), recalcTo.getLongitude());
+            MapHandler.getInstance().calcPath(TopPanel.getInstance().getGdxMap(), recalcFrom.getLatitude(), recalcFrom.getLongitude(), recalcTo.getLatitude(), recalcTo.getLongitude());
             log("Recalculating of path!!!");
           }
         }

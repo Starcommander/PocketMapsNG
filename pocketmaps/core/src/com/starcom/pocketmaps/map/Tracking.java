@@ -7,6 +7,7 @@ import com.starcom.pocketmaps.Cfg;
 //import com.junjunguo.pocketmaps.model.listeners.TrackingListener;
 import com.starcom.pocketmaps.util.GenerateGPX;
 import com.starcom.pocketmaps.views.MapList;
+import com.starcom.pocketmaps.views.TopPanel;
 //import com.junjunguo.pocketmaps.util.Variable;
 import com.starcom.gdx.system.Threading;
 import com.starcom.gdx.ui.ToastMsg;
@@ -142,7 +143,7 @@ public class Tracking {
           if (first)
           { // Center on map.
             GeoPoint firstP = new GeoPoint(pos.getLatitude(), pos.getLongitude());
-            MapHandler.getInstance().centerPointOnMap(MapList.getInstance().getFocusMap(), firstP, 0, 0, 0);
+            MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), firstP, 0, 0, 0);
             setTimeStart(pos.getTime());
             first = false;
           }
