@@ -4,7 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
-import com.starcom.gdx.ui.UiUtil;
+import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.Icons.R;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
@@ -14,15 +14,15 @@ public class NavTopPanel
 	private static NavTopPanel instance = new NavTopPanel();
 	
 	HorizontalGroup topPanel;
-	public final Label topStreetLabel = new Label("Street123", UiUtil.getDefaultSkin());
-	public final Label topInstructionLabel = new Label("---", UiUtil.getDefaultSkin());
-	public final Label topDistanceLabel = new Label("0 m", UiUtil.getDefaultSkin());
-	public final Label topTimeLabel = new Label("0 m", UiUtil.getDefaultSkin());
-	public final Label speedLabel = new Label("---", UiUtil.getDefaultSkin()); // TODO: add this when configured.
+	public final Label topStreetLabel = new Label("Street123", GuiUtil.getDefaultSkin());
+	public final Label topInstructionLabel = new Label("---", GuiUtil.getDefaultSkin());
+	public final Label topDistanceLabel = new Label("0 m", GuiUtil.getDefaultSkin());
+	public final Label topTimeLabel = new Label("0 m", GuiUtil.getDefaultSkin());
+	public final Label speedLabel = new Label("---", GuiUtil.getDefaultSkin()); // TODO: add this when configured.
 	VerticalGroup bottomPanel = new VerticalGroup();
-	TextButton bottomFromButton = new TextButton("From: ", UiUtil.getDefaultSkin());
-	TextButton bottomToButton = new TextButton("To: ", UiUtil.getDefaultSkin());
-	TextButton centerButton = new TextButton("[x]", UiUtil.getDefaultSkin());
+	TextButton bottomFromButton = new TextButton("From: ", GuiUtil.getDefaultSkin());
+	TextButton bottomToButton = new TextButton("To: ", GuiUtil.getDefaultSkin());
+	TextButton centerButton = new TextButton("[x]", GuiUtil.getDefaultSkin());
 	
 	private NavTopPanel()
 	{
@@ -67,8 +67,8 @@ public class NavTopPanel
 	{
 		bottomPanel.addActor(bottomFromButton);
 		bottomPanel.addActor(bottomToButton);
-		bottomFromButton.addListener(UiUtil.wrapClickListener((a,x,y) -> onFromToClick(true)));
-		bottomToButton.addListener(UiUtil.wrapClickListener((a,x,y) -> onFromToClick(false)));
+		bottomFromButton.addListener(GuiUtil.wrapClickListener((a,x,y) -> onFromToClick(true)));
+		bottomToButton.addListener(GuiUtil.wrapClickListener((a,x,y) -> onFromToClick(false)));
 	}
 	
 	void onFromToClick(final boolean from)
