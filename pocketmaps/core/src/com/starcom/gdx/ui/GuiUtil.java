@@ -11,8 +11,10 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
@@ -43,8 +45,15 @@ public class GuiUtil
 	{
 		uiStage = stage;
 	}
+
+	/** Add GUI elements. */
+	public static void addActor(Actor a)
+	{
+		if (uiStage == null) { throw new NullPointerException("Stage must be set first."); }
+		uiStage.addActor(a);
+	}
 	
-	/** Gets the guiStage, where to add GUI elements via addActor(). */
+	/** Gets the guiStage, where to add GUI elements. */
 	public static Stage getStage()
 	{
 		if (uiStage == null) { throw new NullPointerException("Stage must be set first."); }
@@ -88,6 +97,25 @@ public class GuiUtil
 		});
 		selectBox.setPosition(x, y);
 		return selectBox;
+	}
+
+	/** Creates a text label. */
+	public static Actor genLabel(String txt, int x, int y)
+	{
+		Label l = new Label(txt, getDefaultSkin());
+		l.setX(x);
+		l.setY(y);
+		return l;
+	}
+
+	/** Creates a text button. */
+	public static Actor genButton(String txt, int x, int y, IClickListener onClick)
+	{
+		TextButton l = new TextButton(txt, getDefaultSkin());
+		l.setX(x);
+		l.setY(y);
+		l.addListener(GuiUtil.wrapClickListener(onClick));
+		return l;
 	}
 	
     /**
