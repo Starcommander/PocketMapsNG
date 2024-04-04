@@ -7,7 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.starcom.interfaces.IClickListener;
 
-public class Util
+public class UiUtil
 {
 	private static Skin uiSkin;
 	

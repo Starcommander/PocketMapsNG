@@ -15,7 +15,7 @@ import com.starcom.gdx.system.Threading;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
-import com.starcom.gdx.ui.Util;
+import com.starcom.gdx.ui.UiUtil;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.util.PolyParser;
