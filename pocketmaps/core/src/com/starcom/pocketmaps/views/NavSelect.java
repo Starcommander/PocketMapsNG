@@ -44,6 +44,7 @@ public class NavSelect
 		if (this.visible == visible) { return; }
 		if (visible)
 		{
+			TopPanel.getInstance().setVisible(false);
 			GuiUtil.addActor(aPan);
 			GuiUtil.addActor(aFromDD);
 			GuiUtil.addActor(aToDD);
@@ -53,6 +54,7 @@ public class NavSelect
 		}
 		else
 		{
+			TopPanel.getInstance().setVisible(true);
 			aPan.remove();
 			aFromDD.remove();
 			aToDD.remove();

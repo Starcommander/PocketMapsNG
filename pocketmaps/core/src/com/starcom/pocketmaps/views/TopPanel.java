@@ -19,24 +19,42 @@ public class TopPanel
 {
 	static TopPanel instance = new TopPanel();
 	private Map gdxMap;
+	private Actor aPan,aDD;
+	private boolean visible = false;
 	
 	public static TopPanel getInstance() { return instance; }
 	
 	/** Returns the Map that is used as Canvas. */
 	public Map getGdxMap() { return gdxMap; }
+	
+	private TopPanel() {}
 
-	public void show(Map gdxMap)
+	public void init(Map gdxMap)
 	{
 		this.gdxMap = gdxMap;
 		int w = Gdx.graphics.getWidth();
 		int h = Gdx.graphics.getHeight()/8;
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
-		Actor pp = GuiUtil.genPanel(x, y, w, h);
-		Actor dd = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "Navigate...", "CCC", "DoNavigate");
-		GuiUtil.addActor(pp);
-		GuiUtil.addActor(dd);
+		aPan = GuiUtil.genPanel(x, y, w, h);
+		aDD = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "Navigate...", "CCC", "DoNavigate");
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
+	}
+	
+	public void setVisible(boolean visible)
+	{
+		if (this.visible == visible) { return; }
+		if (visible)
+		{
+			GuiUtil.addActor(aPan);
+			GuiUtil.addActor(aDD);
+		}
+		else
+		{
+			aPan.remove();
+			aDD.remove();
+		}
+		this.visible = visible;
 	}
 	
 	private static void doMenuAction(String action)
