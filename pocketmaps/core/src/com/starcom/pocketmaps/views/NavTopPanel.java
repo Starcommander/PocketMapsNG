@@ -4,32 +4,32 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
-import com.starcom.gdx.ui.Util;
+import com.starcom.gdx.ui.UiUtil;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.Icons.R;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 
-public class NavView
+public class NavTopPanel
 {
-	private static NavView instance = new NavView();
+	private static NavTopPanel instance = new NavTopPanel();
 	
 	HorizontalGroup topPanel;
-	public final Label topStreetLabel = new Label("Street123", Util.getDefaultSkin());
-	public final Label topInstructionLabel = new Label("---", Util.getDefaultSkin());
-	public final Label topDistanceLabel = new Label("0 m", Util.getDefaultSkin());
-	public final Label topTimeLabel = new Label("0 m", Util.getDefaultSkin());
-	public final Label speedLabel = new Label("---", Util.getDefaultSkin()); // TODO: add this when configured.
+	public final Label topStreetLabel = new Label("Street123", UiUtil.getDefaultSkin());
+	public final Label topInstructionLabel = new Label("---", UiUtil.getDefaultSkin());
+	public final Label topDistanceLabel = new Label("0 m", UiUtil.getDefaultSkin());
+	public final Label topTimeLabel = new Label("0 m", UiUtil.getDefaultSkin());
+	public final Label speedLabel = new Label("---", UiUtil.getDefaultSkin()); // TODO: add this when configured.
 	VerticalGroup bottomPanel = new VerticalGroup();
-	TextButton bottomFromButton = new TextButton("From: ", Util.getDefaultSkin());
-	TextButton bottomToButton = new TextButton("To: ", Util.getDefaultSkin());
-	TextButton centerButton = new TextButton("[x]", Util.getDefaultSkin());
+	TextButton bottomFromButton = new TextButton("From: ", UiUtil.getDefaultSkin());
+	TextButton bottomToButton = new TextButton("To: ", UiUtil.getDefaultSkin());
+	TextButton centerButton = new TextButton("[x]", UiUtil.getDefaultSkin());
 	
-	private NavView()
+	private NavTopPanel()
 	{
 		initTopPanel();
 	}
 	
-	public static NavView getInstance()
+	public static NavTopPanel getInstance()
 	{
 		return instance;
 	}
@@ -67,8 +67,8 @@ public class NavView
 	{
 		bottomPanel.addActor(bottomFromButton);
 		bottomPanel.addActor(bottomToButton);
-		bottomFromButton.addListener(Util.wrapClickListener((a,x,y) -> onFromToClick(true)));
-		bottomToButton.addListener(Util.wrapClickListener((a,x,y) -> onFromToClick(false)));
+		bottomFromButton.addListener(UiUtil.wrapClickListener((a,x,y) -> onFromToClick(true)));
+		bottomToButton.addListener(UiUtil.wrapClickListener((a,x,y) -> onFromToClick(false)));
 	}
 	
 	void onFromToClick(final boolean from)

@@ -34,8 +34,9 @@ public class TopPanel
 		int h = Gdx.graphics.getHeight()/8;
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
-		Dialogs.showPanel(guiStage,x,y,w,h);
-		Dialogs.showDropDown(guiStage, (o) -> doMenuAction(guiStage, o.toString()),30, y + 30, "AAA", "Maps...", "CCC", "DoNavigate");
+		Dialogs.showPanel(x,y,w,h);
+		Dialogs.showDropDown((o) -> doMenuAction(guiStage, o.toString()),30, y + 30, "AAA", "Maps...", "CCC", "DoNavigate");
+		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
 	}
 	
 	private static void doMenuAction(Stage guiStage, String action)
@@ -75,7 +76,6 @@ public class TopPanel
 		}
 		else if (action.equals("DoNavigate"))
 		{
-			MapHandler.getInstance().createAdditionalMapLayers(TopPanel.getInstance().getGdxMap()); // TODO: Not here.
 //			PolyParser.addDebugLine(MapList.getInstance().getFocusMap());
 ////			MapHandler.getInstance().calcPath(MapList.getInstance().getFocusMap(), 48.271555f, 14.574171f, 48.247748, 14.627872);
 			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), new GeoPoint(48.271555f, 14.574171f), true, false);

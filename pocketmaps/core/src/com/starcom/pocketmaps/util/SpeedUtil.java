@@ -2,7 +2,7 @@ package com.starcom.pocketmaps.util;
 
 import com.graphhopper.util.details.PathDetail;
 import com.starcom.pocketmaps.navigator.Navigator;
-import com.starcom.pocketmaps.views.NavView;
+import com.starcom.pocketmaps.views.NavTopPanel;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
@@ -30,17 +30,17 @@ public class SpeedUtil
      * @param index The path-index for showing text */
     public void showTextSign(int pIndex)
     {
-    	NavView.getInstance().speedLabel.setVisible(enabled);
+    	NavTopPanel.getInstance().speedLabel.setVisible(enabled);
     	if (!enabled) { return; }
         String txt = getSpeedValue(pIndex + pointsDone);
-        NavView.getInstance().speedLabel.setText(txt);
+        NavTopPanel.getInstance().speedLabel.setText(txt);
     }
 
     
     public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
-    	NavView.getInstance().speedLabel.setVisible(enabled);
+    	NavTopPanel.getInstance().speedLabel.setVisible(enabled);
     }
 //    
 //    private void updateViewVis()

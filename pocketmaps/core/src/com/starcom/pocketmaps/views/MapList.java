@@ -31,7 +31,7 @@ import com.starcom.LoggerUtil;
 import com.starcom.gdx.system.Threading;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
-import com.starcom.gdx.ui.Util;
+import com.starcom.gdx.ui.UiUtil;
 import com.starcom.pocketmaps.tasks.Download;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.ConfType;
@@ -247,12 +247,12 @@ public class MapList
 			
 			Table table = new Table();
 			table.add(new Image(mapTextureTop)).left();
-			table.add(new Label(mname.substring(mcont.length()+1), Util.getDefaultSkin())).width(w/3);
-			table.add(new Label(mdate, Util.getDefaultSkin())).width(w/3);
+			table.add(new Label(mname.substring(mcont.length()+1), UiUtil.getDefaultSkin())).width(w/3);
+			table.add(new Label(mdate, UiUtil.getDefaultSkin())).width(w/3);
 			table.row();
 			table.add(new Image(mapTextureBot)).left();
-			table.add(new Label("Map size: " + msize, Util.getDefaultSkin())).width(w/3);
-			table.add(new Label(mcont, Util.getDefaultSkin())).width(w/3);
+			table.add(new Label("Map size: " + msize, UiUtil.getDefaultSkin())).width(w/3);
+			table.add(new Label(mcont, UiUtil.getDefaultSkin())).width(w/3);
 			
 			ll.addElement(table, (a, x, y) -> Download.downloadMapNow(guiStage, mdate, mname));
 		}

@@ -17,22 +17,23 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.starcom.gdx.system.Threading;
 import com.starcom.interfaces.IProgressListener;
+import com.starcom.pocketmaps.views.TopPanel;
 import com.starcom.interfaces.IObjectListener;
 
 public class Dialogs
 {
 	
-	public static Image showPanel(Stage guiStage, int x, int y, int w, int h)
+	public static Actor showPanel(int x, int y, int w, int h)
 	{
 		Image pix = new Image(getColoredDrawable(w,h,Color.GRAY, false));
 		pix.setPosition(x, y);
-		guiStage.addActor(pix);
+		TopPanel.getInstance().getGuiStage().addActor(pix);
 		return pix;
 	}
 	
-	public static void showDropDown(Stage guiStage, IObjectListener l, int x, int y, String ...items)
+	public static Actor showDropDown(IObjectListener l, int x, int y, String ...items)
 	{
-		SelectBox<String> selectBox=new SelectBox<String>(Util.getDefaultSkin());
+		SelectBox<String> selectBox=new SelectBox<String>(UiUtil.getDefaultSkin());
 		selectBox.setItems(items);
 		selectBox.addListener(new ChangeListener()
 		{
@@ -43,7 +44,8 @@ public class Dialogs
 			}
 		});
 		selectBox.setPosition(x, y);
-		guiStage.addActor(selectBox);
+		TopPanel.getInstance().getGuiStage().addActor(selectBox);
+		return selectBox;
 	}
 	
     /**
@@ -138,7 +140,7 @@ public class Dialogs
 	 * @param listener The listener for result of OK="true" and CANCEL="false", listener may also be null. */
 	public static void showDialog(Stage guiStage, String title, String msg, boolean cancel, IObjectListener listener)
 	{
-		Dialog dialog = new Dialog(title, Util.getDefaultSkin(), "dialog")
+		Dialog dialog = new Dialog(title, UiUtil.getDefaultSkin(), "dialog")
 		{
 		    public void result(Object obj)
 		    {

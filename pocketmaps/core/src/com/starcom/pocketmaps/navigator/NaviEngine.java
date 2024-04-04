@@ -23,7 +23,7 @@ import com.starcom.pocketmaps.util.GeoMath;
 //import com.starcom.pocketmaps.util.LightSensor;
 import com.starcom.pocketmaps.util.UnitCalculator;
 import com.starcom.pocketmaps.views.MapList;
-import com.starcom.pocketmaps.views.NavView;
+import com.starcom.pocketmaps.views.NavTopPanel;
 import com.starcom.pocketmaps.views.TopPanel;
 
 import org.oscim.utils.async.AsyncExecutor;
@@ -153,7 +153,7 @@ public class NaviEngine
     naviVoiceInit(activity, false);
     if (!active)
     {
-      NavView.getInstance().showNaviCenterButton(false);
+      NavTopPanel.getInstance().showNaviCenterButton(false);
       MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_my_location_dark_24dp));
       if (pos != null)
       {
@@ -231,7 +231,7 @@ public class NaviEngine
       if (this.mapUpdatesAllowed != allowed)
       {
         this.mapUpdatesAllowed = allowed;
-        NavView.getInstance().showNaviCenterButton(!allowed);
+        NavTopPanel.getInstance().showNaviCenterButton(!allowed);
         if (allowed)
         {
           MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
@@ -332,7 +332,7 @@ public class NaviEngine
 	Text t = Text.getInstance();
     if (in==null)
     {
-    	NavView.getInstance().updateInstruction(t.getSearchLocation(), "0 " + UnitCalculator.getUnit(false), "---------", Icons.R.ic_continue_on_street, "0 min");
+    	NavTopPanel.getInstance().updateInstruction(t.getSearchLocation(), "0 " + UnitCalculator.getUnit(false), "---------", Icons.R.ic_continue_on_street, "0 min");
 //      navtop_when.setText("0 " + UnitCalculator.getUnit(false));
 //      navtop_time.setText("--------");
 //      navtop_curloc.setText(R.string.search_location);
@@ -342,7 +342,7 @@ public class NaviEngine
     }
     else if(nearestP.isDirectionOk())
     {
-    	NavView.getInstance().updateInstruction(in.getCurStreet(), in.getNextDistanceString(), in.getNextInstruction(), Icons.R.valueOf(in.getNextSignResource()), in.getFullTimeString());
+    	NavTopPanel.getInstance().updateInstruction(in.getCurStreet(), in.getNextDistanceString(), in.getNextInstruction(), Icons.R.valueOf(in.getNextSignResource()), in.getFullTimeString());
 //      navtop_when.setText(in.getNextDistanceString());
 //      navtop_time.setText(in.getFullTimeString());
 //      navtop_curloc.setText(in.getCurStreet());
@@ -353,7 +353,7 @@ public class NaviEngine
     }
     else
     {
-    	NavView.getInstance().updateInstruction(t.getWrongDirection(), "0 " + UnitCalculator.getUnit(false), "--------", Icons.R.ic_2x_roundabout, in.getFullTimeString());
+    	NavTopPanel.getInstance().updateInstruction(t.getWrongDirection(), "0 " + UnitCalculator.getUnit(false), "--------", Icons.R.ic_2x_roundabout, in.getFullTimeString());
 //      navtop_when.setText("0 " + UnitCalculator.getUnit(false));
 //      navtop_time.setText(in.getFullTimeString());
 //      navtop_curloc.setText(R.string.wrong_direction);
