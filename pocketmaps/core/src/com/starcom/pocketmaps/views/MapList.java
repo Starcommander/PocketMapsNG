@@ -31,7 +31,7 @@ import com.starcom.LoggerUtil;
 import com.starcom.gdx.system.Threading;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
-import com.starcom.gdx.ui.UiUtil;
+import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.tasks.Download;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.ConfType;
@@ -128,11 +128,11 @@ public class MapList
     }
     
     /** A view that shows the list for select or unselect maps. */
-	public void viewMapsSelect(Stage guiStage, MapAction atype)
+	public void viewMapsSelect(MapAction atype)
 	{
 		if (!Threading.getInstance().isMainThread())
 		{
-			Threading.getInstance().invokeOnMainThread(() -> viewMapsSelect(guiStage, atype));
+			Threading.getInstance().invokeOnMainThread(() -> viewMapsSelect(atype));
 			return;
 		}
 		ListSelect ll = new ListSelect("SelectMaps");
@@ -182,7 +182,7 @@ public class MapList
 				});
 			}
 		}
-		ll.showAsWindow(guiStage);
+		ll.showAsWindow(GuiUtil.getStage());
 	}
 	
 	private void updateCfg(String map, boolean selected)
@@ -212,12 +212,12 @@ public class MapList
 		Cfg.save(ConfType.Navigation);
 	}
 
-	public static void viewMapsDownload(Stage guiStage, String json)
+	public static void viewMapsDownload(String json)
 	{
 		int w = Gdx.graphics.getWidth();
 		if (!Threading.getInstance().isMainThread())
 		{
-			Threading.getInstance().invokeOnMainThread(() -> viewMapsDownload(guiStage, json));
+			Threading.getInstance().invokeOnMainThread(() -> viewMapsDownload(json));
 			return;
 		}
 		org.json.JSONObject jsonObj;
@@ -247,16 +247,16 @@ public class MapList
 			
 			Table table = new Table();
 			table.add(new Image(mapTextureTop)).left();
-			table.add(new Label(mname.substring(mcont.length()+1), UiUtil.getDefaultSkin())).width(w/3);
-			table.add(new Label(mdate, UiUtil.getDefaultSkin())).width(w/3);
+			table.add(new Label(mname.substring(mcont.length()+1), GuiUtil.getDefaultSkin())).width(w/3);
+			table.add(new Label(mdate, GuiUtil.getDefaultSkin())).width(w/3);
 			table.row();
 			table.add(new Image(mapTextureBot)).left();
-			table.add(new Label("Map size: " + msize, UiUtil.getDefaultSkin())).width(w/3);
-			table.add(new Label(mcont, UiUtil.getDefaultSkin())).width(w/3);
+			table.add(new Label("Map size: " + msize, GuiUtil.getDefaultSkin())).width(w/3);
+			table.add(new Label(mcont, GuiUtil.getDefaultSkin())).width(w/3);
 			
-			ll.addElement(table, (a, x, y) -> Download.downloadMapNow(guiStage, mdate, mname));
+			ll.addElement(table, (a, x, y) -> Download.downloadMapNow(GuiUtil.getStage(), mdate, mname));
 		}
-		ll.showAsWindow(guiStage);
+		ll.showAsWindow(GuiUtil.getStage());
 	}
 	
 	public static void viewDirectionList(InstructionList instL)
@@ -266,7 +266,7 @@ public class MapList
 		{
 			ll.addElement(inst.getName(), (a,x,y) -> {});
 		}
-		ll.showAsWindow(TopPanel.getInstance().getGuiStage());
+		ll.showAsWindow(GuiUtil.getStage());
 	}
 	
 }

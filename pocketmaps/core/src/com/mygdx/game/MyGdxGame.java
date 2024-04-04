@@ -15,7 +15,7 @@ import com.starcom.gdx.system.Threading;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
-import com.starcom.gdx.ui.UiUtil;
+import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.util.PolyParser;
@@ -128,7 +128,8 @@ Gdx.input.setInputProcessor(inputMultiplexer);
 //	listSel.addElement("Wahl" + i, (x,y) -> System.out.println("Pressed item " + ii + " on x=" + x + " y=" + y));
 //}
 ////listSel.showAsWindow(guiStage);
-TopPanel.getInstance().show(guiStage, getMap());
+GuiUtil.setStage(guiStage);
+TopPanel.getInstance().show(getMap());
 MapList.getInstance().loadSettings();
 //dialog.show(guiStage);
     }

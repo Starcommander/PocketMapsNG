@@ -4,10 +4,12 @@ import org.oscim.core.GeoPoint;
 import org.oscim.map.Map;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
+import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.interfaces.IProgressListener.Type;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.util.PolyParser;
@@ -16,39 +18,37 @@ import com.starcom.pocketmaps.views.MapList.MapAction;
 public class TopPanel
 {
 	static TopPanel instance = new TopPanel();
-	private Stage guiStage;
 	private Map gdxMap;
 	
 	public static TopPanel getInstance() { return instance; }
 	
-	/** Returns the GuiStage that is used to draw gui. */
-	public Stage getGuiStage() { return guiStage; }
 	/** Returns the Map that is used as Canvas. */
 	public Map getGdxMap() { return gdxMap; }
 
-	public void show(Stage guiStage, Map gdxMap)
+	public void show(Map gdxMap)
 	{
-		this.guiStage = guiStage;
 		this.gdxMap = gdxMap;
 		int w = Gdx.graphics.getWidth();
 		int h = Gdx.graphics.getHeight()/8;
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
-		Dialogs.showPanel(x,y,w,h);
-		Dialogs.showDropDown((o) -> doMenuAction(guiStage, o.toString()),30, y + 30, "AAA", "Maps...", "CCC", "DoNavigate");
+		Actor pp = GuiUtil.genPanel(x, y, w, h);
+		Actor dd = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "CCC", "DoNavigate");
+		GuiUtil.getStage().addActor(dd);
+		GuiUtil.getStage().addActor(pp);
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
 	}
 	
-	private static void doMenuAction(Stage guiStage, String action)
+	private static void doMenuAction(String action)
 	{
 		System.out.println("Menu: " + action);
 		if (action.equals("Maps..."))
 		{
 			ListSelect ll = new ListSelect("Maps");
-			ll.addElement("Download Maps", (a,x,y) -> doMenuAction(guiStage, "Download Maps"));
-			ll.addElement("Show/Hide Maps", (a,x,y) -> doMenuAction(guiStage, "Show/Hide Maps"));
-			ll.addElement("Delete Maps", (a,x,y) -> doMenuAction(guiStage, "Delete Maps"));
-			ll.showAsWindow(guiStage);
+			ll.addElement("Download Maps", (a,x,y) -> doMenuAction("Download Maps"));
+			ll.addElement("Show/Hide Maps", (a,x,y) -> doMenuAction("Show/Hide Maps"));
+			ll.addElement("Delete Maps", (a,x,y) -> doMenuAction("Delete Maps"));
+			ll.showAsWindow(GuiUtil.getStage());
 		}
 		else if (action.equals("Download Maps"))
 		{
@@ -62,17 +62,17 @@ public class TopPanel
 				}
 				else if (t == Type.SUCCESS)
 				{
-					MapList.viewMapsDownload(guiStage, o.toString());}
+					MapList.viewMapsDownload(o.toString());}
 				}
 			);
 		}
 		else if (action.equals("Show/Hide Maps"))
 		{
-			MapList.getInstance().viewMapsSelect(guiStage, MapAction.ShowHide);
+			MapList.getInstance().viewMapsSelect(MapAction.ShowHide);
 		}
 		else if (action.equals("Delete Maps"))
 		{
-			MapList.getInstance().viewMapsSelect(guiStage, MapAction.Delete);
+			MapList.getInstance().viewMapsSelect(MapAction.Delete);
 		}
 		else if (action.equals("DoNavigate"))
 		{

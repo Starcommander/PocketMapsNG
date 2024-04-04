@@ -37,7 +37,7 @@ public class ListSelect extends Window
 	
 	public ListSelect(String title)
 	{
-		super(title, UiUtil.getDefaultSkin());
+		super(title, GuiUtil.getDefaultSkin());
 		setPosition(Gdx.graphics.getWidth()*0.1f, 0);
 		setWidth(Gdx.graphics.getWidth()*0.8f);
 		setHeight(Gdx.graphics.getHeight());
@@ -47,7 +47,7 @@ public class ListSelect extends Window
 		
 
 		//Label headL = new Label(title, Util.getDefaultSkin());
-		scrollP = new ScrollPane(scrollList, UiUtil.getDefaultSkin());
+		scrollP = new ScrollPane(scrollList, GuiUtil.getDefaultSkin());
 //		scrollP.setActor(scrollList);
 		add(this.scrollP).width(getWidth()).height(getHeight()-60); // CloseButton=30 Header=30
 
@@ -62,7 +62,7 @@ public class ListSelect extends Window
 		//win.add(this.scrollP).width(200).height(200);
 		
 		row();
-		TextButton closeB = new TextButton("Close", UiUtil.getDefaultSkin());
+		TextButton closeB = new TextButton("Close", GuiUtil.getDefaultSkin());
 		
 		closeB.addListener(closeListener);
 		add(closeB).width(200).height(30);
@@ -89,8 +89,8 @@ public class ListSelect extends Window
 
 	public void addElement(String line, IClickListener l)
 	{
-		TextButton b = new TextButton(line, UiUtil.getDefaultSkin());
-		b.addListener(UiUtil.wrapClickListener(l));
+		TextButton b = new TextButton(line, GuiUtil.getDefaultSkin());
+		b.addListener(GuiUtil.wrapClickListener(l));
 		b.addListener(closeListener);
 //		scrollList.addActor(new Label(line, Util.getDefaultSkin()));
 		scrollList.addActor(b);
@@ -98,8 +98,8 @@ public class ListSelect extends Window
 	
 	public void addCheckboxElement(String line, boolean checked, IClickListener l)
 	{
-		CheckBox b = new CheckBox(line, UiUtil.getDefaultSkin());
-		b.addListener(UiUtil.wrapClickListener(l));
+		CheckBox b = new CheckBox(line, GuiUtil.getDefaultSkin());
+		b.addListener(GuiUtil.wrapClickListener(l));
 		b.addListener(closeListener);
 		b.setChecked(checked);
 //		scrollList.addActor(new Label(line, Util.getDefaultSkin()));
@@ -108,10 +108,10 @@ public class ListSelect extends Window
 	
 	public void addElement(Actor actor, IClickListener l)
 	{
-		actor.addListener(UiUtil.wrapClickListener(l));
+		actor.addListener(GuiUtil.wrapClickListener(l));
 		actor.addListener(closeListener);
 		scrollList.addActor(actor);
-		scrollList.addActor(new Label("-", UiUtil.getDefaultSkin()));
+		scrollList.addActor(new Label("-", GuiUtil.getDefaultSkin()));
 	}
 	
 

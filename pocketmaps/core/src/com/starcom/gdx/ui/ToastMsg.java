@@ -18,7 +18,7 @@ public class ToastMsg
 {
 	private static ToastMsg instance;
 	private final LinkedList<Toast> toasts = new LinkedList<Toast>();
-	private Toast.ToastFactory toastFactory = new Toast.ToastFactory.Builder().font(UiUtil.getDefaultFont()).build();
+	private Toast.ToastFactory toastFactory = new Toast.ToastFactory.Builder().font(GuiUtil.getDefaultFont()).build();
 
 	public static ToastMsg getInstance()
 	{
