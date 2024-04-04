@@ -33,9 +33,9 @@ public class TopPanel
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
 		Actor pp = GuiUtil.genPanel(x, y, w, h);
-		Actor dd = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "CCC", "DoNavigate");
-		GuiUtil.getStage().addActor(dd);
-		GuiUtil.getStage().addActor(pp);
+		Actor dd = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "Navigate...", "CCC", "DoNavigate");
+		GuiUtil.addActor(pp);
+		GuiUtil.addActor(dd);
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
 	}
 	
@@ -49,6 +49,10 @@ public class TopPanel
 			ll.addElement("Show/Hide Maps", (a,x,y) -> doMenuAction("Show/Hide Maps"));
 			ll.addElement("Delete Maps", (a,x,y) -> doMenuAction("Delete Maps"));
 			ll.showAsWindow(GuiUtil.getStage());
+		}
+		else if (action.equals("Navigate..."))
+		{
+			NavSelect.getInstance().setVisible(true);
 		}
 		else if (action.equals("Download Maps"))
 		{
