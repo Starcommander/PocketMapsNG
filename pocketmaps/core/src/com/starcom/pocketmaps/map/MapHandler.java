@@ -105,10 +105,12 @@ public class MapHandler
   /** Creates the marker layers for path and curPos */
   public void createAdditionalMapLayers(Map map)
   {
+	    if (itemizedLayer != null) { throw new IllegalStateException("ItemizedLayer is already initialized."); }
 	    itemizedLayer = new ItemizedLayer(map, (MarkerSymbol) null);
 	    map.layers().add(itemizedLayer);
 	    customLayer = new ItemizedLayer(map, (MarkerSymbol) null);
 	    map.layers().add(customLayer);
+	    map.layers().add(new MapEventsReceiver(map));
   }
   
   /** Creates a graphhopper instance.
@@ -340,7 +342,7 @@ public class MapHandler
     }
   }
   
-  public void setCustomPointIcon(VtmBitmap customIcon) //TODO: VtmBitmap instead AwtBitmap
+  public void setCustomPointIcon(VtmBitmap customIcon)
   {
     this.customIcon = customIcon;
     if (customLayer.getItemList().size() > 0)
