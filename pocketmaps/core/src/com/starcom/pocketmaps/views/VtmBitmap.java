@@ -48,7 +48,7 @@ public class VtmBitmap implements org.oscim.backend.canvas.Bitmap
 	@Override
 	public void eraseColor(int color)
 	{
-//		throw new IllegalStateException("EraseColor on VtmBitmap not implemented yet"); //TODO: Not implemented yet
+		throw new IllegalStateException("EraseColor on VtmBitmap not implemented yet");
 	}
 
 	@Override
@@ -67,29 +67,13 @@ public class VtmBitmap implements org.oscim.backend.canvas.Bitmap
 	@Override
 	public byte[] getPngEncodedData()
 	{
-//		com.dezzmeister.png.Encoder coder = new com.dezzmeister.png.Encoder(pixels, getWidth(), getHeight(), ColorFormat.RGBA_8888);
-//		return coder.encode();
-		
-//		BufferedImage bitmap = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-//		ByteArrayOutputStream outputStream = null;
-//        try {
-//            outputStream = new ByteArrayOutputStream();
-//            ImageIO.write(bitmap, "png", outputStream);
-//            return outputStream.toByteArray();
-//        } catch (IOException e) {
-//            log.error(e.getMessage(), e);
-//        } finally {
-//            IOUtils.closeQuietly(outputStream);
-//        }
-//        return null;
-//		throw new IllegalStateException("GetPngEncodedData on VtmBitmap not implemented yet"); //TODO: Not implemented yet
 		return null;
 	}
 
 	@Override
 	public void scaleTo(int width, int height)
 	{
-//		throw new IllegalStateException("ScaleTo on VtmBitmap not implemented yet"); //TODO: Not implemented yet
+		throw new IllegalStateException("ScaleTo on VtmBitmap not implemented yet");
 	}
 
 }
