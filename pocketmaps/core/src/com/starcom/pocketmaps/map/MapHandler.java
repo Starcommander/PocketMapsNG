@@ -79,14 +79,7 @@ public class MapHandler
 //    mapHandler = new MapHandler();
 //  }
 
-  private MapHandler()
-  {
-//    setCalculatePath(false,false); // TODO: Need this line?
-//    startMarker = null;
-//    endMarker = null;
-//    needLocation = false;
-//    needPathCal = false;
-  }
+  private MapHandler() {}
 
 //  public void init(MapView mapView, String currentArea, File mapsFolder)
 //  {
