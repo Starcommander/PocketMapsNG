@@ -66,6 +66,7 @@ public class ListSelect extends Window
 		
 		closeB.addListener(closeListener);
 		add(closeB).width(200).height(30);
+		setModal(true);
 	}
 	
 //	private EventListener createScrollListener()
