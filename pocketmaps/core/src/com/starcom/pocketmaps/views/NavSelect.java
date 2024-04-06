@@ -50,14 +50,6 @@ public class NavSelect implements MapHandlerListener
 		if (selection.equals(SEL_POS_ON_MAP))
 		{
 			setVisible(false, false);
-//			Actor fsActor = new Actor();
-//			fsActor.setTouchable(Touchable.enabled);
-//			fsActor.addListener(GuiUtil.wrapClickListener((a,x,y) -> System.out.println("Click: " + x + "/" + y)));
-//			fsActor.setWidth(Gdx.graphics.getWidth());
-//			fsActor.setHeight(Gdx.graphics.getHeight());
-//			fsActor.setX(0);
-//			fsActor.setY(0);
-//			GuiUtil.getStage().addActor(new Actor());
 			ToastMsg.getInstance().toastShort("Touch on Map to choose your start Location");
 			if (from)
 			{

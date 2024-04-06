@@ -37,7 +37,7 @@ public class TopPanel
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
 		aPan = GuiUtil.genPanel(x, y, w, h);
-		aDD = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "Navigate...", "CCC", "DoNavigate");
+		aDD = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "Navigate...", "SimpleDialog");
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
 	}
 	
@@ -96,13 +96,10 @@ public class TopPanel
 		{
 			MapList.getInstance().viewMapsSelect(MapAction.Delete);
 		}
-		else if (action.equals("DoNavigate"))
+
+		else if (action.equals("SimpleDialog"))
 		{
-//			PolyParser.addDebugLine(MapList.getInstance().getFocusMap());
-////			MapHandler.getInstance().calcPath(MapList.getInstance().getFocusMap(), 48.271555f, 14.574171f, 48.247748, 14.627872);
-			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), new GeoPoint(48.271555f, 14.574171f), true, false);
-			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), new GeoPoint(48.247748, 14.627872), false,true);
-////			MapHandler.getInstance().setCustomPoint(MapList.getInstance().getFocusMap(), new GeoPoint(48.271555f, 14.574171f));
+			Dialogs.showDialog(GuiUtil.getStage(), "Title", "msg", false, (o) -> System.out.println("Pressed " + o));
 		}
 	}
 }
