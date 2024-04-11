@@ -1,18 +1,15 @@
 package com.starcom.pocketmaps.views;
 
-import org.oscim.core.GeoPoint;
 import org.oscim.map.Map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.interfaces.IProgressListener.Type;
 import com.starcom.pocketmaps.map.MapHandler;
-import com.starcom.pocketmaps.util.PolyParser;
 import com.starcom.pocketmaps.views.MapList.MapAction;
 
 public class TopPanel

@@ -26,7 +26,13 @@ public class NavTopPanel
 	
 	private NavTopPanel()
 	{
-		initTopPanel();
+		VerticalGroup vg = new VerticalGroup();
+		HorizontalGroup hg = new HorizontalGroup();
+		vg.addActor(topStreetLabel);
+		vg.addActor(topInstructionLabel);
+		hg.addActor(Icons.generateIcon(R.ic_finish_flag));
+		hg.addActor(vg);
+		topPanel = hg;
 	}
 	
 	public static NavTopPanel getInstance()
@@ -49,18 +55,6 @@ public class NavTopPanel
 	public void showNaviCenterButton(boolean doshow)
 	{
 		centerButton.setVisible(doshow); //TODO: Add centerbutton first.
-	}
-
-	void initTopPanel()
-	{
-		VerticalGroup vg = new VerticalGroup();
-		HorizontalGroup hg = new HorizontalGroup();
-		vg.addActor(topStreetLabel);
-		vg.addActor(topInstructionLabel);
-		hg.removeActorAt(0, false);
-		hg.addActor(Icons.generateIcon(R.ic_finish_flag));
-		hg.addActor(vg);
-		topPanel = hg;
 	}
 	
 	void initBottomPanel()

@@ -61,6 +61,11 @@ public class NavSelect implements MapHandlerListener
 			}
 			MapHandler.getInstance().setMapHandlerListener(this);
 		}
+		else if (selection.equals(SEL_SEARCH_LOC))
+		{
+			SearchPanel.getInstance().setVisible(true);
+			setVisible(false, false);
+		}
 	}
 	
 
