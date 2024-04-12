@@ -11,11 +11,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 public class SearchPanel
 {
     private static SearchPanel instance = new SearchPanel();
-    enum Engines { OpenStreetMaps, GoogleMaps; }
+    enum Engines { OpenStreetMaps, GoogleMaps, Offline }
     private TextField txtField;
     private Actor engineDD;
     private Window dialog;
-    VerticalGroup vBox;
     boolean visible;
     
     public static SearchPanel getInstance() {
@@ -23,27 +22,28 @@ public class SearchPanel
     }
     
     private SearchPanel() {
-        this.txtField = new TextField("", GuiUtil.getDefaultSkin());
-        this.engineDD = GuiUtil.genDropDown(o -> this.onEngineDropDown(o.toString()), 0, 0, Engines.OpenStreetMaps.toString(), Engines.GoogleMaps.toString());
-        this.dialog = new Window("Search", GuiUtil.getDefaultSkin());
-        this.vBox = new VerticalGroup();
-        this.visible = false;
-        this.dialog.setModal(true);
-        this.vBox.addActor(this.engineDD);
-        this.vBox.addActor((Actor)this.txtField);
-        this.vBox.addActor(GuiUtil.genButton("Search", 0, 0, (a, x, y) -> this.onSearch(this.txtField.getText())));
-        this.dialog.add((Actor)this.vBox);
-        this.dialog.setSize(Gdx.graphics.getWidth() * 0.8f, Gdx.graphics.getHeight() * 0.8f);
-        this.dialog.setX(Gdx.graphics.getWidth() * 0.1f);
-        this.dialog.setY(Gdx.graphics.getHeight() * 0.1f);
-        this.engineDD.setWidth(Gdx.graphics.getWidth() * 0.8f);
-        this.txtField.setWidth(Gdx.graphics.getWidth() * 0.8f);
-        this.vBox.setWidth(Gdx.graphics.getWidth() * 0.8f);
-        setupTxtField();
+    	float ww = Gdx.graphics.getWidth();
+        txtField = new TextField("", GuiUtil.getDefaultSkin());
+        engineDD = GuiUtil.genDropDown(o -> this.onEngineDropDown(o.toString()), 0, 0,
+        		Engines.OpenStreetMaps.toString(),
+        		Engines.GoogleMaps.toString(),
+        		Engines.Offline.toString());
+        dialog = new Window("Search", GuiUtil.getDefaultSkin());
+        dialog.setModal(true);
+        dialog.add(engineDD).colspan(2);
+        dialog.row();
+        dialog.add(txtField).width(ww * 0.8f).expand().colspan(2);
+        dialog.row();
+        dialog.add(GuiUtil.genButton("Break", 0, 0, (a, x, y) -> this.onSearch(null))).width(ww/3);//.left();//.width(ww/4.0f).left();
+        dialog.add(GuiUtil.genButton("Search", 0, 0, (a, x, y) -> this.onSearch(this.txtField.getText()))).width(ww/3);
+        dialog.setSize(ww * 0.8f, Gdx.graphics.getHeight() * 0.8f);
+        dialog.setX(ww * 0.1f);
+        dialog.setY(Gdx.graphics.getHeight() * 0.1f);
+        
     }
     
     private void setupTxtField()
-    {
+    { //TODO Clear this, if not doing anything
     	txtField.getOnscreenKeyboard().show(true);
     }
     
@@ -61,13 +61,20 @@ public class SearchPanel
     }
     
     private void onEngineDropDown(final String engine) {
+    	System.out.println("Select engine: " + engine);
     }
     
     private void onSearch(final String txt) {
-        if (txt.isEmpty() || txt.isBlank()) {
+    	if (txt == null)
+    	{
+            this.setVisible(false);
+            NavSelect.getInstance().setVisible(true);
+    	}
+    	else if (txt.isEmpty() || txt.isBlank()) {
             ToastMsg.getInstance().toastShort("Enter text");
         }
         else {
+            System.out.println("Searching for " + txt);
             this.setVisible(false);
             NavSelect.getInstance().setVisible(true);
         }
