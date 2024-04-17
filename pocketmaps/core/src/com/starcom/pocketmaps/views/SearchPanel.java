@@ -4,6 +4,7 @@ import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.interfaces.IProgressListener.Type;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.ConfType;
+import com.starcom.pocketmaps.Cfg.GeoKey;
 import com.starcom.pocketmaps.Cfg.GeoKeyI;
 import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.geocoding.GeocoderGlobal;
@@ -14,19 +15,20 @@ import com.starcom.pocketmaps.map.MapLayer.MapFileType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import com.badlogic.gdx.Gdx;
+import com.starcom.LoggerUtil;
 import com.starcom.gdx.ui.GuiUtil;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 
 public class SearchPanel
 {
     private static SearchPanel instance = new SearchPanel();
+    private Logger logger = LoggerUtil.get(SearchPanel.class);
     enum Engines { OpenStreetMaps, GoogleMaps, Offline }
     Engines selectedEngine = Engines.OpenStreetMaps;
     private TextField txtField;
@@ -77,7 +79,15 @@ public class SearchPanel
     		String countryName = m.getMapFile(MapFileType.Country);
     		String contName = m.getMapFile(MapFileType.Continent);
     		if (offlineCountry == null) { offlineCountry = countryName; offlineContinent = contName; }
-    		maps.add(contName + "_" + countryName);
+    		String name = contName + "_" + countryName;
+    		if (name.equals(Cfg.getValue(GeoKey.OfflineCountry, null)))
+    		{
+    			maps.add(0, name);
+    		}
+    		else
+    		{
+    			maps.add(name);
+    		}
     	}
     	int sel = Cfg.getIntValue(Cfg.GeoKeyI.SearchBits, 6);
     	offlinePanel.add(GuiUtil.genDropDown((o) -> onOfflineCountrySelect(o.toString()), 0, 0, maps.toArray(new String[0])));
@@ -101,13 +111,17 @@ public class SearchPanel
     
     private void onOfflineCheckbox(int bit, Object selected)
     {
-    	System.out.println("Country Selected: " + selected);
-    	int sel = Cfg.getIntValue(Cfg.GeoKeyI.SearchBits, 6) ^ bit; //XOR
-    	if (selected == Boolean.TRUE)
+    	int sel = Cfg.getIntValue(Cfg.GeoKeyI.SearchBits, 6);
+    	boolean wasSelected = (sel & bit) != 0;
+    	if (wasSelected)
     	{
-    		sel += bit;
-    	}
-    	System.out.println("Bits stored: " + sel);
+    		sel = sel - bit;
+		}
+		if (selected == Boolean.TRUE)
+		{
+			sel += bit;
+		}
+    	logger.info("Geocoding Checkbox-Bits stored: " + sel);
     	Cfg.setIntValue(GeoKeyI.SearchBits, sel);
     }
     
@@ -115,6 +129,7 @@ public class SearchPanel
     {
     	offlineContinent = continentCountry.split("_")[0];
     	offlineCountry = continentCountry.split("_")[1];
+    	Cfg.setValue(GeoKey.OfflineCountry, continentCountry);
     }
     
     public void setVisible(final boolean visible) {
@@ -161,7 +176,7 @@ public class SearchPanel
             }
             else if (selectedEngine == Engines.Offline)
             {
-            	Cfg.save(ConfType.Geocoding);
+            	Cfg.save(ConfType.Geocoding); //TODO: Only offline, or hints also on others?
             	list = new GeocoderGlobal(Locale.getDefault()).find_local(offlineCountry, txt, (t,o) -> onOfflineSearch(t,o.toString())); //TODO: update this.
             }
             else if (selectedEngine == Engines.GoogleMaps)

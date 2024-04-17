@@ -10,7 +10,7 @@ public class Cfg
 	public enum NavKey { TravelMode, Weighting, TtsEngine, TtsWantedVoice, MapSelection }
 	public enum NavKeyB { DirectionsOn, IsImperialUnit, ShowingSpeedLimits, SpeakingSpeedLimits, TtsOn }
 	public enum GeoKeyI { SearchBits }
-	public enum GeoKey { offlineCountry }
+	public enum GeoKey { OfflineCountry }
 	public enum ConfType { Navigation, Geocoding } //TODO: old used 'base' unuseable, better 'SearchHints'
 	
 	public static void setDirectory(File newDir)
