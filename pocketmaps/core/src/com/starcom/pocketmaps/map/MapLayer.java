@@ -16,11 +16,13 @@ import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import com.graphhopper.GraphHopper;
 import com.starcom.LoggerUtil;
 import com.starcom.pocketmaps.map.MapHandler.MapEventsReceiver;
+import com.starcom.pocketmaps.map.MapLayer.MapFileType;
 import com.starcom.pocketmaps.views.TopPanel;
 
 public class MapLayer
 {
 	static Logger logger = LoggerUtil.get(MapLayer.class);
+	public enum MapFileType { FullPath, Country, Continent }
 	private BuildingLayer buildingLayer;
 	private LabelLayer labelLayer;
 	private VectorTileLayer vtLayer;
@@ -70,15 +72,29 @@ public class MapLayer
 //	public MapEventsReceiver getTargetLayer() { return mer; }
 	public GeoPoint getCenter()
 	{
-		if (tileSource.getMapInfo() == null) { throw new NullPointerException("Error getting boundingBox of map: " + getMapFile()); }
+		if (tileSource.getMapInfo() == null) { throw new NullPointerException("Error getting boundingBox of map: " + getMapFile(MapFileType.FullPath)); }
 		return tileSource.getMapInfo().mapCenter;
 	}
 	public BoundingBox getBoundingBox()
 	{
-		if (tileSource.getMapInfo() == null) { throw new NullPointerException("Error getting boundingBox of map: " + getMapFile()); }
+		if (tileSource.getMapInfo() == null) { throw new NullPointerException("Error getting boundingBox of map: " + getMapFile(MapFileType.FullPath)); }
 		return tileSource.getMapInfo().boundingBox;
 	}
-	public String getMapFile() { return mapFile; }
+	public String getMapFile(MapFileType type)
+	{
+		if (type == MapFileType.FullPath)
+		{
+			return mapFile;
+		}
+		else if (type == MapFileType.Country)
+		{
+			return new File(mapFile).getName().split("_")[1].split("\\.")[0]; // any/path/europe_austria.map -> austria
+		}
+		else // Continent
+		{
+			return new File(mapFile).getName().split("_")[0]; // any/path/europe_austria.map -> europe
+		}
+	}
 	public GraphHopper getPathfinder() { return graphHopper; }
 	public void dispose()
 	{

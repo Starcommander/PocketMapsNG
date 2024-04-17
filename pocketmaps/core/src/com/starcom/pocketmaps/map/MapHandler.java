@@ -23,6 +23,7 @@ import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.PathWrapper;
+import com.graphhopper.routing.util.AllEdgesIterator;
 import com.graphhopper.util.Constants;
 import com.starcom.LoggerUtil;
 import com.starcom.gdx.system.Threading;
@@ -243,12 +244,13 @@ public class MapHandler
 //      }.execute();
 //  }
   
-//  public AllEdgesIterator getAllEdges()
-//  {
-//    if (hopper==null) { return null; }
-//    if (hopper.getGraphHopperStorage()==null) { return null; }
-//    return hopper.getGraphHopperStorage().getAllEdges();
-//  }
+  public AllEdgesIterator getAllEdges(String searchCountry)
+  {
+    MapLayer mapLayer = MapList.getInstance().findMapLayerFromCountry(searchCountry);
+    if (mapLayer.getPathfinder()==null) { return null; }
+    if (mapLayer.getPathfinder().getGraphHopperStorage()==null) { return null; }
+    return mapLayer.getPathfinder().getGraphHopperStorage().getAllEdges();
+  }
 
   /**
    * center the LatLong point in the map and zoom map to zoomLevel
