@@ -38,6 +38,7 @@ import com.starcom.pocketmaps.Cfg.ConfType;
 import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapLayer;
+import com.starcom.pocketmaps.map.MapLayer.MapFileType;
 
 public class MapList
 {
@@ -74,13 +75,21 @@ public class MapList
 		return null;
 	}
 	
+	public MapLayer findMapLayerFromCountry(String countryName)
+	{
+		for (MapLayer l : mapLayers)
+		{
+			String cName = l.getMapFile(MapFileType.Country);
+			if (cName.equals(countryName)) { return l; }
+		}
+		return null;
+	}
+	
 	private boolean checkLocationInside(GeoPoint pos, MapLayer matchingMap)
 	{
 		//TODO: Fine tuning: Check complete path if inside.
 		return true;
 	}
-
-	public boolean hasFocusMap() { return mapLayers.size() > 0; }
 	
 	/** Should only be called on init. */
 	public void loadSettings()
@@ -117,7 +126,7 @@ public class MapList
     
     public void unloadMap(MapLayer ml)
     {
-		logger.info("Discarding map: " + ml.getMapFile());
+		logger.info("Discarding map: " + ml.getMapFile(MapFileType.FullPath));
 		mapLayers.remove(ml);
 		ml.dispose();
     }
@@ -143,7 +152,7 @@ public class MapList
 				boolean isVisible = false;
 				for (MapLayer m : mapLayers)
 				{
-					if (m.getMapFile().endsWith(f.name() + ".map"))
+					if (m.getMapFile(MapFileType.FullPath).endsWith(f.name() + ".map"))
 					{
 						isVisible = true;
 						break;
@@ -166,7 +175,7 @@ public class MapList
 					{ //Hide and clear map.
 						for (MapLayer ml : mapLayers)
 						{
-							if (ml.getMapFile().equals(mapFile.getPath()))
+							if (ml.getMapFile(MapFileType.FullPath).equals(mapFile.getPath()))
 							{
 								unloadMap(ml);
 								updateCfg(mapFile.getName(), false);
@@ -232,7 +241,7 @@ public class MapList
 			return;
 		}
 		ListSelect ll = new ListSelect("DownloadMaps");
-		org.json.JSONArray arr = jsonObj.getJSONArray("maps-0.13.0_0");
+		org.json.JSONArray arr = jsonObj.getJSONArray("maps-0.13.0_0"); //TODO: Dynamic version?
 		//Image mapImage = new Image(new Texture("icon_pocketmaps.png"));
 		Texture mapTextureTop = new Texture("icon_pocketmaps_top.png");
 		Texture mapTextureBot = new Texture("icon_pocketmaps_bot.png");

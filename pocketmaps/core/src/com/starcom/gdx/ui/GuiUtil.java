@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
@@ -85,7 +86,7 @@ public class GuiUtil
 	/** Creates a dropDown menu. */
 	public static Actor genDropDown(IObjectListener l, int x, int y, String ...items)
 	{
-		SelectBox<String> selectBox=new SelectBox<String>(GuiUtil.getDefaultSkin());
+		SelectBox<String> selectBox = new SelectBox<String>(GuiUtil.getDefaultSkin());
 		selectBox.setItems(items);
 		selectBox.addListener(new ChangeListener()
 		{
@@ -98,7 +99,24 @@ public class GuiUtil
 		selectBox.setPosition(x, y);
 		return selectBox;
 	}
-
+	
+	/** Creates a checkBox menu. */
+	public static Actor genCheckBox(IObjectListener l, int x, int y, String txt, boolean checked)
+	{
+		CheckBox selectBox = new CheckBox(txt, GuiUtil.getDefaultSkin());
+		selectBox.addListener(new ChangeListener()
+		{
+			@Override
+			public void changed(ChangeEvent event, Actor actor)
+			{
+				l.run(selectBox.isChecked());
+			}
+		});
+		selectBox.setPosition(x, y);
+		selectBox.setChecked(checked);
+		return selectBox;
+	}
+	
 	/** Creates a text label. */
 	public static Actor genLabel(String txt, int x, int y)
 	{

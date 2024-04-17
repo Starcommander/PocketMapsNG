@@ -9,7 +9,9 @@ public class Cfg
 	public final static String TRAVEL_MODE_FOOT = "foot";
 	public enum NavKey { TravelMode, Weighting, TtsEngine, TtsWantedVoice, MapSelection }
 	public enum NavKeyB { DirectionsOn, IsImperialUnit, ShowingSpeedLimits, SpeakingSpeedLimits, TtsOn }
-	public enum ConfType { Navigation } //TODO: old used 'base' unuseable, better 'SearchHints'
+	public enum GeoKeyI { SearchBits }
+	public enum GeoKey { offlineCountry }
+	public enum ConfType { Navigation, Geocoding } //TODO: old used 'base' unuseable, better 'SearchHints'
 	
 	public static void setDirectory(File newDir)
 	{
@@ -36,6 +38,16 @@ public class Cfg
 		return Settings.getValue(ConfType.Navigation.toString(), key.toString(), def);
 	}
 	
+	public static String getValue(GeoKey key, String def)
+	{
+		return Settings.getValue(ConfType.Geocoding.toString(), key.toString(), def);
+	}
+	
+	public static int getIntValue(GeoKeyI key, int def)
+	{
+		return Settings.getIntValue(ConfType.Geocoding.toString(), key.toString(), def);
+	}
+	
 	public static void setValue(NavKey key, String val)
 	{
 		Settings.setValue(ConfType.Navigation.toString(), key.toString(), val);
@@ -54,6 +66,16 @@ public class Cfg
 	public static void setFloatValue(NavKey key, float val)
 	{
 		Settings.setValue(ConfType.Navigation.toString(), key.toString(), "" + val);
+	}
+	
+	public static void setValue(GeoKey key, String val)
+	{
+		Settings.setValue(ConfType.Geocoding.toString(), key.toString(), val);
+	}
+
+	public static void setIntValue(GeoKeyI key, int val)
+	{
+		Settings.setValue(ConfType.Geocoding.toString(), key.toString(), "" + val);
 	}
 	
 	/** Stores the settings with name.
