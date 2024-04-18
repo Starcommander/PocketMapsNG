@@ -65,7 +65,7 @@ public class GuiUtil
 	 * <br>This allows to use lamda-expressions.
 	 * @param l The listener to wrap.
 	 * @return The (gdx-)ClickListener with l included. */
-	public static ClickListener wrapClickListener(IClickListener l)
+	public static ClickListener wrapClickListener(IClickListener<Actor> l)
 	{
 		return new ClickListener()
 		{
