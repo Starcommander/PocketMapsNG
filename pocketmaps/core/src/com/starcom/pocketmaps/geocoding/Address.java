@@ -47,6 +47,17 @@ public class Address
 		addressLines = new StringBuilder();
 	}
 	
+	public String toNiceString()
+	{
+		StringBuffer sb = new StringBuffer();
+		String sep = "";
+		if (featureName != null) { sb.append(sep).append(featureName); sep = ", "; }
+		if (locality != null) { sb.append(sep).append(locality); sep = ", "; }
+		if (thoroughfare != null) { sb.append(sep).append(thoroughfare); sep = ", "; }
+		if (sb.isEmpty()) { sb.append("lat=").append(latitude).append(", lon=").append(longitude); }
+		return sb.toString();
+	}
+	
 	@Override public String toString()
 	{
 		StringBuffer sb = new StringBuffer();

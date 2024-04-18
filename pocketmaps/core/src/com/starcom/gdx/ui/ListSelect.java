@@ -52,7 +52,7 @@ public class ListSelect extends Window
 		setModal(true);
 	}
 
-	public void addElement(String line, IClickListener l)
+	public void addElement(String line, IClickListener<Actor> l)
 	{
 		TextButton b = new TextButton(line, GuiUtil.getDefaultSkin());
 		b.addListener(GuiUtil.wrapClickListener(l));
@@ -60,7 +60,7 @@ public class ListSelect extends Window
 		scrollList.addActor(b);
 	}
 	
-	public void addCheckboxElement(String line, boolean checked, IClickListener l)
+	public void addCheckboxElement(String line, boolean checked, IClickListener<Actor> l)
 	{
 		CheckBox b = new CheckBox(line, GuiUtil.getDefaultSkin());
 		b.addListener(GuiUtil.wrapClickListener(l));
@@ -69,7 +69,7 @@ public class ListSelect extends Window
 		scrollList.addActor(b);
 	}
 	
-	public void addElement(Actor actor, IClickListener l)
+	public void addElement(Actor actor, IClickListener<Actor> l)
 	{
 		actor.addListener(GuiUtil.wrapClickListener(l));
 		actor.addListener(closeListener);
