@@ -9,7 +9,7 @@ import com.starcom.interfaces.IProgressListener.Type;
 
 public class Web
 {
-	public static void downloadTextfileLater(String textFileUrl, IProgressListener callback)
+	public static void downloadTextfileLater(String textFileUrl, IProgressListener<Object> callback)
 	{
 		Thread t = new Thread(() ->
 		{
@@ -21,6 +21,7 @@ public class Web
 		t.start();
 	}
 	
+	/** Returns null on IOException. */
 	public static String downloadTextfile(String textFileUrl)
 	{
 		StringBuilder json = new StringBuilder();

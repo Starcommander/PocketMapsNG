@@ -33,7 +33,13 @@ public class ListSelect extends Window
 		public void clicked (InputEvent event, float x, float y) { ListSelect.this.remove(); }
 	};
 	
-	public ListSelect(String title)
+
+	public ListSelect(String title) //TODO: Do we need this?
+	{
+		this(title, null);
+	}
+	
+	public ListSelect(String title, Runnable onClose)
 	{
 		super(title, GuiUtil.getDefaultSkin());
 		setPosition(Gdx.graphics.getWidth()*0.1f, 0);
@@ -46,6 +52,7 @@ public class ListSelect extends Window
 
 		row();
 		TextButton closeB = new TextButton("Close", GuiUtil.getDefaultSkin());
+		if (onClose!=null) { closeB.addListener(GuiUtil.wrapClickListener((e,x,y) -> onClose.run())); }
 		
 		closeB.addListener(closeListener);
 		add(closeB).width(200).height(30);
