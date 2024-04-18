@@ -2,6 +2,8 @@ package com.starcom.pocketmaps.geocoding;
 
 import java.util.Locale;
 
+import org.oscim.core.GeoPoint;
+
 public class Address
 {
 	public double latitude, longitude;
@@ -54,8 +56,21 @@ public class Address
 		if (featureName != null) { sb.append(sep).append(featureName); sep = ", "; }
 		if (locality != null) { sb.append(sep).append(locality); sep = ", "; }
 		if (thoroughfare != null) { sb.append(sep).append(thoroughfare); sep = ", "; }
-		if (sb.isEmpty()) { sb.append("lat=").append(latitude).append(", lon=").append(longitude); }
+		if (sb.toString().isEmpty()) { sb.append("lat=").append(latitude).append(", lon=").append(longitude); }
 		return sb.toString();
+	}
+	
+	public GeoPoint toGeoPoint()
+	{
+		return new GeoPoint(latitude, longitude);
+	}
+	
+	public static Address fromGeoPoint(GeoPoint g)
+	{
+		Address a = new Address(Locale.getDefault());
+		a.latitude = g.getLatitude();
+		a.longitude = g.getLongitude();
+		return a;
 	}
 	
 	@Override public String toString()

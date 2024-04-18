@@ -34,7 +34,9 @@ import com.starcom.pocketmaps.Cfg.NavKeyB;
 import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.starcom.pocketmaps.navigator.Navigator;
 import com.starcom.pocketmaps.Icons;
+import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.views.MapList;
+import com.starcom.pocketmaps.views.NavSelect;
 import com.starcom.pocketmaps.views.VtmBitmap;
 import com.starcom.pocketmaps.util.TargetDirComputer;
 import com.graphhopper.util.Parameters.Algorithms;
@@ -282,7 +284,7 @@ public class MapHandler
    *  @param isStart True for startpoint false for endpoint.
    *  @param recalculate True to calculate path, when booth points are set.
    *  @return Whether the path will be recalculated. **/
-  public boolean setStartEndPoint(Map map, GeoPoint p, boolean isStart, boolean recalculate)
+  public boolean setStartEndPoint(Map map, Address p, boolean isStart, boolean recalculate)
   {
     boolean result = false;
     boolean refreshBoth = false;
@@ -290,9 +292,9 @@ public class MapHandler
       
     if (isStart)
     {
-      startMarker = p;
+      startMarker = p.toGeoPoint();
     }
-    else { endMarker = p; }
+    else { endMarker = p.toGeoPoint(); }
 
     // remove routing layers
     if ((startMarker==null || endMarker==null) || refreshBoth)
@@ -316,6 +318,7 @@ public class MapHandler
       result = true;
     }
     map.updateMap(true);
+    NavSelect.getInstance().setLocation(p, isStart);
     return result;
   }
   

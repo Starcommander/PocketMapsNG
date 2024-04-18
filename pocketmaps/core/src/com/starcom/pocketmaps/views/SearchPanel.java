@@ -34,7 +34,8 @@ public class SearchPanel
     private TextField txtField;
     private Actor engineDD;
     private Window dialog;
-    boolean visible;
+    private boolean visible;
+    private boolean isStart;
     private Table offlinePanel = new Table();
     private String offlineCountry;
     private String offlineContinent;
@@ -132,7 +133,8 @@ public class SearchPanel
     	Cfg.setValue(GeoKey.OfflineCountry, continentCountry);
     }
     
-    public void setVisible(final boolean visible) {
+    public void setVisible(final boolean visible, final boolean isStart) {
+    	this.isStart = isStart;
         if (this.visible == visible) {
             return;
         }
@@ -161,7 +163,7 @@ public class SearchPanel
     private void onSearch(final String txt) {
     	if (txt == null)
     	{
-            this.setVisible(false);
+            this.setVisible(false, isStart);
             NavSelect.getInstance().setVisible(true);
     	}
     	else if (txt.isEmpty() || txt.isBlank()) {
@@ -188,12 +190,13 @@ public class SearchPanel
             {
             	throw new IllegalStateException("No engine found: " + selectedEngine);
             }
-            for (Address a : list)
+            if (list == null)
             {
-            	System.out.println("###### Fount entry #######\n" + a.toString());
+            	ToastMsg.getInstance().toastShort("Error on searching");
+            	return;
             }
-            this.setVisible(false);
-            NavSelect.getInstance().setVisible(true);
+            AddressList.getInstance().viewList(list, isStart);
+            this.setVisible(false, isStart);
         }
     }
     
