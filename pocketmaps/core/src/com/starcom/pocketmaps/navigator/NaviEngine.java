@@ -158,7 +158,7 @@ public class NaviEngine
       if (pos != null)
       {
         GeoPoint curPos = new GeoPoint(pos.getLatitude(), pos.getLongitude());
-        MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), curPos, BEST_NAVI_ZOOM, 0, 0);
+        MapHandler.getInstance().centerPointOnMap(curPos, BEST_NAVI_ZOOM, 0, 0);
       }
       NaviDebugSimulator.getSimu().setSimuRun(false);
       return;
@@ -234,7 +234,7 @@ public class NaviEngine
         NavTopPanel.getInstance().showNaviCenterButton(!allowed);
         if (allowed)
         {
-          MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
+          MapHandler.getInstance().centerPointOnMap(new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
           MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_navigation_black_24dp));
         }
         else
@@ -255,7 +255,7 @@ public class NaviEngine
     GeoPoint newCenter = curPos.destinationPoint(70.0 * tiltMultPos, pos.getBearing());
     if (mapUpdatesAllowed)
     {
-      MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), newCenter, BEST_NAVI_ZOOM, 360.0f - pos.getBearing(), 45.0f * tiltMult);
+      MapHandler.getInstance().centerPointOnMap(newCenter, BEST_NAVI_ZOOM, 360.0f - pos.getBearing(), 45.0f * tiltMult);
     }
     
     calculatePositionAsync(curPos);

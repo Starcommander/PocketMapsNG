@@ -37,6 +37,7 @@ import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.NavSelect;
+import com.starcom.pocketmaps.views.TopPanel;
 import com.starcom.pocketmaps.views.VtmBitmap;
 import com.starcom.pocketmaps.util.TargetDirComputer;
 import com.graphhopper.util.Parameters.Algorithms;
@@ -260,8 +261,9 @@ public class MapHandler
    * @param latLong
    * @param zoomLevel (if 0 use current zoomlevel)
    */
-  public void centerPointOnMap(Map map, GeoPoint latLong, int zoomLevel, float bearing, float tilt)
+  public void centerPointOnMap(GeoPoint latLong, int zoomLevel, float bearing, float tilt)
   {
+    Map map = TopPanel.getInstance().getGdxMap(); // Must exist at this time.
     if (zoomLevel == 0)
     {
       zoomLevel = map.getMapPosition().zoomLevel;

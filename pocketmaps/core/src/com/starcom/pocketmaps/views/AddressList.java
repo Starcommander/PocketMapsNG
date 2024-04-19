@@ -30,6 +30,7 @@ public class AddressList
 	private void onAddressSelected(Address a, boolean from)
 	{
 		MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), a, from, true);
+		MapHandler.getInstance().centerPointOnMap(a.toGeoPoint(), 0, 0, 0);
 		NavSelect.getInstance().setVisible(true);
 	}
 	
