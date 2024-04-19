@@ -143,7 +143,7 @@ public class Tracking {
           if (first)
           { // Center on map.
             GeoPoint firstP = new GeoPoint(pos.getLatitude(), pos.getLongitude());
-            MapHandler.getInstance().centerPointOnMap(TopPanel.getInstance().getGdxMap(), firstP, 0, 0, 0);
+            MapHandler.getInstance().centerPointOnMap(firstP, 0, 0, 0);
             setTimeStart(pos.getTime());
             first = false;
           }
