@@ -14,6 +14,7 @@ import com.starcom.navigation.Location;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
+import com.starcom.pocketmaps.Icons.R;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapLayer;
@@ -61,7 +62,7 @@ public class NaviEngine
   private GeoPoint recalcFrom, recalcTo;
   private static NaviEngine instance;
   private boolean mapUpdatesAllowed = true;
-  private Location pos;
+  private Location pos, mCurrentLocation, mLastLocation;
   final PointPosData nearestP = new PointPosData(); 
   private boolean active = false;
   private InstructionList instructions;
@@ -153,16 +154,17 @@ public class NaviEngine
     naviVoiceInit(activity, false);
     if (!active)
     {
-      NavTopPanel.getInstance().showNaviCenterButton(false);
+      NavTopPanel.getInstance().setVisible(false);
       MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_my_location_dark_24dp));
       if (pos != null)
       {
         GeoPoint curPos = new GeoPoint(pos.getLatitude(), pos.getLongitude());
         MapHandler.getInstance().centerPointOnMap(curPos, BEST_NAVI_ZOOM, 0, 0);
       }
-      NaviDebugSimulator.getSimu().setSimuRun(false);
+      NaviDebugSimulator.stopDebugSimulator();
       return;
     }
+    NavTopPanel.getInstance().setVisible(true);
     mapUpdatesAllowed = true;
     MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_navigation_black_24dp));
     naviVoiceSpoken = false;
@@ -231,7 +233,6 @@ public class NaviEngine
       if (this.mapUpdatesAllowed != allowed)
       {
         this.mapUpdatesAllowed = allowed;
-        NavTopPanel.getInstance().showNaviCenterButton(!allowed);
         if (allowed)
         {
           MapHandler.getInstance().centerPointOnMap(new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
@@ -239,9 +240,34 @@ public class NaviEngine
         }
         else
         {
+          NavTopPanel.getInstance().showNaviCenterButton();
           MapHandler.getInstance().resetTilt(TopPanel.getInstance().getGdxMap(), 0);
           MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_my_location_dark_24dp));
         }
+      }
+  }
+  
+  /** Executed from native GPS or NaviDebugSimulator */
+  public void onLocationChanged(Location location) {
+      if (location != null) {
+          mCurrentLocation = location;
+      } else if (mLastLocation != null && mCurrentLocation == null) {
+          mCurrentLocation = mLastLocation;
+      }
+      if (mCurrentLocation != null) {
+          GeoPoint mcLatLong = new GeoPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+//          if (Tracking.getTracking(getApplicationContext()).isTracking()) { //TODO: Implement this
+//              MapHandler.getMapHandler().addTrackPoint(this, mcLatLong);
+//              Tracking.getTracking(getApplicationContext()).addPoint(mCurrentLocation, mapActions.getAppSettings());
+//          }
+          if (NaviEngine.getNaviEngine().isNavigating())
+          {
+            NaviEngine.getNaviEngine().updatePosition(mCurrentLocation);
+          }
+          MapHandler.getInstance().setCustomPoint(mcLatLong);
+//          mapActions.showPositionBtn.setImageResource(R.drawable.ic_my_location_white_24dp); //TODO: Implement this
+      } else {
+//          mapActions.showPositionBtn.setImageResource(R.drawable.ic_location_searching_white_24dp); //TODO: Implement this
       }
   }
   
@@ -255,9 +281,9 @@ public class NaviEngine
     GeoPoint newCenter = curPos.destinationPoint(70.0 * tiltMultPos, pos.getBearing());
     if (mapUpdatesAllowed)
     {
-      MapHandler.getInstance().centerPointOnMap(newCenter, BEST_NAVI_ZOOM, 360.0f - pos.getBearing(), 45.0f * tiltMult);
+      Threading.getInstance().invokeOnMainThread(() -> 
+        MapHandler.getInstance().centerPointOnMap(newCenter, BEST_NAVI_ZOOM, 360.0f - pos.getBearing(), 45.0f * tiltMult));
     }
-    
     calculatePositionAsync(curPos);
   }
 

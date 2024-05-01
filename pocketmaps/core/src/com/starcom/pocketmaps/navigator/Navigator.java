@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * singleton class
  * <p/>
- * Handler navigation information
+ * Handler navigation information (text and icons)
  * <p/>
  * This file is part of PocketMaps
  * <p/>
@@ -65,15 +65,15 @@ public class Navigator {
         this.ghResponse = ghResponse;
         if (NaviEngine.getNaviEngine().isNavigating())
         {
-          NaviEngine.getNaviEngine().onUpdateInstructions(ghResponse.getInstructions(), ghResponse.getPathDetails());
+            NaviEngine.getNaviEngine().onUpdateInstructions(ghResponse.getInstructions(), ghResponse.getPathDetails());
         }
-        else if (Cfg.getBoolValue(NavKeyB.DirectionsOn, true))
+        else if (Cfg.getBoolValue(NavKeyB.DirectionsOn, false))
         {
-          MapList.viewDirectionList(ghResponse.getInstructions()); // Navigator.getNavigator().setGhResponse(resp);
+            MapList.viewDirectionList(ghResponse.getInstructions());
         }
         else
         {
-//          NaviEngine.getNaviEngine().setNavigating(aaa, true); //TODO
+        	NaviEngine.getNaviEngine().setNavigating(null, true);
         }
     }
 
@@ -138,12 +138,12 @@ public class Navigator {
 ////        broadcast();
 //    }
     
-    public void setNaviStart(Object activity, boolean on) {
-        NaviEngine.getNaviEngine().setNavigating(activity, on);
-//        for (NavigatorListener listener : listeners) {
-//            listener.onNaviStart(on);
-//        }
-    }
+//    public void setNaviStart(Object activity, boolean on) {
+//        NaviEngine.getNaviEngine().setNavigating(activity, on);
+////        for (NavigatorListener listener : listeners) {
+////            listener.onNaviStart(on);
+////        }
+//    }
 
 //    /**
 //     * broadcast changes to listeners

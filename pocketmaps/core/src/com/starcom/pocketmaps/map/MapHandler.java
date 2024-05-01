@@ -331,14 +331,14 @@ public class MapHandler
 
   /** Set the custom Point for current location, or null to delete.
    *  Sets the offset to center. **/
-  public void setCustomPoint(Map map, GeoPoint p)
+  public void setCustomPoint(GeoPoint p)
   {
     if (customLayer==null) { return; } // Not loaded yet.
     customLayer.removeAllItems();
     if (p!=null)
     {
       customLayer.addItem(createMarkerItem(p, customIcon, 0.5f, 0.5f));
-      map.updateMap(true);
+      TopPanel.getInstance().getGdxMap().updateMap(true);
     }
   }
   

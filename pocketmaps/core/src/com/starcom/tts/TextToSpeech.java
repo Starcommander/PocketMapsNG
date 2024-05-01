@@ -27,14 +27,14 @@ public class TextToSpeech
 		return lst;
 	}
 	
-	public Set<Voice> getVoices() { return null; } //TODO: Implement
+	/** Returns all existing voices, or an empty list. */
+	public Set<Voice> getVoices() { return new HashSet<>(); } //TODO: Implement
 	public Voice getVoice() { return null; } //TODO: Implement
 	public void setVoice(Voice voice) {} //TODO: Implement
 	
 	public Set<Voice> getVoices(Locale lang)
 	{
 	    Set<Voice> allV = getVoices();
-	    if (allV==null) { return null; }
 	    Set<Voice> selV = new HashSet<>();
 	    for (Voice curV : allV)
 	    {
