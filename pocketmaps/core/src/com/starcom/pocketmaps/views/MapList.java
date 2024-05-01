@@ -39,6 +39,8 @@ import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapLayer;
 import com.starcom.pocketmaps.map.MapLayer.MapFileType;
+import com.starcom.pocketmaps.navigator.NaviEngine;
+import com.starcom.pocketmaps.navigator.Navigator;
 
 public class MapList
 {
@@ -270,7 +272,8 @@ public class MapList
 	
 	public static void viewDirectionList(InstructionList instL)
 	{
-		ListSelect ll = new ListSelect("Directions");
+		NavSelect.getInstance().setVisible(false,false);
+		ListSelect ll = new ListSelect("Directions", "Navigate", (b) -> NaviEngine.getNaviEngine().setNavigating(null, true));
 		for (Instruction inst : instL)
 		{
 			ll.addElement(inst.getName(), (a,x,y) -> {});

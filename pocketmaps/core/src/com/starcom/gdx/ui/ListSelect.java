@@ -1,27 +1,18 @@
 package com.starcom.gdx.ui;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Container;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.starcom.gdx.io.Storage;
-import com.starcom.gdx.io.Web;
 import com.starcom.interfaces.IClickListener;
+import com.starcom.interfaces.IObjectListener;
 
 public class ListSelect extends Window
 {
@@ -32,14 +23,27 @@ public class ListSelect extends Window
 	{
 		public void clicked (InputEvent event, float x, float y) { ListSelect.this.remove(); }
 	};
-	
 
-	public ListSelect(String title) //TODO: Do we need this?
+	/** Creates a ListSelectView with close button only.
+	 * @param title The title of this window. */
+	public ListSelect(String title)
 	{
 		this(title, null);
 	}
+
+	/** Creates a ListSelectView with close button only.
+	 * @param title The title of this window.
+	 * @param onClose Will be executed, when close pressed (always with false), may also be null. */
+	public ListSelect(String title, IObjectListener<Boolean> onClose)
+	{
+		this(title, null, onClose);
+	}
 	
-	public ListSelect(String title, Runnable onClose)
+	/** Creates a ListSelectView.
+	 * @param title The title of this window.
+	 * @param extraButton Extra button name, or null for close button only.
+	 * @param onClose Will be executed, when close pressed (false), or when extra button pressed (true), may also be null. */
+	public ListSelect(String title, String extraButton, IObjectListener<Boolean> onClose)
 	{
 		super(title, GuiUtil.getDefaultSkin());
 		setPosition(Gdx.graphics.getWidth()*0.1f, 0);
@@ -48,14 +52,25 @@ public class ListSelect extends Window
 		this.scrollList = new VerticalGroup();
 		
 		scrollP = new ScrollPane(scrollList, GuiUtil.getDefaultSkin());
-		add(this.scrollP).width(getWidth()).height(getHeight()-60); // CloseButton=30 Header=30
+		add(this.scrollP).width(getWidth()).height(getHeight()-60).colspan(2); // CloseButton=30 Header=30
 
 		row();
 		TextButton closeB = new TextButton("Close", GuiUtil.getDefaultSkin());
-		if (onClose!=null) { closeB.addListener(GuiUtil.wrapClickListener((e,x,y) -> onClose.run())); }
+		if (onClose!=null) { closeB.addListener(GuiUtil.wrapClickListener((e,x,y) -> onClose.run(false))); }
 		
 		closeB.addListener(closeListener);
-		add(closeB).width(200).height(30);
+		if (extraButton != null)
+		{
+			TextButton extraB = new TextButton(extraButton, GuiUtil.getDefaultSkin());
+			if (onClose!=null) { extraB.addListener(GuiUtil.wrapClickListener((e,x,y) -> onClose.run(true))); }
+			extraB.addListener(closeListener);
+			add(extraB).width(200).height(30);
+			add(closeB).width(200).height(30);
+		}
+		else
+		{
+			add(closeB).width(200).height(30).colspan(2);
+		}
 		setModal(true);
 	}
 

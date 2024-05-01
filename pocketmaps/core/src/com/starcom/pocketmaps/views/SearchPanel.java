@@ -164,7 +164,7 @@ public class SearchPanel
     	if (txt == null)
     	{
             this.setVisible(false, isStart);
-            NavSelect.getInstance().setVisible(true);
+            NavSelect.getInstance().setVisible(true, true);
     	}
     	else if (txt.isEmpty() || txt.isBlank()) {
             ToastMsg.getInstance().toastShort("Enter text");

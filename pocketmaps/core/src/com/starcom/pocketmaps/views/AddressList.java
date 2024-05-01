@@ -19,7 +19,7 @@ public class AddressList
 	
 	public void viewList(List<Address> list, boolean from)
 	{
-		ListSelect ll = new ListSelect("SelectAddress", () -> onClose());
+		ListSelect ll = new ListSelect("SelectAddress", (b) -> onClose());
 		for (Address a : list)
 		{
 			ll.addElement(a.toNiceString(), (o,x,y) -> onAddressSelected(a, from));
@@ -31,11 +31,11 @@ public class AddressList
 	{
 		MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), a, from, true);
 		MapHandler.getInstance().centerPointOnMap(a.toGeoPoint(), 0, 0, 0);
-		NavSelect.getInstance().setVisible(true);
+		NavSelect.getInstance().setVisible(true, true);
 	}
 	
 	private void onClose()
 	{
-		NavSelect.getInstance().setVisible(true);
+		NavSelect.getInstance().setVisible(true, true);
 	}
 }

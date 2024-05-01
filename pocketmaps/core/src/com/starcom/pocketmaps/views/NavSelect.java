@@ -42,7 +42,7 @@ public class NavSelect implements MapHandlerListener
 		aToDD = GuiUtil.genDropDown((o) -> onDropDown(o.toString(), false), x, y, SEL_CUR_LOC, SEL_FROM_LATLON, SEL_POS_ON_MAP, SEL_SEARCH_LOC);
 		aToL = GuiUtil.genLabel("To:", 0, y);
 		aToLTxt = GuiUtil.genLabel("...", 60, y);
-		aX = GuiUtil.genButton("X", (int)(w*0.9f), h/2, (a,xx,yy) -> setVisible(false));
+		aX = GuiUtil.genButton("X", (int)(w*0.9f), h/2, (a,xx,yy) -> setVisible(false, true));
 	}
 	
 	public static NavSelect getInstance() { return instance; }
@@ -78,12 +78,12 @@ public class NavSelect implements MapHandlerListener
 		if (tabAction == TabAction.StartPoint)
 		{
 			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), Address.fromGeoPoint(latLon), true, true);
-			setVisible(true);
+			setVisible(true, true);
 		}
 		else if (tabAction == TabAction.EndPoint)
 		{
 			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), Address.fromGeoPoint(latLon), false, true);
-			setVisible(true);
+			setVisible(true, true);
 		}
 		tabAction = TabAction.None;
 	}
@@ -100,7 +100,9 @@ public class NavSelect implements MapHandlerListener
 		}
 	}
 
-	public void setVisible(boolean visible) { setVisible(visible, true); }
+	/** Sets this View visible or invisible.
+	 * @param visible Whether this NavSelectPanel should be visible.
+	 * @param withTopPanelSwitch Switch between this Panel and TopPanel, so hide TopPanel, when this Panel gets visible, show otherwise. */
 	public void setVisible(boolean visible, boolean withTopPanelSwitch)
 	{
 		if (this.visible == visible) { return; }

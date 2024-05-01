@@ -30,17 +30,17 @@ public class SpeedUtil
      * @param index The path-index for showing text */
     public void showTextSign(int pIndex)
     {
-    	NavTopPanel.getInstance().speedLabel.setVisible(enabled);
+    	NavTopPanel.getInstance().getSpeedLabel().setVisible(enabled);
     	if (!enabled) { return; }
         String txt = getSpeedValue(pIndex + pointsDone);
-        NavTopPanel.getInstance().speedLabel.setText(txt);
+        NavTopPanel.getInstance().getSpeedLabel().setText(txt);
     }
 
     
     public void setEnabled(boolean enabled)
     {
         this.enabled = enabled;
-    	NavTopPanel.getInstance().speedLabel.setVisible(enabled);
+    	NavTopPanel.getInstance().getSpeedLabel().setVisible(enabled);
     }
 //    
 //    private void updateViewVis()

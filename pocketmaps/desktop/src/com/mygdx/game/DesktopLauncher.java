@@ -85,7 +85,7 @@ com.starcom.gdx.system.App.setAppName("PocketMaps", false);
 
     @Override
     public void dispose() {
-    	MapList.getInstance().unloadMaps();
+    	super.dispose();
     }
 
     public static void main(String[] args) {

@@ -20,9 +20,9 @@ import com.starcom.navigation.Location;
 public class NaviDebugSimulator
 {
   /** The DEBUG_SIMULATOR will simulate first generated route on naviStart and trackingStart. **/
-  private static final boolean DEBUG_SIMULATOR = false;
+  private static final boolean DEBUG_SIMULATOR = true;
   private static final int MAX_STEP_DISTANCE = 40;
-  private static boolean debug_simulator_run = false;
+  private static volatile boolean debug_simulator_run = false;
   private static boolean debug_simulator_from_tracking = false;
   private static ArrayList<GeoPoint> debug_simulator_points;
   private static NaviDebugSimulator instance;
@@ -34,7 +34,7 @@ public class NaviDebugSimulator
     return instance;
   }
   
-  public void setSimuRun(boolean run) { debug_simulator_run = run; }
+  public static void stopDebugSimulator() { debug_simulator_run = false; }
   
   /** The DEBUG_SIMULATOR will simulate first generated route on naviStart and trackingStart. **/
   public void startDebugSimulator(InstructionList instructions, boolean fromTracking)
@@ -72,7 +72,7 @@ public class NaviDebugSimulator
         float bearing = lastLoc.bearingTo(pLoc);
         pLoc.set((float)p.getLatitude(), (float)p.getLongitude(), 5.555f, bearing, 0, 0L);
         lastLoc.set(pLoc);
-//        cur.onLocationChanged(pLoc); TODO: Implement MapActivity.onLocationChanged(L)
+        NaviEngine.getNaviEngine().onLocationChanged(pLoc);
         log("Update position for Debug purpose! Lat=" + pLoc.getLatitude() + " Lon=" + pLoc.getLongitude());
         if (debug_simulator_points.size() > newIndex)
         {
@@ -81,22 +81,30 @@ public class NaviDebugSimulator
       }, 2000);
   }
 
+  /** Checks the distance to next waypoint, and sets checkP.
+   * @param index The current index to check.
+   * @param p The next waypoint.
+   * @return The new index for next call. */
   private int checkDistance(int index, GeoPoint p)
   {
-    if (index <= 0)
+    if (index < 0)
     {
+    	throw new IllegalStateException("Index must never be less than 0.");
+    }
+    else if (index == 0)
+    { // First time
       checkP = p;
-      return index + 1;
+      return 1;
     }
     double dist = p.distance(checkP);
     if (dist > GeoPoint.latitudeDistance(MAX_STEP_DISTANCE))
-    {
+    { // Split next waypoint
       float bearing = (float)checkP.bearingTo(p);
       checkP = checkP.destinationPoint(MAX_STEP_DISTANCE * 0.5, bearing);
       return index;
     }
     else
-    {
+    { // Just use existing new waypoint
       checkP = p;
       return index + 1;
     }

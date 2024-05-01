@@ -1,5 +1,6 @@
 package com.starcom.pocketmaps.views;
 
+import org.oscim.core.GeoPoint;
 import org.oscim.map.Map;
 
 import com.badlogic.gdx.Gdx;
@@ -9,6 +10,7 @@ import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.interfaces.IProgressListener.Type;
+import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.views.MapList.MapAction;
 
@@ -34,7 +36,7 @@ public class TopPanel
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
 		aPan = GuiUtil.genPanel(x, y, w, h);
-		aDD = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "Navigate...", "SimpleDialog");
+		aDD = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "Navigate...", "SimpleDialog", "DebugFastNav");
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
 	}
 	
@@ -67,7 +69,7 @@ public class TopPanel
 		}
 		else if (action.equals("Navigate..."))
 		{
-			NavSelect.getInstance().setVisible(true);
+			NavSelect.getInstance().setVisible(true, true);
 		}
 		else if (action.equals("Download Maps"))
 		{
@@ -93,10 +95,15 @@ public class TopPanel
 		{
 			MapList.getInstance().viewMapsSelect(MapAction.Delete);
 		}
-
 		else if (action.equals("SimpleDialog"))
 		{
 			Dialogs.showDialog(GuiUtil.getStage(), "Title", "msg", false, (o) -> System.out.println("Pressed " + o));
+		}
+		else if (action.equals("DebugFastNav"))
+		{
+			MapHandler.getInstance().setStartEndPoint(getInstance().getGdxMap(), Address.fromGeoPoint(new GeoPoint(47.730f,13.417f)), true, false);
+			MapHandler.getInstance().setStartEndPoint(getInstance().getGdxMap(), Address.fromGeoPoint(new GeoPoint(47.734f,13.424f)), false, true);
+			getInstance().setVisible(false);
 		}
 	}
 }

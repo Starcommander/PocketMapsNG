@@ -18,6 +18,7 @@ import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.map.MapHandler;
+import com.starcom.pocketmaps.navigator.NaviDebugSimulator;
 import com.starcom.pocketmaps.util.PolyParser;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.TopPanel;
@@ -179,5 +180,12 @@ ToastMsg.getInstance().render();
         mMapRenderer.onSurfaceChanged(w, h);
         mMap.viewport().setViewSize(w, h);
         viewport.update(w, h);
+    }
+    
+    @Override
+    public void dispose()
+    {
+    	NaviDebugSimulator.stopDebugSimulator();
+    	MapList.getInstance().unloadMaps();
     }
 }
