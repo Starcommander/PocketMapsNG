@@ -37,6 +37,7 @@ public class Location
 		this.alt = alt;
 		this.time = time;
 	}
+	public void setBearing(float bearing) { this.bearing = bearing; }
 	
 	public double distanceTo(Location other)
 	{

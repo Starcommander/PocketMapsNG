@@ -1,15 +1,18 @@
 package com.starcom.pocketmaps.views;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
+import com.badlogic.gdx.utils.Align;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.Icons.R;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class NavTopPanel
 {
@@ -30,17 +33,18 @@ public class NavTopPanel
 	
 	private NavTopPanel()
 	{
+		Image icon = Icons.generateIcon(R.ic_2x_finish_flag);
 		VerticalGroup vg = new VerticalGroup();
-		vg.addActor(topStreetLabel);
+		vg.addActor(topDistanceLabel);
 		vg.addActor(topInstructionLabel);
 		VerticalGroup vg2 = new VerticalGroup();
-		vg2.addActor(topDistanceLabel);
+		vg2.addActor(topStreetLabel);
 		vg2.addActor(topTimeLabel);
-		HorizontalGroup hg = new HorizontalGroup();
-		hg.addActor(Icons.generateIcon(R.ic_finish_flag));
+		HorizontalGroup hg = new HorizontalGroup().space(50);
+		hg.addActor(icon);
 		hg.addActor(vg);
 		hg.addActor(vg2);
-		hg.setY(Gdx.graphics.getHeight()-90); //TODO: is 90 ok?
+		hg.setY(Gdx.graphics.getHeight()-icon.getHeight()/2);
 		topPanel = hg;
 	}
 	
@@ -54,11 +58,12 @@ public class NavTopPanel
 	public void updateInstruction(String street, String distance, String instr, Icons.R icon, String time)
 	{
 		topStreetLabel.setText(street);
-		topDistanceLabel.setText(instr);
+		topDistanceLabel.setText(distance);
 		topInstructionLabel.setText(instr);
 		topTimeLabel.setText(time);
 		topPanel.removeActorAt(0, false);
-		topPanel.addActorAt(0, Icons.generateIcon(icon));
+		Image image = Icons.generateIcon(icon);
+		topPanel.addActorAt(0, image);
 	}
 
 	public void setVisible(boolean visible)
@@ -66,6 +71,8 @@ public class NavTopPanel
 		if (this.visible == visible) { return; }
 		if (visible)
 		{
+			Actor pan = GuiUtil.genPanel(0, (int)(Gdx.graphics.getHeight() * 0.86f), Gdx.graphics.getWidth(), (int)(Gdx.graphics.getHeight() * 0.15f));
+			GuiUtil.getStage().addActor(pan);
 			GuiUtil.getStage().addActor(topPanel);
 		}
 		else

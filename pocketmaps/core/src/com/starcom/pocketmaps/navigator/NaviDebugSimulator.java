@@ -69,9 +69,10 @@ public class NaviDebugSimulator
         GeoPoint p = debug_simulator_points.get(index);
         int newIndex = checkDistance(index, p);
         p = checkP;
-        float bearing = lastLoc.bearingTo(pLoc);
-        pLoc.set((float)p.getLatitude(), (float)p.getLongitude(), 5.555f, bearing, 0, 0L);
         lastLoc.set(pLoc);
+        pLoc.set((float)p.getLatitude(), (float)p.getLongitude(), 5.555f, 0, 0, 0L);
+        float bearing = lastLoc.bearingTo(pLoc);
+        pLoc.setBearing(bearing);
         NaviEngine.getNaviEngine().onLocationChanged(pLoc);
         log("Update position for Debug purpose! Lat=" + pLoc.getLatitude() + " Lon=" + pLoc.getLongitude());
         if (debug_simulator_points.size() > newIndex)
