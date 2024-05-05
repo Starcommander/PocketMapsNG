@@ -358,7 +358,7 @@ public class NaviEngine
 	Text t = Text.getInstance();
     if (in==null)
     {
-    	NavTopPanel.getInstance().updateInstruction(t.getSearchLocation(), "0 " + UnitCalculator.getUnit(false), "---------", Icons.R.ic_continue_on_street, "0 min");
+    	NavTopPanel.getInstance().updateInstruction(t.getSearchLocation(), "0 " + UnitCalculator.getUnit(false), "---------", Icons.R.ic_2x_continue_on_street, "0 min");
 //      navtop_when.setText("0 " + UnitCalculator.getUnit(false));
 //      navtop_time.setText("--------");
 //      navtop_curloc.setText(R.string.search_location);
