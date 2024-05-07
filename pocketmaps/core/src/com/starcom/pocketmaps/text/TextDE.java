@@ -18,6 +18,8 @@ public class TextDE implements Text
 	@Override public String getToLoc() { return "Nach"; }
 	@Override public String getChooseFromFavorite() { return "Wähle von Favoriten"; }
 	@Override public String getEnterLatLon() { return "Eingabe Längengrad Breitengrad"; }
+	@Override public String getExample() { return "Beispiel"; }
+	@Override public String getErrorOccured() { return "Fehler aufgetreten"; }
 	@Override public String getPointOnMap() { return "Punkt auf Karte"; }
 	@Override public String getTravelMode() { return "Reise Modus"; }
 	@Override public String getTravelModeFoot() { return "Fuß"; }

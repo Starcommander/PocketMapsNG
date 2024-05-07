@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -159,5 +160,22 @@ public class GuiUtil
             TextureRegionDrawable drawable = new TextureRegionDrawable(new TextureRegion(new Texture(pixmap)));
             pixmap.dispose();
             return drawable;
+    }
+    
+    /** Allows to disable (gray out) or enable an actor, for example a button. */
+    public static void setEnabled(Actor a, boolean enabled)
+    {
+    	if (enabled)
+    	{
+    		if (a instanceof TextButton) { ((TextButton)a).getLabel().setColor(Color.WHITE); }
+    		a.setTouchable(Touchable.enabled);
+    		a.setColor(1,1,1,1);
+    	}
+    	else
+    	{
+    		if (a instanceof TextButton) { ((TextButton)a).getLabel().setColor(Color.BLACK); }
+    		a.setTouchable(Touchable.disabled);
+    		a.setColor(Color.GRAY);
+    	}
     }
 }

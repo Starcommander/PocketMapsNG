@@ -18,6 +18,8 @@ public class TextEN implements Text
 	@Override public String getToLoc() { return "To"; }
 	@Override public String getChooseFromFavorite() { return "Choose from favorite"; }
 	@Override public String getEnterLatLon() { return "Enter latitude longitude"; }
+	@Override public String getExample() { return "Example"; }
+	@Override public String getErrorOccured() { return "Error occured"; }
 	@Override public String getPointOnMap() { return "Point on map"; }
 	@Override public String getTravelMode() { return "Travel mode"; }
 	@Override public String getTravelModeFoot() { return "Foot"; }

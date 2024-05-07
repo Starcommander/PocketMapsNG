@@ -17,6 +17,8 @@ public class TextES implements Text {
 	@Override public String getToLoc() { return "hacia"; }
 	@Override public String getChooseFromFavorite() { return "Seleccionar de favoritos"; }
 	@Override public String getEnterLatLon() { return "Introducir latitud longitud"; }
+	@Override public String getExample() { return "Ejemplo"; }
+	@Override public String getErrorOccured() { return "Error oculto"; }
 	@Override public String getPointOnMap() { return "Punto del mapa"; }
 	@Override public String getTravelMode() { return "Modo viaje"; }
 	@Override public String getTravelModeFoot() { return "A pie"; }

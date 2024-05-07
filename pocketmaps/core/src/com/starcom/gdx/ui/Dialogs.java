@@ -78,13 +78,13 @@ public class Dialogs
 	 * @param msg The Message.
 	 * @param cancel True to also show cancel-button.
 	 * @param listener The listener for result of OK="true" and CANCEL="false", listener may also be null. */
-	public static void showDialog(Stage guiStage, String title, String msg, boolean cancel, IObjectListener listener)
+	public static void showDialog(Stage guiStage, String title, String msg, boolean cancel, IObjectListener<Boolean> listener)
 	{
 		Dialog dialog = new Dialog(title, GuiUtil.getDefaultSkin(), "dialog")
 		{
 		    public void result(Object obj)
 		    {
-		    	if (listener != null) { listener.run(obj); }
+		    	if (listener != null) { listener.run(obj == Boolean.TRUE); }
 		    }
 		};
 		dialog.text(msg);
