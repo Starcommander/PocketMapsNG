@@ -17,6 +17,8 @@ public class TextIT implements Text {
 	@Override public String getToLoc() { return "A"; }
 	@Override public String getChooseFromFavorite() { return "Scegli dai preferiti"; }
 	@Override public String getEnterLatLon() { return "Inserisci latitudine e longitudine"; }
+	@Override public String getExample() { return "Esempio"; }
+	@Override public String getErrorOccured() { return "Errore assicurato"; }
 	@Override public String getPointOnMap() { return "Punto sulla mappa"; }
 	@Override public String getTravelMode() { return "Mezzo"; }
 	@Override public String getTravelModeFoot() { return "Piedi"; }

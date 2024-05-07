@@ -20,6 +20,8 @@ public interface Text
 	public String getToLoc();
 	public String getChooseFromFavorite();
 	public String getEnterLatLon();
+	public String getExample();
+	public String getErrorOccured();
 	public String getPointOnMap();
 	public String getTravelMode();
 	public String getTravelModeFoot();

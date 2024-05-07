@@ -17,6 +17,8 @@ public class TextNL implements Text {
 	@Override public String getToLoc() { return "Naar"; }
 	@Override public String getChooseFromFavorite() { return "Kies uit favorieten"; }
 	@Override public String getEnterLatLon() { return "Enter latitude longitude"; }
+	@Override public String getExample() { return "Voorbeeld"; }
+	@Override public String getErrorOccured() { return "Fout opgetreden"; }
 	@Override public String getPointOnMap() { return "Locatie op de kaart"; }
 	@Override public String getTravelMode() { return "Onderweg modus"; }
 	@Override public String getTravelModeFoot() { return "Te voet"; }

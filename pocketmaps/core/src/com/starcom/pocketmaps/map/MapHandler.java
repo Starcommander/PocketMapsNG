@@ -258,8 +258,10 @@ public class MapHandler
   /**
    * center the LatLong point in the map and zoom map to zoomLevel
    *
-   * @param latLong
+   * @param latLong The position to center
    * @param zoomLevel (if 0 use current zoomlevel)
+   * @param bearing The bearing/rotation
+   * @param tilt The tilt, mostly modified in relation to speed and distance to next point.
    */
   public void centerPointOnMap(GeoPoint latLong, int zoomLevel, float bearing, float tilt)
   {
@@ -294,9 +296,9 @@ public class MapHandler
       
     if (isStart)
     {
-      startMarker = p.toGeoPoint();
+      startMarker = p==null ? null : p.toGeoPoint();
     }
-    else { endMarker = p.toGeoPoint(); }
+    else { endMarker = p==null ? null : p.toGeoPoint(); }
 
     // remove routing layers
     if ((startMarker==null || endMarker==null) || refreshBoth)
@@ -320,7 +322,7 @@ public class MapHandler
       result = true;
     }
     map.updateMap(true);
-    NavSelect.getInstance().setLocation(p, isStart);
+    if (p != null) { NavSelect.getInstance().setLocation(p, isStart); }
     return result;
   }
   

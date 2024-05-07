@@ -17,6 +17,8 @@ public class TextPT implements Text {
 	@Override public String getToLoc() { return "para"; }
 	@Override public String getChooseFromFavorite() { return "Escolher dos favoritos"; }
 	@Override public String getEnterLatLon() { return "Enter latitude longitude"; }
+	@Override public String getExample() { return "Exemplo"; }
+	@Override public String getErrorOccured() { return "Erro ocorrido"; }
 	@Override public String getPointOnMap() { return "Ponto no mapa"; }
 	@Override public String getTravelMode() { return "Modo Viagem"; }
 	@Override public String getTravelModeFoot() { return "Caminhando"; }
