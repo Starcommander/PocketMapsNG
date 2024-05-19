@@ -10,11 +10,15 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.starcom.LoggerUtil;
 import com.starcom.gdx.io.Storage;
 import com.starcom.gdx.system.Threading;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
+import com.starcom.navigation.ILocationListener;
+import com.starcom.navigation.ILocationService;
+import com.starcom.navigation.Location;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.map.MapHandler;
@@ -48,13 +52,15 @@ import org.oscim.gdx.GdxMap;
 import static org.oscim.backend.GLAdapter.gl;
 
 import java.io.File;
+import java.util.logging.Logger;
 
-public abstract class MyGdxGame extends GdxMap {
+public abstract class MyGdxGame extends GdxMap implements ILocationListener {
 
     private OrthographicCamera camera;
     private Viewport viewport;
     private SpriteBatch spriteBatch;
-private Stage guiStage;
+    private Stage guiStage;
+    private Logger logger = LoggerUtil.get(MyGdxGame.class);
 
 //    private Texture texture;
 
@@ -133,6 +139,15 @@ GuiUtil.setStage(guiStage);
 TopPanel.getInstance().init(getMap());
 TopPanel.getInstance().setVisible(true);
 MapList.getInstance().loadSettings();
+ILocationService locService = ILocationService.getLocationService();
+if (locService == null)
+{
+	logger.warning("No native GPS navigation hardware found.");
+}
+else
+{
+	locService.setLocationListener(this);
+}
 //dialog.show(guiStage);
     }
 
@@ -180,6 +195,11 @@ ToastMsg.getInstance().render();
         mMapRenderer.onSurfaceChanged(w, h);
         mMap.viewport().setViewSize(w, h);
         viewport.update(w, h);
+    }
+    
+    public void onLocationChanged(Location l)
+    { //TODO: Implement this!!!
+    	
     }
     
     @Override

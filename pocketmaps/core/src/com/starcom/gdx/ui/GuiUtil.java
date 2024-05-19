@@ -85,7 +85,7 @@ public class GuiUtil
 	}
 
 	/** Creates a dropDown menu. */
-	public static Actor genDropDown(IObjectListener l, int x, int y, String ...items)
+	public static Actor genDropDown(IObjectListener<String> l, int x, int y, String ...items)
 	{
 		SelectBox<String> selectBox = new SelectBox<String>(GuiUtil.getDefaultSkin());
 		selectBox.setItems(items);
@@ -102,7 +102,7 @@ public class GuiUtil
 	}
 	
 	/** Creates a checkBox menu. */
-	public static Actor genCheckBox(IObjectListener l, int x, int y, String txt, boolean checked)
+	public static Actor genCheckBox(IObjectListener<Boolean> l, int x, int y, String txt, boolean checked)
 	{
 		CheckBox selectBox = new CheckBox(txt, GuiUtil.getDefaultSkin());
 		selectBox.addListener(new ChangeListener()
@@ -128,7 +128,7 @@ public class GuiUtil
 	}
 
 	/** Creates a text button. */
-	public static Actor genButton(String txt, int x, int y, IClickListener onClick)
+	public static Actor genButton(String txt, int x, int y, IClickListener<Actor> onClick)
 	{
 		TextButton l = new TextButton(txt, getDefaultSkin());
 		l.setX(x);
