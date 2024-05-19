@@ -1,32 +1,24 @@
 package com.starcom.pocketmaps.views;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
-import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
-import com.badlogic.gdx.utils.Align;
+import com.starcom.gdx.ui.AbsLayout;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.Icons.R;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class NavTopPanel
 {
 	private static NavTopPanel instance = new NavTopPanel();
 	
-	HorizontalGroup topPanel;
+	AbsLayout topPanel = new AbsLayout(0, 0, 1, 0.2f);
 	private final Label topStreetLabel = new Label("Street123", GuiUtil.getDefaultSkin());
 	private final Label topInstructionLabel = new Label("---", GuiUtil.getDefaultSkin());
 	private final Label topDistanceLabel = new Label("0 m", GuiUtil.getDefaultSkin());
-	private final Label topTimeLabel = new Label("0 m", GuiUtil.getDefaultSkin());
+	private final Label topTimeLabel = new Label("0 min", GuiUtil.getDefaultSkin());
 	private final Label speedLabel = new Label("---", GuiUtil.getDefaultSkin()); // TODO: add this when configured.
-//	VerticalGroup bottomPanel = new VerticalGroup();
-//	private TextButton bottomFromButton = new TextButton("From: ", GuiUtil.getDefaultSkin());
-//	private TextButton bottomToButton = new TextButton("To: ", GuiUtil.getDefaultSkin());
 //	private TextButton centerButton = new TextButton("[x]", GuiUtil.getDefaultSkin());
 	private Actor centerButton = GuiUtil.genButton("[X]", Gdx.graphics.getWidth()-30, Gdx.graphics.getHeight()-30, null);
 	private boolean visible = false;
@@ -34,18 +26,14 @@ public class NavTopPanel
 	private NavTopPanel()
 	{
 		Image icon = Icons.generateIcon(R.ic_2x_finish_flag);
-		VerticalGroup vg = new VerticalGroup();
-		vg.addActor(topDistanceLabel);
-		vg.addActor(topInstructionLabel);
-		VerticalGroup vg2 = new VerticalGroup();
-		vg2.addActor(topStreetLabel);
-		vg2.addActor(topTimeLabel);
-		HorizontalGroup hg = new HorizontalGroup().space(50);
-		hg.addActor(icon);
-		hg.addActor(vg);
-		hg.addActor(vg2);
-		hg.setY(Gdx.graphics.getHeight()-icon.getHeight()/2);
-		topPanel = hg;
+		topPanel.setMinHeight(30);
+		Actor aPan = GuiUtil.genPanel(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getWidth());
+		topPanel.addChild(aPan, 0, 0, 1, 1);
+		topPanel.addChild(icon, 0, 0, 0.2f, 1.0f).keepRatioW();
+		topPanel.addChild(topDistanceLabel, 0.3f, 0, 0.4f, 0.4f);
+		topPanel.addChild(topInstructionLabel, 0.3f, 0.6f, 0.4f, 0.4f);
+		topPanel.addChild(topStreetLabel, 0.7f, 0, 0.4f, 0.4f);
+		topPanel.addChild(topTimeLabel, 0.7f, 0.6f, 0.4f, 0.4f);
 	}
 	
 	public static NavTopPanel getInstance()
@@ -61,9 +49,8 @@ public class NavTopPanel
 		topDistanceLabel.setText(distance);
 		topInstructionLabel.setText(instr);
 		topTimeLabel.setText(time);
-		topPanel.removeActorAt(0, false);
 		Image image = Icons.generateIcon(icon);
-		topPanel.addActorAt(0, image);
+		topPanel.replaceChild(1, image, 0, 0, 0.2f, 1.0f).keepRatioW().setDebug("Icon");
 	}
 
 	public void setVisible(boolean visible)
@@ -71,8 +58,8 @@ public class NavTopPanel
 		if (this.visible == visible) { return; }
 		if (visible)
 		{
-			Actor pan = GuiUtil.genPanel(0, (int)(Gdx.graphics.getHeight() * 0.86f), Gdx.graphics.getWidth(), (int)(Gdx.graphics.getHeight() * 0.15f));
-			GuiUtil.getStage().addActor(pan);
+//			Actor pan = GuiUtil.genPanel(0, (int)(Gdx.graphics.getHeight() * 0.86f), Gdx.graphics.getWidth(), (int)(Gdx.graphics.getHeight() * 0.15f));
+//			GuiUtil.getStage().addActor(pan);
 			GuiUtil.getStage().addActor(topPanel);
 		}
 		else
