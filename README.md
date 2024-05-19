@@ -8,7 +8,7 @@ See https://github.com/junjunguo/PocketMaps
 Currently work in progress.
 - Downloading maps -> works
 - Selecting / unselecting maps -> works
-- Processing a route -> in progress
-- TODO: Navigating
+- Processing a route -> works
+- Navigating -> in progress
 - TODO: GUI redesign
 - TODO: Tracking
