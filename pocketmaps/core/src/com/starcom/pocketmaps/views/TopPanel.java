@@ -36,7 +36,7 @@ public class TopPanel
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
 		aPan = GuiUtil.genPanel(x, y, w, h);
-		aDD = GuiUtil.genDropDown((o) -> doMenuAction(o.toString()),30, y + 30, "AAA", "Maps...", "Navigate...", "SimpleDialog", "DebugFastNav");
+		aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 30, "AAA", "Maps...", "Navigate...", "SimpleDialog", "DebugFastNav");
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
 	}
 	
