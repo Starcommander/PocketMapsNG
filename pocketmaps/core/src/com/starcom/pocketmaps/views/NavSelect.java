@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.starcom.gdx.ui.AbsLayout;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.pocketmaps.geocoding.Address;
@@ -28,6 +29,7 @@ public class NavSelect implements MapHandlerListener
 	private TabAction tabAction = TabAction.None;
 
 	private Actor aPan, aFromDD, aToDD, aFromL, aToL, aFromLTxt, aToLTxt, aX, aFromX, aToX;
+	AbsLayout al;
 	private boolean visible;
 	
 	private NavSelect()
@@ -37,20 +39,32 @@ public class NavSelect implements MapHandlerListener
 		int x = 0;
 		int y = 0;
 		aPan = GuiUtil.genPanel(x,y,w,h);
-		x = w/2;
-		y = h/2;
+		al = new AbsLayout(0, 0.875f, 1.0f, 0.125f);
+		al.setMinHeight(60);
+		al.addChild(aPan, 0, 0, 1, 1);
+
 		aFromDD = GuiUtil.genDropDown((o) -> onDropDown(o.toString(), true), x, y, SEL_CUR_LOC, SEL_FROM_LATLON, SEL_POS_ON_MAP, SEL_SEARCH_LOC);
 		aFromL = GuiUtil.genLabel("From:", 0, y);
 		aFromLTxt = GuiUtil.genLabel(EMPTY_LOC, 60, y);
 		aFromX = GuiUtil.genButton("X", (int)(w*0.7f), y, (a,xx,yy) -> onClearLocation(true));
 		GuiUtil.setEnabled(aFromX, false);
-		y = h/4;
+
 		aToDD = GuiUtil.genDropDown((o) -> onDropDown(o.toString(), false), x, y, SEL_CUR_LOC, SEL_FROM_LATLON, SEL_POS_ON_MAP, SEL_SEARCH_LOC);
 		aToL = GuiUtil.genLabel("To:", 0, y);
 		aToLTxt = GuiUtil.genLabel(EMPTY_LOC, 60, y);
 		aToX = GuiUtil.genButton("X", (int)(w*0.7f), y, (a,xx,yy) -> onClearLocation(false));
 		GuiUtil.setEnabled(aToX, false);
 		aX = GuiUtil.genButton("X", (int)(w*0.9f), h/2, (a,xx,yy) -> setVisible(false, true));
+		
+		al.addChild(aFromL, 0.0f, 0.1f, 0.6f, 0.3f);
+		al.addChild(aToL, 0.0f, 0.6f, 0.6f, 0.3f);
+		al.addChild(aFromLTxt, 0.1f, 0.1f, 0.6f, 0.3f);
+		al.addChild(aToLTxt, 0.1f, 0.6f, 0.6f, 0.3f);
+		al.addChild(aFromDD, 0.3f, 0.1f, 0.3f, 0.3f);
+		al.addChild(aToDD, 0.3f, 0.6f, 0.3f, 0.3f);
+		al.addChild(aFromX, 0.8f, 0.1f, 0.1f, 0.3f);
+		al.addChild(aToX, 0.8f, 0.6f, 0.1f, 0.3f);
+		al.addChild(aX, 0.9f, 0.0f, 0.1f, 0.3f);
 	}
 	
 	public static NavSelect getInstance() { return instance; }
@@ -147,30 +161,12 @@ public class NavSelect implements MapHandlerListener
 		if (visible)
 		{
 			if (withTopPanelSwitch) { TopPanel.getInstance().setVisible(false); }
-			GuiUtil.addActor(aPan);
-			GuiUtil.addActor(aFromLTxt);
-			GuiUtil.addActor(aFromDD);
-			GuiUtil.addActor(aFromX);
-			GuiUtil.addActor(aFromL);
-			GuiUtil.addActor(aToLTxt);
-			GuiUtil.addActor(aToDD);
-			GuiUtil.addActor(aToX);
-			GuiUtil.addActor(aToL);
-			GuiUtil.addActor(aX);
+			GuiUtil.addActor(al);
 		}
 		else
 		{
 			if (withTopPanelSwitch) { TopPanel.getInstance().setVisible(true); }
-			aPan.remove();
-			aFromLTxt.remove();
-			aFromDD.remove();
-			aFromX.remove();
-			aFromL.remove();
-			aToLTxt.remove();
-			aToDD.remove();
-			aToX.remove();
-			aToL.remove();
-			aX.remove();
+			al.remove();
 		}
 		this.visible = visible;
 	}
