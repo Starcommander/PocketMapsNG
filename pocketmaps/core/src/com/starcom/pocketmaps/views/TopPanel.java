@@ -5,6 +5,7 @@ import org.oscim.map.Map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.starcom.gdx.ui.AbsLayout;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
@@ -18,7 +19,7 @@ public class TopPanel
 {
 	static TopPanel instance = new TopPanel();
 	private Map gdxMap;
-	private Actor aPan,aDD;
+	private AbsLayout al;
 	private boolean visible = false;
 	
 	public static TopPanel getInstance() { return instance; }
@@ -35,9 +36,12 @@ public class TopPanel
 		int h = Gdx.graphics.getHeight()/8;
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
-		aPan = GuiUtil.genPanel(x, y, w, h);
-		aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 20, "AAA", "Maps...", "Navigate...", "SimpleDialog", "DebugFastNav");
-		aDD.setSize(300, 60);
+		Actor aPan = GuiUtil.genPanel(x, y, w, h);
+		Actor aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 20, "AAA", "Maps...", "Navigate...", "SimpleDialog", "DebugFastNav");
+		al = new AbsLayout(0, 0, 1, 0.1f);
+		al.setMinHeight(30);
+		al.addChild(aPan, 0, 0, 1, 1);
+		al.addChild(aDD, 0.1f, 0.2f, 0.25f, 0.6f);
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
 	}
 	
@@ -46,13 +50,11 @@ public class TopPanel
 		if (this.visible == visible) { return; }
 		if (visible)
 		{
-			GuiUtil.addActor(aPan);
-			GuiUtil.addActor(aDD);
+			GuiUtil.addActor(al);
 		}
 		else
 		{
-			aPan.remove();
-			aDD.remove();
+			al.remove();
 		}
 		this.visible = visible;
 	}
