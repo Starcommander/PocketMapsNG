@@ -1,6 +1,5 @@
 package com.starcom.gdx.ui;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -72,6 +71,13 @@ public class AbsLayout extends WidgetGroup
 	}
 	
 	@Override
+	public void setParent(Group p)
+	{
+		super.setParent(p);
+		invalidate(); // Ensure to layout components
+	}
+	
+	@Override
 	public void layout()
 	{
 		Group parent = getParent();
@@ -80,21 +86,32 @@ public class AbsLayout extends WidgetGroup
 		float hh = 0.0f;
 		float xx = 0.0f;
 		float yy = 0.0f;
+		float parentW = 0.0f;
+		float parentH = 0.0f;
 		if (stage != null && parent == stage.getRoot())
 		{
-			ww = stage.getWidth() * w;
-			hh = stage.getHeight() * h;
-			xx = stage.getWidth() * x;
-			yy = stage.getHeight() - stage.getHeight() * y;
-			setColor(Color.RED);
+			parentW = stage.getWidth();
+			parentH = stage.getHeight();
 		}
 		else
 		{
-			ww = parent.getWidth() * w;
-			hh = parent.getHeight() * h;
+			parentW = parent.getWidth();
+			parentH = parent.getHeight();
 		}
+		ww = parentW * w;
+		hh = parentH * h;
 		if (ww < minWidth) { ww = minWidth; }
 		if (hh < minHeight) { hh = minHeight; }
+		xx = parentW * x;
+		yy = parentH * y; // First from top
+		if ((yy + hh) > parentH)
+		{ // Clip may happen, when minHeight was forced.
+			yy = minHeight; // Bottom
+		}
+		else
+		{
+			yy = parentH - yy; // From bottom
+		}
 		setSize(ww,hh);
 		setX(xx);
 		setY(yy);
