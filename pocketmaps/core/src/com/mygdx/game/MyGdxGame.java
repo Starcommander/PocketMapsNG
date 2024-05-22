@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -29,6 +30,7 @@ import com.starcom.pocketmaps.views.TopPanel;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.InputMultiplexer;
 import org.oscim.backend.GL;
 import org.oscim.core.Point;
@@ -61,6 +63,7 @@ public abstract class MyGdxGame extends GdxMap implements ILocationListener {
     private SpriteBatch spriteBatch;
     private Stage guiStage;
     private Logger logger = LoggerUtil.get(MyGdxGame.class);
+    private int oldW,oldH;
 
 //    private Texture texture;
 
@@ -189,12 +192,23 @@ guiStage.act(Gdx.graphics.getDeltaTime());
 guiStage.draw();
 ToastMsg.getInstance().render();
     }
-
+    
     @Override
     public void resize(int w, int h) {
+    	if (w==oldW && h == oldH) { return; }
         mMapRenderer.onSurfaceChanged(w, h);
         mMap.viewport().setViewSize(w, h);
         viewport.update(w, h);
+        for (Actor a : GuiUtil.getStage().getActors())
+        {
+        	if (a instanceof Layout)
+        	{
+        		((Layout)a).invalidate();
+        	}
+        }
+        logger.info("Resized to: " + w + "/" + h);
+        oldW = w;
+        oldH = h;
     }
     
     public void onLocationChanged(Location l)
