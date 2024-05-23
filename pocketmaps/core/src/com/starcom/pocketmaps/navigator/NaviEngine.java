@@ -228,6 +228,7 @@ public class NaviEngine
 //    speedUtil.initTextView(navspeed_text);
 //  }
   
+  /** Called when map dnd-moved while navigating, or re-center again. */
   public void setMapUpdatesAllowed(boolean allowed)
   {
       if (this.mapUpdatesAllowed != allowed)
@@ -241,8 +242,9 @@ public class NaviEngine
         else
         {
           NavTopPanel.getInstance().showNaviCenterButton();
-          MapHandler.getInstance().resetTilt(TopPanel.getInstance().getGdxMap(), 0);
+          MapHandler.getInstance().resetTilt(0);
           MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_my_location_dark_24dp));
+          NavTopPanel.getInstance().showNaviCenterButton();
         }
       }
   }

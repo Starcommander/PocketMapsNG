@@ -69,6 +69,13 @@ public class AbsLayout extends WidgetGroup
 		super.addActorAt(index, actor);
 		return uObj;
 	}
+
+	/** Removes a child and its user object. */
+	public void clearChild(Actor c)
+	{
+		super.removeActor(c);
+		c.setUserObject(null);
+	}
 	
 	@Override
 	public void setParent(Group p)

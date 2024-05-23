@@ -24,6 +24,7 @@ import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.navigator.NaviDebugSimulator;
+import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.starcom.pocketmaps.util.PolyParser;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.TopPanel;
@@ -34,6 +35,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.InputMultiplexer;
 import org.oscim.backend.GL;
 import org.oscim.core.Point;
+import org.oscim.event.Event;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapRenderer;
 import org.oscim.tiling.TileSource;
@@ -49,7 +51,9 @@ import org.oscim.gdx.GdxAssets;
 import org.oscim.theme.VtmThemes;
 import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
+import org.oscim.map.Map.UpdateListener;
 import org.oscim.core.GeoPoint;
+import org.oscim.core.MapPosition;
 import org.oscim.gdx.GdxMap;
 import static org.oscim.backend.GLAdapter.gl;
 
@@ -139,6 +143,7 @@ Gdx.input.setInputProcessor(inputMultiplexer);
 //}
 ////listSel.showAsWindow(guiStage);
 GuiUtil.setStage(guiStage);
+getMap().events.bind(createUpdateListener());
 TopPanel.getInstance().init(getMap());
 TopPanel.getInstance().setVisible(true);
 MapList.getInstance().loadSettings();
@@ -211,9 +216,24 @@ ToastMsg.getInstance().render();
         oldH = h;
     }
     
-    public void onLocationChanged(Location l)
+    public void onGpsLocationChanged(Location l)
     { //TODO: Implement this!!!
     	
+    }
+    
+    private UpdateListener createUpdateListener()
+    {
+        UpdateListener d = new UpdateListener(){
+            @Override
+            public void onMapEvent(Event e, MapPosition mapPosition)
+            {
+                if (e == org.oscim.map.Map.MOVE_EVENT && NaviEngine.getNaviEngine().isNavigating())
+                {
+                    NaviEngine.getNaviEngine().setMapUpdatesAllowed(false);
+                }
+            }
+        };
+        return d;
     }
     
     @Override
