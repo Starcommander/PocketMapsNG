@@ -278,8 +278,10 @@ public class MapHandler
     map.animator().animateTo(300, tmpPos);
   }
   
-  public void resetTilt(Map map, float tilt)
+  /** Resets the tilt angle-rotation. */
+  public void resetTilt(float tilt)
   {
+      Map map = TopPanel.getInstance().getGdxMap(); 
       map.setMapPosition(map.getMapPosition().setTilt(tilt));
   }
 
@@ -331,8 +333,9 @@ public class MapHandler
     calcPath(map, startMarker.getLatitude(), startMarker.getLongitude(), endMarker.getLatitude(), endMarker.getLongitude());
   }
 
-  /** Set the custom Point for current location, or null to delete.
-   *  Sets the offset to center. **/
+  /** Set the custom Point for current location.
+   *  Sets the offset to center.
+   *  @param New location, or null to delete **/
   public void setCustomPoint(GeoPoint p)
   {
     if (customLayer==null) { return; } // Not loaded yet.
