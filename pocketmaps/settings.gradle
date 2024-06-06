@@ -1,1 +1,1 @@
-include 'desktop', 'ios', 'html', 'core'
+include 'desktop', 'ios', 'html', 'core', 'gps-module'
