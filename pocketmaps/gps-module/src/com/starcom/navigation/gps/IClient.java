@@ -2,6 +2,8 @@ package com.starcom.navigation.gps;
 
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.ivkos.gpsd4j.client.GpsdClient;
 import com.ivkos.gpsd4j.client.GpsdClientOptions;
 import com.ivkos.gpsd4j.messages.ErrorMessage;
@@ -10,6 +12,7 @@ import com.ivkos.gpsd4j.messages.reports.TPVReport;
 
 public interface IClient
 {
+	static final Logger logger = LoggerFactory.getLogger(IClient.class);
 	public void start();
 	public void stop();
 	public void sendPollCommand(Consumer<PollMessage> responseHandler);
@@ -17,20 +20,36 @@ public interface IClient
 	public void addTpvHandler(Consumer<TPVReport> handler);
 	public void addErrorHandler(Consumer<ErrorMessage> handler);
 	
-	/** Creates the native gps client, that may be PsClientImpl or GpsdClientImpl, using default values.
+	/** Creates the native gps client, that may be PsClientImpl or GpsdClientImpl or StaticClientImpl.
+	 * <br> For GPSD the environment variables GPSD_HOST and GPSD_PORT are considered with default values of "localhost:2944".
 	 * @return The native client. */
-	public static IClient createGpsClient() { return createGpsClient("localhost", 2944); }
-	
-	/** Creates the native gps client, that may be PsClientImpl or GpsdClientImpl.
-	 * @param gpsdHost The host, default is localhost.
-	 * @param gpsdPort The port, default is 2944.
-	 * @return The native client. */
-	public static IClient createGpsClient(String gpsdHost, int gpsdPort)
+	public static IClient createGpsClient()
 	{
+		String gpsdHost = "localhost";
+		int gpsdPort = 2944;
+		String env = System.getenv("GPSD_HOST");
+		if (env != null && ! env.isEmpty())
+		{
+			gpsdHost = env;
+		}
+		env = System.getenv("GPSD_PORT");
+		if (env != null && ! env.isEmpty())
+		{
+			try
+			{
+				gpsdPort = Integer.parseInt(env);
+			}
+			catch (NumberFormatException e) { logger.error("GPSD_PORT NumberFormatException, using default: " + gpsdPort); }
+		}
+		
     	boolean isWin = System.getProperties().get("os.name").toString().startsWith("Windows"); // Hint: apache commons lang3 -> SystemUtils.java -> IS_OS_WINDOWS
     	if (isWin)
     	{
     		return new PsClientImpl();
+    	}
+    	else if (StaticClientImpl.isAvailable())
+    	{
+    		return new StaticClientImpl();
     	}
     	else
     	{
@@ -43,6 +62,5 @@ public interface IClient
     		GpsdClient gpsdClient = new GpsdClient(gpsdHost, gpsdPort, options);
     		return new GpsdClientImpl(gpsdClient);
     	}
-    	//TODO: On Android use StaticClientImpl.
 	}
 }
