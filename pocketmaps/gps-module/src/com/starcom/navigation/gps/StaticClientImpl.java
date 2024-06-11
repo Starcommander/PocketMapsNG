@@ -16,6 +16,7 @@ public class StaticClientImpl implements IClient
 	private static Consumer<TPVReport> tpvHandler;
 	private static boolean watching = false;
 private static TPVReport lastTpvReport;
+private static boolean available = false;
 
 	@Override
 	public void start()
@@ -28,17 +29,25 @@ private static TPVReport lastTpvReport;
 	{
 		log.info("Stopping StaticClient.");
 	}
+	
+	public static boolean isAvailable() { return available; }
 
-/** This is called by native location service to update location */
-public static void onUpdate(double lat, double lon, double alt, double speed)
-{
-	if (!watching) { return; }
-	lastTpvReport = new StaticTpvReport(lat,lon,alt,speed);
-	if (tpvHandler != null)
+	/** This is initially called by native location service to ensure using this StaticClient */
+	public static void setAvailable()
 	{
-		tpvHandler.accept(lastTpvReport);
+		available = true;
 	}
-}
+
+	/** This is called by native location service to update location */
+	public static void onUpdate(double lat, double lon, double alt, double speed)
+	{
+		if (!watching) { return; }
+		lastTpvReport = new StaticTpvReport(lat,lon,alt,speed);
+		if (tpvHandler != null)
+		{
+			tpvHandler.accept(lastTpvReport);
+		}
+	}
 
 	@Override
 	public void sendPollCommand(Consumer<PollMessage> responseHandler)
