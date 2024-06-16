@@ -104,8 +104,9 @@ project(":core") {
         api "com.kotcrab.vis:vis-ui:1.4.11"
         api "org.mapsforge:vtm:$vtmVersion"
         api "org.mapsforge:vtm-gdx:$vtmVersion"
-        api "org.apache.commons:commons-lang3:3.13.0"
         api project(':gps-module')
+        api project(':gdx-utils')
+        api project(':starcom-base')
         implementation 'org.json:json:20231013'
         implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.13.0') {
           exclude group: 'com.google.protobuf', module: 'protobuf-java'
