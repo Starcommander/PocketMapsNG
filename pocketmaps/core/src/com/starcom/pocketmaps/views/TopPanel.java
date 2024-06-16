@@ -5,19 +5,24 @@ import org.oscim.map.Map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.ivkos.gpsd4j.messages.reports.TPVReport;
+import com.starcom.LoggerUtil;
 import com.starcom.gdx.ui.AbsLayout;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.interfaces.IProgressListener.Type;
+import com.starcom.navigation.Location;
 import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.map.MapHandler;
+import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.starcom.pocketmaps.views.MapList.MapAction;
 
 public class TopPanel
 {
 	static TopPanel instance = new TopPanel();
+	private Actor centerButton = GuiUtil.genButton("[O]", 30, 90, (a,x,y) -> onCenterButtonPressed());
 	private Map gdxMap;
 	private AbsLayout al;
 	private boolean visible = false;
@@ -45,16 +50,38 @@ public class TopPanel
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
 	}
 	
+	private void onCenterButtonPressed()
+	{
+		Location curLoc = NaviEngine.getNaviEngine().getCurrentLocation();
+		if (curLoc!=null)
+		{
+			log("Using latest gps location");
+			MapHandler.getInstance().centerPointOnMap(new GeoPoint( curLoc.getLatitude(), curLoc.getLongitude()), NaviEngine.BEST_NAVI_ZOOM, 0, 0);
+			return;
+		}
+		log("Polling gps location");
+		NaviEngine.getNaviEngine().getGpsClient().sendPollCommand((posLst) ->
+		{
+			if (posLst==null) { log("Position is null"); return; }
+			if (posLst.getTPVList().isEmpty()) { log("Position list is empty"); return; }
+			TPVReport pos = posLst.getTPVList().get(0);
+			if (pos.getLatitude() == Double.NaN || pos.getLongitude() == Double.NaN) { log("Position is NaN"); return; }
+			MapHandler.getInstance().centerPointOnMap(new GeoPoint( pos.getLatitude(), pos.getLongitude()), NaviEngine.BEST_NAVI_ZOOM, 0, 0);
+		});
+	}
+	
 	public void setVisible(boolean visible)
 	{
 		if (this.visible == visible) { return; }
 		if (visible)
 		{
 			GuiUtil.addActor(al);
+			GuiUtil.addActor(centerButton);
 		}
 		else
 		{
 			al.remove();
+			centerButton.remove();
 		}
 		this.visible = visible;
 	}
@@ -108,5 +135,10 @@ public class TopPanel
 			MapHandler.getInstance().setStartEndPoint(getInstance().getGdxMap(), Address.fromGeoPoint(new GeoPoint(47.734f,13.424f)), false, true);
 			getInstance().setVisible(false);
 		}
+	}
+	
+	void log(String msg)
+	{
+		LoggerUtil.get(TopPanel.class).info(msg);
 	}
 }

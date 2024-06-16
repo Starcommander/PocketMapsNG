@@ -3,64 +3,36 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.starcom.LoggerUtil;
 import com.starcom.gdx.io.Storage;
 import com.starcom.gdx.system.Threading;
-import com.starcom.gdx.ui.Dialogs;
-import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
-import com.starcom.navigation.ILocationListener;
-import com.starcom.navigation.ILocationService;
-import com.starcom.navigation.Location;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Cfg;
-import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.navigator.NaviDebugSimulator;
 import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.starcom.pocketmaps.util.PolyParser;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.TopPanel;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.InputMultiplexer;
 import org.oscim.backend.GL;
-import org.oscim.core.Point;
 import org.oscim.event.Event;
 import org.oscim.renderer.GLState;
 import org.oscim.renderer.MapRenderer;
-import org.oscim.tiling.TileSource;
-//import org.oscim.tiling.source.OkHttpEngine;
-import org.oscim.tiling.source.oscimap4.OSciMap4TileSource;
-import org.oscim.tiling.source.mapfile.MapFileTileSource;
-import org.oscim.layers.tile.vector.VectorTileLayer;
-import com.badlogic.gdx.utils.SharedLibraryLoader;
-import org.oscim.backend.DateTime;
-import org.oscim.backend.DateTimeAdapter;
-import org.oscim.gdx.GdxAssets;
-
-import org.oscim.theme.VtmThemes;
-import org.oscim.layers.tile.buildings.BuildingLayer;
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map.UpdateListener;
-import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.gdx.GdxMap;
 import static org.oscim.backend.GLAdapter.gl;
 
-import java.io.File;
 import java.util.logging.Logger;
 
-public abstract class MyGdxGame extends GdxMap implements ILocationListener {
+public abstract class MyGdxGame extends GdxMap {
 
     private OrthographicCamera camera;
     private Viewport viewport;
@@ -147,16 +119,8 @@ getMap().events.bind(createUpdateListener());
 TopPanel.getInstance().init(getMap());
 TopPanel.getInstance().setVisible(true);
 MapList.getInstance().loadSettings();
-ILocationService locService = ILocationService.getLocationService();
-if (locService == null)
-{
-	logger.warning("No native GPS navigation hardware found.");
-}
-else
-{
-	locService.setLocationListener(this);
-}
 //dialog.show(guiStage);
+
     }
 
     @Override
@@ -216,11 +180,6 @@ ToastMsg.getInstance().render();
         oldH = h;
     }
     
-    public void onGpsLocationChanged(Location l)
-    { //TODO: Implement this!!!
-    	
-    }
-    
     private UpdateListener createUpdateListener()
     {
         UpdateListener d = new UpdateListener(){
@@ -240,6 +199,7 @@ ToastMsg.getInstance().render();
     public void dispose()
     {
     	NaviDebugSimulator.stopDebugSimulator();
+    	NaviEngine.dispose();
     	MapList.getInstance().unloadMaps();
     }
 }
