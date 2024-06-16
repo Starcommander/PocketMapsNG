@@ -1,1 +1,1 @@
-include 'desktop', 'ios', 'html', 'core', 'gps-module'
+include 'desktop', 'ios', 'html', 'core', 'gps-module', 'gdx-utils', 'starcom-base'
