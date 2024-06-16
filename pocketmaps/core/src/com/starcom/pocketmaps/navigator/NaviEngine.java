@@ -11,6 +11,7 @@ import com.graphhopper.util.InstructionList;
 import com.starcom.LoggerUtil;
 import com.starcom.gdx.system.Threading;
 import com.starcom.navigation.Location;
+import com.starcom.navigation.gps.IClient;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
@@ -51,7 +52,7 @@ public class NaviEngine
   private static final double MAX_WAY_TOLERANCE = GeoMath.DEGREE_PER_METER * 30.0;
   private static final double MAX_WAY_TOLERANCE_METER = 30.0;
 
-  private static final int BEST_NAVI_ZOOM = 18;
+  public static final int BEST_NAVI_ZOOM = 18;
   enum UiJob { Nothing, RecalcPath, UpdateInstruction, Finished };
   private UiJob uiJob = UiJob.Nothing;
   private boolean directTargetDir = false;
@@ -62,10 +63,11 @@ public class NaviEngine
   private GeoPoint recalcFrom, recalcTo;
   private static NaviEngine instance;
   private boolean mapUpdatesAllowed = true;
-  private Location pos, mCurrentLocation, mLastLocation;
+  private Location pos, mCurrentLocation;
   final PointPosData nearestP = new PointPosData(); 
   private boolean active = false;
   private InstructionList instructions;
+  private IClient gpsClient;
 //  private ImageView navtop_image;
 //  private TextView navtop_curloc;
 //  private TextView navtop_nextloc;
@@ -79,20 +81,38 @@ public class NaviEngine
   private Runnable naviEngineTask;
   private double partDistanceScaler = 1.0;
 
+  private NaviEngine()
+  {
+gpsClient = IClient.createGpsClient();
+gpsClient.start();
+gpsClient.addTpvHandler((t) ->
+	onLocationChanged(
+			new Location(
+					t.getLatitude().floatValue(),
+					t.getLongitude().floatValue(),
+					t.getSpeed().floatValue(),
+					t.getCourse().floatValue())));
+gpsClient.watch(true, true);
+  }
+  
   public static NaviEngine getNaviEngine()
   {
     if (instance == null) { instance = new NaviEngine(); }
     return instance;
   }
-
-  public static void reset(){
-    instance = new NaviEngine();
+  
+  public static void dispose()
+  {
+	  if (instance == null) { return; }
+	  instance.getGpsClient().stop();
   }
   
   public boolean isNavigating()
   {
     return active;
   }
+  
+  public IClient getGpsClient() { return gpsClient; }
   
   /** Ensures, that voice is initialized. Use forceReset for switching engine **/
   public void naviVoiceInit(Object appContext, boolean forceReset)
@@ -251,20 +271,26 @@ public class NaviEngine
   
   /** Executed from native GPS or NaviDebugSimulator */
   public void onLocationChanged(Location location) {
-      if (location != null) {
-          mCurrentLocation = location;
-      } else if (mLastLocation != null && mCurrentLocation == null) {
-          mCurrentLocation = mLastLocation;
-      }
+	  if (location == null)
+	  {
+		  log("Got null as location");
+		  return;
+	  }
+	  if (location.getLatitude() == Float.NaN || location.getLongitude() == Float.NaN)
+	  {
+		  log("Got location with NaN");
+		  return;
+	  }
+      mCurrentLocation = location;
       if (mCurrentLocation != null) {
           GeoPoint mcLatLong = new GeoPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
 //          if (Tracking.getTracking(getApplicationContext()).isTracking()) { //TODO: Implement this
 //              MapHandler.getMapHandler().addTrackPoint(this, mcLatLong);
 //              Tracking.getTracking(getApplicationContext()).addPoint(mCurrentLocation, mapActions.getAppSettings());
 //          }
-          if (NaviEngine.getNaviEngine().isNavigating())
+          if (isNavigating())
           {
-            NaviEngine.getNaviEngine().updatePosition(mCurrentLocation);
+            updatePosition(mCurrentLocation);
           }
           MapHandler.getInstance().setCustomPoint(mcLatLong);
 //          mapActions.showPositionBtn.setImageResource(R.drawable.ic_my_location_white_24dp); //TODO: Implement this
@@ -272,6 +298,9 @@ public class NaviEngine
 //          mapActions.showPositionBtn.setImageResource(R.drawable.ic_location_searching_white_24dp); //TODO: Implement this
       }
   }
+  
+  /** Returns the current location, may be null. */
+  public Location getCurrentLocation() { return mCurrentLocation; }
   
   public void updatePosition(Location pos)
   {
@@ -283,8 +312,7 @@ public class NaviEngine
     GeoPoint newCenter = curPos.destinationPoint(70.0 * tiltMultPos, pos.getBearing());
     if (mapUpdatesAllowed)
     {
-      Threading.getInstance().invokeOnMainThread(() -> 
-        MapHandler.getInstance().centerPointOnMap(newCenter, BEST_NAVI_ZOOM, 360.0f - pos.getBearing(), 45.0f * tiltMult));
+        MapHandler.getInstance().centerPointOnMap(newCenter, BEST_NAVI_ZOOM, 360.0f - pos.getBearing(), 45.0f * tiltMult);
     }
     calculatePositionAsync(curPos);
   }

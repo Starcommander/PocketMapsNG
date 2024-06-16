@@ -265,6 +265,14 @@ public class MapHandler
    */
   public void centerPointOnMap(GeoPoint latLong, int zoomLevel, float bearing, float tilt)
   {
+	if (!Threading.getInstance().isMainThread())
+	{
+		final int z = zoomLevel;
+		Threading.getInstance().invokeOnMainThread((o) -> centerPointOnMap(latLong, z, bearing, tilt), "");
+		return;
+	}
+
+	logger.info("Center on map: " + latLong.getLatitude() + ":" + latLong.getLongitude() + "/" + zoomLevel + ":" + bearing + ":" + tilt);
     Map map = TopPanel.getInstance().getGdxMap(); // Must exist at this time.
     if (zoomLevel == 0)
     {
@@ -276,6 +284,8 @@ public class MapHandler
     tmpPos.setBearing(bearing);
     tmpPos.setTilt(tilt);
     map.animator().animateTo(300, tmpPos);
+	map.updateMap();
+	logger.info("Center on map done.");
   }
   
   /** Resets the tilt angle-rotation. */
