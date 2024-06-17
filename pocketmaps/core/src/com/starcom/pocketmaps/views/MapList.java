@@ -28,7 +28,7 @@ import com.graphhopper.PathWrapper;
 import com.graphhopper.util.Instruction;
 import com.graphhopper.util.InstructionList;
 import com.starcom.LoggerUtil;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.gdx.ui.GuiUtil;

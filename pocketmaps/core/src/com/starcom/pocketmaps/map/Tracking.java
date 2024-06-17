@@ -9,7 +9,7 @@ import com.starcom.pocketmaps.util.GenerateGPX;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.TopPanel;
 //import com.junjunguo.pocketmaps.util.Variable;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.navigation.Location;
 

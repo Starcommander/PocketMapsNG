@@ -5,7 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.interfaces.IProgressListener;
 import com.starcom.interfaces.IObjectListener;
 

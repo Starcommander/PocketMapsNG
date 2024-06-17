@@ -41,6 +41,7 @@ dependencies {
     implementation("org.json:json:20160810")
 
     implementation("org.slf4j:slf4j-simple:1.7.5")
+    implementation project(":starcom-base")
 }
 
 //testing {
