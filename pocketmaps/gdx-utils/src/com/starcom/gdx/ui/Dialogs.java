@@ -1,5 +1,7 @@
 package com.starcom.gdx.ui;
 
+import java.util.function.Consumer;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -7,7 +9,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
 import com.starcom.system.Threading;
 import com.starcom.interfaces.IProgressListener;
-import com.starcom.interfaces.IObjectListener;
 
 public class Dialogs
 {
@@ -17,7 +18,7 @@ public class Dialogs
      * @param onSuccess Runnable for success, or null.
      * @param onError Listener for error, or null.
      * @throws IllegalStateException when this function is executed in a worker Thread. */
-	public static IProgressListener showProgress(Stage guiStage, Runnable onSuccess, IObjectListener onError)
+	public static IProgressListener showProgress(Stage guiStage, Runnable onSuccess, Consumer<Object> onError)
 	{
 		if (!Threading.getInstance().isMainThread())
 		{
@@ -65,7 +66,7 @@ public class Dialogs
 					bar.remove();
 					if (onError != null)
 					{
-						onError.run(txt);
+						onError.accept(txt);
 					}
 				}
 			}
@@ -78,13 +79,13 @@ public class Dialogs
 	 * @param msg The Message.
 	 * @param cancel True to also show cancel-button.
 	 * @param listener The listener for result of OK="true" and CANCEL="false", listener may also be null. */
-	public static void showDialog(Stage guiStage, String title, String msg, boolean cancel, IObjectListener<Boolean> listener)
+	public static void showDialog(Stage guiStage, String title, String msg, boolean cancel, Consumer<Boolean> listener)
 	{
 		Dialog dialog = new Dialog(title, GuiUtil.getDefaultSkin(), "dialog")
 		{
 		    public void result(Object obj)
 		    {
-		    	if (listener != null) { listener.run(obj == Boolean.TRUE); }
+		    	if (listener != null) { listener.accept(obj == Boolean.TRUE); }
 		    }
 		};
 		dialog.text(msg);

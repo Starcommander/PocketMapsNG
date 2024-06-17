@@ -2,7 +2,6 @@ package com.starcom.system;
 
 import java.util.function.Consumer;
 
-import com.starcom.interfaces.IObjectListener;
 import com.starcom.interfaces.IObjectResponse;
 
 public class Threading
@@ -33,7 +32,7 @@ public class Threading
 	}
 	
 	public void invokeOnMainThread(Runnable run) { onMainRunner.accept(run); }
-	public void invokeOnMainThread(IObjectListener<Object> run, Object arg) { onMainRunner.accept(() -> run.run(arg)); }
+	public <T> void invokeOnMainThread(Consumer<T> run, T arg) { onMainRunner.accept(() -> run.accept(arg)); }
 	
 	/** Ensures, that not running on ui thread. */
 	public void invokeOnWorkerThread(Runnable run)
@@ -54,9 +53,9 @@ public class Threading
 	/** Ensures, that not running on ui thread.
 	 * Also catches Exceptions of asyncTask and passes it through runMain 
 	 * @param runAsync The task that runs in an async thread and returns a result.
-	 * @param runMain The task, that runs on UI thread afterwards, with result-object or an exception-object, can return anything.
+	 * @param runMain The task, that runs on UI thread afterwards, with result-object or an exception-object.
 	 * @return The runnable, or when async it is a thread object. */
-	public Runnable invokeAsyncTask(IObjectResponse runAsync, IObjectListener runMain)
+	public Runnable invokeAsyncTask(IObjectResponse<Object> runAsync, Consumer<Object> runMain)
 	{
 		Runnable run = () ->
 		{

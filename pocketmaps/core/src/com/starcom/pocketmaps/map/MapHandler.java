@@ -3,6 +3,7 @@ package com.starcom.pocketmaps.map;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.oscim.backend.canvas.Color;
@@ -28,7 +29,6 @@ import com.graphhopper.util.Constants;
 import com.starcom.LoggerUtil;
 import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ToastMsg;
-import com.starcom.interfaces.IObjectListener;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
 import com.starcom.pocketmaps.navigator.NaviEngine;
@@ -113,7 +113,7 @@ public class MapHandler
   /** Creates a graphhopper instance.
    * @param mapFolder The path/to/continent_country
    * @param result Result with graphhopper instance or Exception. */
-  public void createPathfinder(File mapFolder, IObjectListener result)
+  public void createPathfinder(File mapFolder, Consumer result)
   {
 	  logger.info("loading graph (" + Constants.VERSION + ") ... ");
 	  Threading.getInstance().invokeAsyncTask(() ->
