@@ -1,5 +1,7 @@
 package com.starcom.gdx.ui;
 
+import java.util.function.Consumer;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -12,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.starcom.interfaces.IClickListener;
-import com.starcom.interfaces.IObjectListener;
 
 public class ListSelect extends Window
 {
@@ -34,7 +35,7 @@ public class ListSelect extends Window
 	/** Creates a ListSelectView with close button only.
 	 * @param title The title of this window.
 	 * @param onClose Will be executed, when close pressed (always with false), may also be null. */
-	public ListSelect(String title, IObjectListener<Boolean> onClose)
+	public ListSelect(String title, Consumer<Boolean> onClose)
 	{
 		this(title, null, onClose);
 	}
@@ -43,7 +44,7 @@ public class ListSelect extends Window
 	 * @param title The title of this window.
 	 * @param extraButton Extra button name, or null for close button only.
 	 * @param onClose Will be executed, when close pressed (false), or when extra button pressed (true), may also be null. */
-	public ListSelect(String title, String extraButton, IObjectListener<Boolean> onClose)
+	public ListSelect(String title, String extraButton, Consumer<Boolean> onClose)
 	{
 		super(title, GuiUtil.getDefaultSkin());
 		setPosition(Gdx.graphics.getWidth()*0.1f, 0);
@@ -56,13 +57,13 @@ public class ListSelect extends Window
 
 		row();
 		TextButton closeB = new TextButton("Close", GuiUtil.getDefaultSkin());
-		if (onClose!=null) { closeB.addListener(GuiUtil.wrapClickListener((e,x,y) -> onClose.run(false))); }
+		if (onClose!=null) { closeB.addListener(GuiUtil.wrapClickListener((e,x,y) -> onClose.accept(false))); }
 		
 		closeB.addListener(closeListener);
 		if (extraButton != null)
 		{
 			TextButton extraB = new TextButton(extraButton, GuiUtil.getDefaultSkin());
-			if (onClose!=null) { extraB.addListener(GuiUtil.wrapClickListener((e,x,y) -> onClose.run(true))); }
+			if (onClose!=null) { extraB.addListener(GuiUtil.wrapClickListener((e,x,y) -> onClose.accept(true))); }
 			extraB.addListener(closeListener);
 			add(extraB).width(200).height(30);
 			add(closeB).width(200).height(30);

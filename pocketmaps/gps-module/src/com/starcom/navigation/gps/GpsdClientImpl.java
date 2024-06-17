@@ -16,6 +16,8 @@ public class GpsdClientImpl implements IClient
 	Consumer<ErrorMessage> errorHandler = System.out::println;
 	
 	GpsdClient child;
+	
+	/** Acts as a wrapper for child implementation. */
 	public GpsdClientImpl(GpsdClient child)
 	{
 		this.child = child;

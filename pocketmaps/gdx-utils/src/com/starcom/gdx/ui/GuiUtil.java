@@ -1,5 +1,7 @@
 package com.starcom.gdx.ui;
 
+import java.util.function.Consumer;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -23,7 +25,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.starcom.interfaces.IClickListener;
-import com.starcom.interfaces.IObjectListener;
 
 public class GuiUtil
 {
@@ -86,7 +87,7 @@ public class GuiUtil
 	}
 
 	/** Creates a dropDown menu. */
-	public static Actor genDropDown(IObjectListener<String> l, int x, int y, String ...items)
+	public static Actor genDropDown(Consumer<String> l, int x, int y, String ...items)
 	{
 		SelectBox<String> selectBox = new SelectBox<String>(GuiUtil.getDefaultSkin())
 		{
@@ -111,7 +112,7 @@ public class GuiUtil
 			@Override
 			public void changed(ChangeEvent event, Actor actor)
 			{
-				l.run(selectBox.getSelected());
+				l.accept(selectBox.getSelected());
 			}
 		});
 		selectBox.setPosition(x, y);
@@ -119,7 +120,7 @@ public class GuiUtil
 	}
 	
 	/** Creates a checkBox menu. */
-	public static Actor genCheckBox(IObjectListener<Boolean> l, int x, int y, String txt, boolean checked)
+	public static Actor genCheckBox(Consumer<Boolean> l, int x, int y, String txt, boolean checked)
 	{
 		CheckBox selectBox = new CheckBox(txt, GuiUtil.getDefaultSkin());
 		selectBox.addListener(new ChangeListener()
@@ -127,7 +128,7 @@ public class GuiUtil
 			@Override
 			public void changed(ChangeEvent event, Actor actor)
 			{
-				l.run(selectBox.isChecked());
+				l.accept(selectBox.isChecked());
 			}
 		});
 		selectBox.setPosition(x, y);
