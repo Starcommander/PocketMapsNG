@@ -12,7 +12,7 @@ import com.starcom.pocketmaps.map.Tracking;
 //import android.app.Activity;
 
 import com.starcom.LoggerUtil;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.navigation.Location;
 //import android.os.Handler;
 //import android.util.Log;

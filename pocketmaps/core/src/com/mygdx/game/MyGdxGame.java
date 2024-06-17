@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.starcom.LoggerUtil;
 import com.starcom.gdx.io.Storage;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Cfg;
@@ -82,7 +82,7 @@ PolyParser.doItAll(mMap);
 
 
 
-Threading.getInstance().init();
+Threading.getInstance().init(Gdx.app::postRunnable);
 //Skin uiSkin = Util.getDefaultSkin();
 //Dialog dialog = new Dialog("Warning", uiSkin, "dialog") {
 //    public void result(Object obj) {

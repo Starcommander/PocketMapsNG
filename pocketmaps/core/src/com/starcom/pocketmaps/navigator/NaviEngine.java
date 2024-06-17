@@ -9,7 +9,7 @@ import com.graphhopper.storage.index.QueryResult;
 import com.graphhopper.util.Instruction;
 import com.graphhopper.util.InstructionList;
 import com.starcom.LoggerUtil;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.navigation.Location;
 import com.starcom.navigation.gps.IClient;
 import com.starcom.pocketmaps.Cfg;

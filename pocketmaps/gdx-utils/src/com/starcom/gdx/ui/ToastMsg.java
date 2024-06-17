@@ -10,7 +10,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 
 /* Source: https://github.com/wentsa/Toast-LibGDX */
 

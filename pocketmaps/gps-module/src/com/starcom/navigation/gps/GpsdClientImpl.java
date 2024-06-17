@@ -38,15 +38,41 @@ public class GpsdClientImpl implements IClient
 	@Override
 	public void sendPollCommand(Consumer<PollMessage> responseHandler)
 	{
-		//TODO: This is blocking, and throws an IllegalStateException in case of disconnected.
-		//child.sendCommand(new PollMessage(), responseHandler);
+		if (com.starcom.system.Threading.getInstance().isMainThread())
+		{
+			com.starcom.system.Threading.getInstance().invokeOnWorkerThread(() -> sendPollCommand(responseHandler));
+			return;
+		}
+		try {
+			child.sendCommand(new PollMessage(), responseHandler);
+		}
+		catch (IllegalStateException e)
+		{
+			onErrorOccured("Connection error for sendPollCommand:\n" + e.toString());
+		}
 	}
 	
 	@Override
 	public void watch(boolean enable, boolean reportMessages)
 	{
-		//TODO: This is blocking, and throws an IllegalStateException in case of disconnected.
-		//child.watch(enable, reportMessages);
+		if (com.starcom.system.Threading.getInstance().isMainThread())
+		{
+			com.starcom.system.Threading.getInstance().invokeOnWorkerThread(() -> watch(enable, reportMessages));
+			return;
+		}
+		try {
+			child.watch(enable, reportMessages);
+		}
+		catch (IllegalStateException e)
+		{
+			onErrorOccured("Connection error for watch:\n" + e.toString());
+		}
+	}
+	
+	private void onErrorOccured(String info)
+	{
+		ErrorMessage msg = new ErrorMessage() { @Override public String getMessage() { return info; } };
+		errorHandler.accept(msg);
 	}
 	
 	@Override

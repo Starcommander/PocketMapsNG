@@ -26,7 +26,7 @@ import com.graphhopper.PathWrapper;
 import com.graphhopper.routing.util.AllEdgesIterator;
 import com.graphhopper.util.Constants;
 import com.starcom.LoggerUtil;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.interfaces.IObjectListener;
 import com.starcom.pocketmaps.Cfg;

@@ -1,6 +1,7 @@
-package com.starcom.gdx.system;
+package com.starcom.system;
 
-import com.badlogic.gdx.Gdx;
+import java.util.function.Consumer;
+
 import com.starcom.interfaces.IObjectListener;
 import com.starcom.interfaces.IObjectResponse;
 
@@ -8,6 +9,7 @@ public class Threading
 {
 	private static Threading instance;
 	long tid;
+	Consumer<Runnable> onMainRunner;
 	
 	public static Threading getInstance()
 	{
@@ -17,10 +19,12 @@ public class Threading
 	
 	private Threading() {} // Make it private. Use getInstance().
 
-	/** Must be run on init of app. */
-	public void init()
+	/** Must be run on init of app, that stores this ThreadID as main-thread-id.
+	 * @param The function for running function on UI Thread, that is specific to selected UI-system. */
+	public void init(Consumer<Runnable> onMainRunner)
 	{
 		tid = Thread.currentThread().getId();
+		this.onMainRunner = onMainRunner;
 	}
 	
 	public boolean isMainThread()
@@ -28,8 +32,8 @@ public class Threading
 		return tid == Thread.currentThread().getId();
 	}
 	
-	public void invokeOnMainThread(Runnable run) { Gdx.app.postRunnable(run); }
-	public void invokeOnMainThread(IObjectListener run, Object arg) { Gdx.app.postRunnable(() -> run.run(arg)); }
+	public void invokeOnMainThread(Runnable run) { onMainRunner.accept(run); }
+	public void invokeOnMainThread(IObjectListener<Object> run, Object arg) { onMainRunner.accept(() -> run.run(arg)); }
 	
 	/** Ensures, that not running on ui thread. */
 	public void invokeOnWorkerThread(Runnable run)

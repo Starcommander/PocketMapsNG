@@ -4,7 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.starcom.gdx.io.Storage;
 import com.starcom.gdx.io.Web;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.interfaces.IProgressListener;
