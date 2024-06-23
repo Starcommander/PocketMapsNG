@@ -59,6 +59,7 @@ private static boolean available = false;
 	@Override
 	public void sendPollCommand(Consumer<PollMessage> responseHandler)
 	{
+		if (lastTpvReport==null) { return; } //TODO: Any action instead of just looking for last one.
 		responseHandler.accept(new StaticPollMessage(lastTpvReport));
 	}
 

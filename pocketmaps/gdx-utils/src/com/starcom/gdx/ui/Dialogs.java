@@ -73,13 +73,13 @@ public class Dialogs
 		};
 	}
 	
-	/** Shows a simple dialog.
+	/** Generates a simple dialog.
 	 * @param guiStage The guiStage where to attach.
 	 * @param title The Dialog title.
 	 * @param msg The Message.
 	 * @param cancel True to also show cancel-button.
 	 * @param listener The listener for result of OK="true" and CANCEL="false", listener may also be null. */
-	public static void showDialog(Stage guiStage, String title, String msg, boolean cancel, Consumer<Boolean> listener)
+	public static Dialog genDialog(Stage guiStage, String title, String msg, boolean cancel, Consumer<Boolean> listener)
 	{
 		Dialog dialog = new Dialog(title, GuiUtil.getDefaultSkin(), "dialog")
 		{
@@ -91,6 +91,18 @@ public class Dialogs
 		dialog.text(msg);
 		dialog.button("OK", true);
 		if (cancel) { dialog.button("Cancel", false); }
+		return dialog;
+	}
+	
+	/** Shows a simple dialog.
+	 * @param guiStage The guiStage where to attach.
+	 * @param title The Dialog title.
+	 * @param msg The Message.
+	 * @param cancel True to also show cancel-button.
+	 * @param listener The listener for result of OK="true" and CANCEL="false", listener may also be null. */
+	public static void showDialog(Stage guiStage, String title, String msg, boolean cancel, Consumer<Boolean> listener)
+	{
+		Dialog dialog = genDialog(guiStage, title, msg, cancel, listener);
 		dialog.show(guiStage);
 	}
 }
