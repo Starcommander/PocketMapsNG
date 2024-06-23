@@ -12,6 +12,7 @@ import com.starcom.LoggerUtil;
 import com.starcom.system.Threading;
 import com.starcom.navigation.Location;
 import com.starcom.navigation.gps.IClient;
+import com.starcom.navigation.gps.StaticClientImpl;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
@@ -26,6 +27,7 @@ import com.starcom.pocketmaps.util.GeoMath;
 import com.starcom.pocketmaps.util.UnitCalculator;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.NavTopPanel;
+import com.starcom.pocketmaps.views.SettingsView;
 import com.starcom.pocketmaps.views.TopPanel;
 
 import org.oscim.utils.async.AsyncExecutor;
@@ -83,6 +85,8 @@ public class NaviEngine
 
   private NaviEngine()
   {
+	  if (Cfg.getBoolValue(NavKeyB.GpsOn, true))
+	  {
 gpsClient = IClient.createGpsClient();
 gpsClient.start();
 gpsClient.addTpvHandler((t) ->
@@ -93,6 +97,11 @@ gpsClient.addTpvHandler((t) ->
 					t.getSpeed().floatValue(),
 					t.getCourse().floatValue())));
 gpsClient.watch(true, true);
+	  }
+	  else
+	  {
+		  gpsClient = new StaticClientImpl();
+	  }
   }
   
   public static NaviEngine getNaviEngine()
@@ -110,6 +119,16 @@ gpsClient.watch(true, true);
   public boolean isNavigating()
   {
     return active;
+  }
+  
+  public String getStatistics()
+  {
+	return "Status: Navigating" +
+			"\nWaypoints:" + (instructions==null ? "0":instructions.size()) +
+			"\nCurrent:" + nearestP.arrPos +
+			"\nNearestDist:" + nearestP.distance +
+			"\nNearestStatus:" + nearestP.status +
+			"\nUiJob:" + uiJob;
   }
   
   public IClient getGpsClient() { return gpsClient; }
@@ -181,7 +200,7 @@ gpsClient.watch(true, true);
         GeoPoint curPos = new GeoPoint(pos.getLatitude(), pos.getLongitude());
         MapHandler.getInstance().centerPointOnMap(curPos, BEST_NAVI_ZOOM, 0, 0);
       }
-      NaviDebugSimulator.stopDebugSimulator();
+      NaviDebugSimulator.getSimu().stopDebugSimulator();
       return;
     }
     NavTopPanel.getInstance().setVisible(true);
@@ -195,7 +214,7 @@ gpsClient.watch(true, true);
     resetNewInstruction();
     if (instructions.size() > 0)
     {
-      startDebugSimulator(false);
+      NaviDebugSimulator.getSimu().updateRoute(instructions);
     }
   }
   
@@ -217,11 +236,6 @@ gpsClient.watch(true, true);
     this.speedUtil.updateList(pathDetails);
     getNewInstruction();
     uiJob = UiJob.UpdateInstruction;
-  }
-  
-  public void startDebugSimulator(boolean fromTracking)
-  {
-    NaviDebugSimulator.getSimu().startDebugSimulator(instructions, fromTracking);
   }
 
   private GeoPoint findClosestStreet(GeoPoint fromPos)
@@ -292,6 +306,8 @@ gpsClient.watch(true, true);
           {
             updatePosition(mCurrentLocation);
           }
+    SettingsView.getInstance().updateStatistics();
+          //TODO: Tracking update
           MapHandler.getInstance().setCustomPoint(mcLatLong);
 //          mapActions.showPositionBtn.setImageResource(R.drawable.ic_my_location_white_24dp); //TODO: Implement this
       } else {
@@ -302,7 +318,7 @@ gpsClient.watch(true, true);
   /** Returns the current location, may be null. */
   public Location getCurrentLocation() { return mCurrentLocation; }
   
-  public void updatePosition(Location pos)
+  private void updatePosition(Location pos)
   {
     if (active == false) { return; }
     if (uiJob == UiJob.RecalcPath) { return; }
@@ -329,7 +345,7 @@ gpsClient.watch(true, true);
       updateDirectTargetDir(curPos);
       if (naviEngineTask instanceof Thread && ((Thread)naviEngineTask).isAlive() )
       {
-        log("Error, NaviEngineTask is still running! Drop job ...");
+        log("Error, NaviEngineTask is still running! Drop job .");
       }
       else
       {

@@ -6,45 +6,40 @@ import org.oscim.core.GeoPoint;
 
 import com.graphhopper.util.Instruction;
 import com.graphhopper.util.InstructionList;
-//import com.junjunguo.pocketmaps.activities.MapActivity;
 import com.starcom.pocketmaps.map.Tracking;
 
-//import android.app.Activity;
-
 import com.starcom.LoggerUtil;
+import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.system.Threading;
 import com.starcom.navigation.Location;
-//import android.os.Handler;
-//import android.util.Log;
 
 public class NaviDebugSimulator
 {
-  /** The DEBUG_SIMULATOR will simulate first generated route on naviStart and trackingStart. **/
-  private static final boolean DEBUG_SIMULATOR = true;
+  /** The DEBUG_SIMULATOR will simulate first generated route. **/
   private static final int MAX_STEP_DISTANCE = 40;
   private static volatile boolean debug_simulator_run = false;
-  private static boolean debug_simulator_from_tracking = false;
-  private static ArrayList<GeoPoint> debug_simulator_points;
-  private static NaviDebugSimulator instance;
+  private static volatile boolean debug_simulator_running = false;
+  private static ArrayList<GeoPoint> debug_simulator_points = new ArrayList<GeoPoint>();
+  private static NaviDebugSimulator instance = new NaviDebugSimulator();
   GeoPoint checkP = new GeoPoint(0,0);
+  
+  private NaviDebugSimulator() {}
   
   public static NaviDebugSimulator getSimu()
   {
-    if (instance == null) { instance = new NaviDebugSimulator(); }
     return instance;
   }
   
-  public static void stopDebugSimulator() { debug_simulator_run = false; }
+  public void stopDebugSimulator() { debug_simulator_run = false; }
   
-  /** The DEBUG_SIMULATOR will simulate first generated route on naviStart and trackingStart. **/
-  public void startDebugSimulator(InstructionList instructions, boolean fromTracking)
+  public void updateRoute(InstructionList instructions)
   {
-    if (!DEBUG_SIMULATOR) { return; }
-    debug_simulator_from_tracking = fromTracking;
-    if (instructions == null) { return; }
-    if (debug_simulator_points == null)
+    if (debug_simulator_running) { return; }
+    if (instructions == null || (instructions.size() == 0))
     {
-      debug_simulator_points = new ArrayList<GeoPoint>();
+    	return;
+    }
+    debug_simulator_points.clear();
       for (Instruction ins : instructions)
       {
         for (int i=0; i<ins.getPoints().size(); i++)
@@ -52,20 +47,37 @@ public class NaviDebugSimulator
           debug_simulator_points.add(new GeoPoint(ins.getPoints().getLat(i),ins.getPoints().getLon(i)));
         }
       }
-    }
+  }
+  
+  /** The DEBUG_SIMULATOR will simulate the last generated route on naviStart and trackingStart. **/
+  public void startDebugSimulator()
+  {
+	if (debug_simulator_running)
+	{
+		logUser("Simulator is already running");
+		debug_simulator_run = false;
+		return;
+	}
     final Location pLoc = new Location(0, 0, 0, 0);
     final Location lastLoc = new Location(0, 0, 0, 0);
     debug_simulator_run = true;
     runDelayed(pLoc, lastLoc, 0);
   }
   
+  public boolean isRunning() { return debug_simulator_running; }
+  
   private void runDelayed(final Location pLoc, final Location lastLoc, final int index)
   {
+	  if (debug_simulator_points.isEmpty())
+	  {
+		  logUser("There is no route to simulate");
+		    debug_simulator_run = false;
+		  return;
+	  }
+	  debug_simulator_running = true;
 	  Threading.getInstance().invokeLater(() ->
       {
-        if (debug_simulator_from_tracking &&
-            !Tracking.getInstance().isTracking()) { debug_simulator_run = false; }
-        if (!debug_simulator_run) { return; }
+        if (!debug_simulator_run) { debug_simulator_running = false; return; } //Stopped
         GeoPoint p = debug_simulator_points.get(index);
         int newIndex = checkDistance(index, p);
         p = checkP;
@@ -78,6 +90,11 @@ public class NaviDebugSimulator
         if (debug_simulator_points.size() > newIndex)
         {
           runDelayed(pLoc, lastLoc, newIndex);
+        }
+        else
+       	{
+        	debug_simulator_running = false;
+        	logUser("Simulator finished");
         }
       }, 2000);
   }
@@ -114,5 +131,11 @@ public class NaviDebugSimulator
   private void log(String str)
   {
 	  LoggerUtil.get(NaviDebugSimulator.class).info(str);
+  }
+  
+  private void logUser(String str)
+  {
+	  log(str);
+	  ToastMsg.getInstance().toastShort(str);
   }
 }

@@ -27,6 +27,7 @@ public class TopPanel
 	private AbsLayout al;
 	private boolean visible = false;
 	
+	/** This is also the main panel that keeps the GdxMap. */
 	public static TopPanel getInstance() { return instance; }
 	
 	/** Returns the Map that is used as Canvas. */
@@ -42,7 +43,7 @@ public class TopPanel
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
 		Actor aPan = GuiUtil.genPanel(x, y, w, h);
-		Actor aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 20, "AAA", "Maps...", "Navigate...", "SimpleDialog", "DebugFastNav");
+		Actor aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 20, "AAA", "Maps...", "Navigate...", "Settings...", "SimpleDialog", "DebugFastNav");
 		al = new AbsLayout(0, 0, 1, 0.1f);
 		al.setMinHeight(30);
 		al.addChild(aPan, 0, 0, 1, 1);
@@ -100,6 +101,10 @@ public class TopPanel
 		else if (action.equals("Navigate..."))
 		{
 			NavSelect.getInstance().setVisible(true, true);
+		}
+		else if (action.equals("Settings..."))
+		{
+			SettingsView.getInstance().showSettings();
 		}
 		else if (action.equals("Download Maps"))
 		{

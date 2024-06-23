@@ -8,7 +8,7 @@ public class Cfg
 	public final static String TRAVEL_MODE_CAR = "car";
 	public final static String TRAVEL_MODE_FOOT = "foot";
 	public enum NavKey { TravelMode, Weighting, TtsEngine, TtsWantedVoice, MapSelection }
-	public enum NavKeyB { DirectionsOn, IsImperialUnit, ShowingSpeedLimits, SpeakingSpeedLimits, TtsOn }
+	public enum NavKeyB { DirectionsOn, IsImperialUnit, ShowingSpeedLimits, SpeakingSpeedLimits, TtsOn, Debugging, GpsOn }
 	public enum GeoKeyI { SearchBits }
 	public enum GeoKey { OfflineCountry }
 	public enum ConfType { Navigation, Geocoding } //TODO: old used 'base' unuseable, better 'SearchHints'
@@ -53,7 +53,7 @@ public class Cfg
 		Settings.setValue(ConfType.Navigation.toString(), key.toString(), val);
 	}
 
-	public static void setBoolValue(NavKey key, boolean val)
+	public static void setBoolValue(NavKeyB key, boolean val)
 	{
 		Settings.setValue(ConfType.Navigation.toString(), key.toString(), "" + val);
 	}

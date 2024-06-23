@@ -18,6 +18,7 @@ import com.starcom.pocketmaps.navigator.NaviDebugSimulator;
 import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.starcom.pocketmaps.util.PolyParser;
 import com.starcom.pocketmaps.views.MapList;
+import com.starcom.pocketmaps.views.SettingsView;
 import com.starcom.pocketmaps.views.TopPanel;
 import com.badlogic.gdx.scenes.scene2d.utils.Layout;
 import com.badlogic.gdx.InputMultiplexer;
@@ -120,6 +121,7 @@ TopPanel.getInstance().init(getMap());
 TopPanel.getInstance().setVisible(true);
 MapList.getInstance().loadSettings();
 //dialog.show(guiStage);
+SettingsView.getInstance(); //Ensure init for possible debugButton.
 
     }
 
@@ -198,7 +200,7 @@ ToastMsg.getInstance().render();
     @Override
     public void dispose()
     {
-    	NaviDebugSimulator.stopDebugSimulator();
+    	NaviDebugSimulator.getSimu().stopDebugSimulator();
     	NaviEngine.dispose();
     	MapList.getInstance().unloadMaps();
     }
