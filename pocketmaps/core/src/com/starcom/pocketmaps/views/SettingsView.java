@@ -2,8 +2,8 @@ package com.starcom.pocketmaps.views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
-import com.starcom.gdx.ui.Dialogs;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.pocketmaps.Cfg;
@@ -20,7 +20,8 @@ public class SettingsView
 	private static final String SEL_GPS_ON = "GPS on";
 	
 	Actor debugButton;
-	Dialog debugStatWindow;
+	Window debugStatWindow;
+	Label debugStatLabel = new Label("", GuiUtil.getDefaultSkin());
 	
 	private static SettingsView instance = new SettingsView();
 	
@@ -101,11 +102,8 @@ public class SettingsView
 				debugStatWindow.remove();
 				return;
 			}
-			String msg = "Status: none";
-			debugStatWindow = Dialogs.genDialog(GuiUtil.getStage(), "======== DebugStatistics ========", msg, false, (o) -> System.out.println("Debug window closed"));
-			debugStatWindow.setModal(false);
-			updateStatistics();
-			debugStatWindow.show(GuiUtil.getStage());
+			initDebugStatistics();
+			GuiUtil.getStage().addActor(debugStatWindow);
 			
 		}
 		else if (selection == SEL_GPS_ON)
@@ -116,11 +114,24 @@ public class SettingsView
 		}
 	}
 	
+	private void initDebugStatistics()
+	{
+		debugStatLabel.setText("Status: none");
+		if (debugStatWindow!=null) { return; }
+		debugStatWindow = new Window("======== DebugStatistics ========", GuiUtil.getDefaultSkin());
+		debugStatWindow.add(debugStatLabel);
+		debugStatWindow.setWidth(Gdx.graphics.getWidth()*0.3f);
+		debugStatWindow.setHeight(Gdx.graphics.getHeight()*0.8f);
+		debugStatWindow.setResizable(true);
+		debugStatWindow.row();
+		debugStatWindow.add(GuiUtil.genButton("Close", 0, 0, (a,x,y) -> { debugStatWindow.remove(); }));
+	}
+	
 	public void updateStatistics()
 	{
-		if (debugStatWindow != null && NaviEngine.getNaviEngine().isNavigating())
+		if (debugStatWindow != null && debugStatWindow.hasParent() && NaviEngine.getNaviEngine().isNavigating())
 		{
-			debugStatWindow.text(NaviEngine.getNaviEngine().getStatistics());
+			debugStatLabel.setText(NaviEngine.getNaviEngine().getStatistics());
 		}
 	}
 	
