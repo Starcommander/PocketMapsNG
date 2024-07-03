@@ -87,7 +87,7 @@ public class GuiUtil
 	}
 
 	/** Creates a dropDown menu. */
-	public static Actor genDropDown(Consumer<String> l, int x, int y, String ...items)
+	public static SelectBox<String> genDropDown(Consumer<String> l, int x, int y, String ...items)
 	{
 		SelectBox<String> selectBox = new SelectBox<String>(GuiUtil.getDefaultSkin())
 		{
@@ -137,7 +137,7 @@ public class GuiUtil
 	}
 	
 	/** Creates a text label. */
-	public static Actor genLabel(String txt, int x, int y)
+	public static Label genLabel(String txt, int x, int y)
 	{
 		Label l = new Label(txt, getDefaultSkin());
 		l.setX(x);
@@ -146,7 +146,7 @@ public class GuiUtil
 	}
 
 	/** Creates a text button. */
-	public static Actor genButton(String txt, int x, int y, IClickListener<Actor> onClick)
+	public static TextButton genButton(String txt, int x, int y, IClickListener<Actor> onClick)
 	{
 		TextButton l = new TextButton(txt, getDefaultSkin());
 		l.setX(x);

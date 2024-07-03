@@ -20,6 +20,7 @@ import com.starcom.pocketmaps.Icons.R;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapLayer;
+import com.starcom.pocketmaps.map.Tracking;
 import com.starcom.pocketmaps.navigator.Navigator;
 import com.starcom.pocketmaps.text.Text;
 import com.starcom.pocketmaps.util.GeoMath;
@@ -51,8 +52,8 @@ import java.util.Map;
 
 public class NaviEngine
 {
-  private static final double MAX_WAY_TOLERANCE = GeoMath.DEGREE_PER_METER * 30.0;
   private static final double MAX_WAY_TOLERANCE_METER = 30.0;
+  private static final double MAX_WAY_TOLERANCE = GeoMath.DEGREE_PER_METER * MAX_WAY_TOLERANCE_METER;
 
   public static final int BEST_NAVI_ZOOM = 18;
   enum UiJob { Nothing, RecalcPath, UpdateInstruction, Finished };
@@ -125,9 +126,11 @@ gpsClient.watch(true, true);
   {
 	return "Status: Navigating" +
 			"\nWaypoints:" + (instructions==null ? "0":instructions.size()) +
-			"\nCurrent:" + nearestP.arrPos +
-			"\nNearestDist:" + nearestP.distance +
-			"\nNearestStatus:" + nearestP.status +
+			"\nNearestPos:" + nearestP.arrPos +
+			"\n       Dist:" + nearestP.distance +
+			"\n       Status:" + nearestP.status +
+			"\n       DirOK:" + nearestP.isDirectionOk() +
+			"\n       DistOK:" + nearestP.isDistanceOk() +
 			"\nUiJob:" + uiJob;
   }
   
@@ -295,6 +298,7 @@ gpsClient.watch(true, true);
 		  log("Got location with NaN");
 		  return;
 	  }
+	  Tracking.getInstance().onLocationChanged(location);
       mCurrentLocation = location;
       if (mCurrentLocation != null) {
           GeoPoint mcLatLong = new GeoPoint(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
@@ -436,7 +440,7 @@ gpsClient.watch(true, true);
   }
   
   /** When next instruction has a distance of 400m then rotate tilt to see 400m far.
-   *  Alternatively raise tilt on fast speed. **/
+   *  <br>Alternatively raise tilt on fast speed. **/
   private void setTiltMult(double nextDist)
   {
     double speedXtra = 0;
@@ -462,6 +466,7 @@ gpsClient.watch(true, true);
     tiltMult = (float)(1.0 + nextDist);
   }
   
+  /** Running in BG. */
   private NaviInstruction calculatePosition(GeoPoint curPos)
   {
     if (uiJob == UiJob.RecalcPath) { return null; }
