@@ -8,6 +8,7 @@ import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.util.GenerateGPX;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.TopPanel;
+import com.starcom.pocketmaps.views.TrackingPanel;
 //import com.junjunguo.pocketmaps.util.Variable;
 import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ToastMsg;
@@ -27,7 +28,7 @@ import org.oscim.core.GeoPoint;
  * Created by GuoJunjun <junjunguo.com> on August 16, 2015.
  */
 public class Tracking {
-    private static Tracking tracking;
+    private static Tracking tracking = new Tracking();
     private double avgSpeed, maxSpeed, distance;
     private Location startLocation;
     private long timeStart, timeEnd;
@@ -37,15 +38,12 @@ public class Tracking {
 //    private List<TrackingListener> listeners;
 
     private Tracking() {
-        isOnTracking = false;
+//        isOnTracking = false;
 //        dBtrackingPoints = new DBtrackingPoints(applicationContext);
 //        listeners = new ArrayList<>();
     }
 
     public static Tracking getInstance() {
-        if (tracking == null) {
-            tracking = new Tracking();
-        }
         return tracking;
     }
 
@@ -236,7 +234,7 @@ public class Tracking {
      *
      * @param location
      */
-    public void addPoint(Location location) {
+    private void addPoint(Location location) {
         dBtrackingPoints.add(location);
 //        dBtrackingPoints.addLocation(location);
 //        dBtrackingPoints.close();
@@ -244,13 +242,23 @@ public class Tracking {
         updateMaxSpeed(location);// update after updateDisSpeed
         startLocation = location;
     }
+    
+    public void onLocationChanged(Location location)
+    {
+    	if (isOnTracking)
+    	{
+    		addPoint(location);
+    		long time = System.currentTimeMillis() - timeStart;
+    		TrackingPanel.getInstance().showData(dBtrackingPoints.size(), time);
+    	}
+    }
 
     /**
      * distance DataPoint series  DataPoint (x, y) x = increased time, y = increased distance
      * <p/>
      * Listener will handler the return data
      */
-    public void requestDistanceGraphSeries() {
+//    public void requestDistanceGraphSeries() {
 //    	dBtrackingPoints.stream().forEach(null); TODO: Implement if necessary
 //        new AsyncTask<URL, Integer, DataPoint[][]>() {
 //            protected DataPoint[][] doInBackground(URL... params) {
@@ -268,7 +276,7 @@ public class Tracking {
 //                broadcast(null, null, null, dataPoints);
 //            }
 //        }.execute();
-    }
+//    }
 
     /**
      * update distance and speed
