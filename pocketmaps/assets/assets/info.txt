@@ -1,0 +1,8 @@
+# Copied for android usage:
+/vtm-themes/resources/assets/vtm/
+/vtm-themes/resources/assets/textures/
+/vtm-themes/resources/assets/symbols/
+/vtm-themes/resources/assets/patterns/
+
+# Copies, but why?
+/vtm/resources/assets/shaders

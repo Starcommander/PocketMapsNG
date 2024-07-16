@@ -35,6 +35,10 @@ public class GuiUtil
 		if (uiSkin == null)
 		{
 			uiSkin = new Skin(Gdx.files.internal("default_skin/uiskin.json"));
+			if (Gdx.graphics.getWidth() > 1300 && Gdx.graphics.getWidth() > 1300)
+			{
+				uiSkin.getFont("default-font").getData().scale(2.0f);
+			}
 		}
 		return uiSkin;
 	}
