@@ -1,6 +1,7 @@
-package com.starcom.pocketmaps.views;
+package com.starcom.pocketmaps.tracking;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 //import com.jjoe64.graphview.GraphView;
@@ -15,14 +16,7 @@ import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.navigation.Location;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
-//import com.junjunguo.pocketmaps.model.SportCategory;
-//import com.junjunguo.pocketmaps.model.listeners.TrackingListener;
-import com.starcom.pocketmaps.map.Tracking;
-import com.starcom.pocketmaps.util.Calorie;
-//import com.junjunguo.pocketmaps.util.SetStatusBarColor;
 import com.starcom.pocketmaps.util.UnitCalculator;
-//import com.junjunguo.pocketmaps.fragments.SpinnerAdapter;
-//import com.junjunguo.pocketmaps.util.Variable;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -31,17 +25,12 @@ import java.util.Locale;
  * <p>
  * Created by GuoJunjun <junjunguo.com> on July 04, 2015.
  */
-public class Analytics {
+public class AnalyticsGraph {
     // status   -----------------
     public static boolean startTimer = true;
-    private static final String SB_WALK = "walk";
-    private static final String SB_BIKE = "bike";
-    private static final String SB_CAR = "car";
     /**
      * a sport category spinner: to choose with type of sport which also has MET value in its adapter
      */
-    private SelectBox<String> spinner;
-    private Label durationTV, avgSpeedTV, maxSpeedTV, distanceTV, distanceUnitTV, caloriesTV, maxSpeedUnitTV, avgSpeedUnitTV;
     // duration
 //    private Handler durationHandler;
 //    private Handler calorieUpdateHandler;
@@ -61,102 +50,16 @@ public class Analytics {
     private LineGraphSeries<DataPoint> speedGraphSeries;
     private LineGraphSeries<DataPoint> distanceGraphSeries;
 
-    public Analytics()
+    public AnalyticsGraph()
     {
-    	spinner = GuiUtil.genDropDown((s) -> updateCalorieBurned(), 0, 0, SB_WALK, SB_BIKE, SB_CAR);
-        distanceTV = GuiUtil.genLabel("Distance", 0, 0);
-        distanceUnitTV = GuiUtil.genLabel("m", 0, 0);
-        caloriesTV = GuiUtil.genLabel("Calories", 0, 0);
-        maxSpeedTV = GuiUtil.genLabel("MaxSpeed", 0, 0);
-        durationTV = GuiUtil.genLabel("Duration", 0, 0);
-        avgSpeedTV = GuiUtil.genLabel("AvgSpeed", 0, 0);
-        maxSpeedUnitTV = GuiUtil.genLabel("km/h", 0, 0);
-        avgSpeedUnitTV = GuiUtil.genLabel("km/h", 0, 0);
         initGraph();
-        updateNewLocation(null);
     }
     
-    public void updateNewLocation(Location l)
+    public GraphView getGraph()
     {
-        updateDistance(Tracking.getInstance().getDistance());
-        updateAvgSpeed(Tracking.getInstance().getAvgSpeed());
-        updateMaxSpeed(Tracking.getInstance().getMaxSpeed());
-        updateCalorieBurned();
-    	updateTimeSpent();
+    	return graph;
     }
     
-    /**
-     * update avg speedGraphSeries
-     *
-     * @param avgSpeed in km/h
-     */
-    private void updateAvgSpeed(Double avgSpeed) {
-        avgSpeedTV.setText(UnitCalculator.getBigDistance(avgSpeed * 1000.0, 2));
-    }
-
-    /**
-     * update max speedGraphSeries
-     *
-     * @param maxSpeed in km/h
-     */
-    private void updateMaxSpeed(Double maxSpeed) {
-        maxSpeedTV.setText(UnitCalculator.getBigDistance(maxSpeed * 1000.0, 2));
-    }
-
-    private void updateCalorieBurned() {
-        long endTime = System.currentTimeMillis();
-        if (!startTimer) { endTime = Tracking.getInstance().getTimeEnd(); }
-        double speedKmh = Tracking.getInstance().getAvgSpeed();
-        double met = Calorie.getMET(speedKmh, getSportCategory());
-        double cals = Calorie.calorieBurned(met, Tracking.getInstance().getDurationInHours(endTime));
-        caloriesTV.setText(String.format(Locale.getDefault(), "%.2f", cals));
-    }
-    
-    private void updateTimeSpent()
-    {
-      long endTime = System.currentTimeMillis();
-      if (!startTimer) { endTime = Tracking.getInstance().getTimeEnd(); }
-      long updatedTime = endTime - Tracking.getInstance().getTimeStart();
-      int secs = (int) (updatedTime / 1000);
-      int mins = secs / 60;
-      secs = secs % 60;
-      int hours = mins / 60;
-      mins = mins % 60;
-      durationTV.setText("" + String.format(Locale.getDefault(), "%02d", hours) + ":" + String.format(Locale.getDefault(), "%02d", mins) + ":" +
-              String.format(Locale.getDefault(), "%02d", secs));
-    }
-
-    /**
-     * get activity type (MET) from selected spinner (object)
-     */
-    private Calorie.Type getSportCategory() {
-    	if (SB_WALK.equals(spinner.getSelected()))
-    	{
-    		return Calorie.Type.Run;
-    	}
-    	else if (SB_BIKE.equals(spinner.getSelected()))
-    	{
-    		return Calorie.Type.Bike;
-    	}
-        return Calorie.Type.Car;
-    }
-
-    /**
-     * update distanceGraphSeries
-     *
-     * @param distance in meter.
-     */
-    private void updateDistance(Double distance) {
-      
-        if (distance < UnitCalculator.getMultValue()) {
-            distanceTV.setText(UnitCalculator.getShortDistance(distance));
-            distanceUnitTV.setText(UnitCalculator.getUnit(false));
-        } else {
-            distanceTV.setText(UnitCalculator.getBigDistance(distance, 2));
-            distanceUnitTV.setText(UnitCalculator.getUnit(true));
-        }
-    }
-
     /**
      * new thread to update timer
      */
@@ -274,11 +177,15 @@ public class Analytics {
 
     public void resetGraphXMaxValue() {
         //        double max = 0.1;
-        double time = Tracking.getInstance().getDurationInHours();
+        double time;
         if (!startTimer)
         {
           long end = Tracking.getInstance().getTimeEnd();
           time = Tracking.getInstance().getDurationInHours(end);
+        }
+        else
+        {
+        	time = Tracking.getInstance().getDurationInHours();
         }
         if (time > maxXaxis * 0.9) {
             maxXaxis = getMaxValue(time, maxXaxis);
@@ -322,11 +229,11 @@ public class Analytics {
 //    }
 
     /**
-     * updated when {@link Tracking#requestDistanceGraphSeries()} is called
+     * Resets the graph data.
      *
      * @param dataPoints
      */
-    public void updateDistanceGraphSeries(ArrayList<DataPoint> speedGraph, ArrayList<DataPoint> distanceGraph) {
+    public void resetGraphSeries(ArrayList<DataPoint> speedGraph, ArrayList<DataPoint> distanceGraph) {
         resetGraphY1MaxValue();
         resetGraphY2MaxValue();
         //        resetGraphXMaxValue();
@@ -345,15 +252,21 @@ public class Analytics {
           double factor = UnitCalculator.METERS_OF_MILE / 1000.0;
           maxV = maxV * factor;
         }
-        Tracking.getInstance().setMaxSpeed(maxV);
-        updateMaxSpeed(maxV);
-        if(!startTimer)
-        {
-          updateTimeSpent();
-          updateCalorieBurned();
-          updateAvgSpeed(Tracking.getInstance().getAvgSpeed());
-          resetGraphXMaxValue();
-        }
+//        Tracking.getInstance().setMaxSpeed(maxV);
+//        TrackingPanel.getInstance().updateMaxSpeed(maxV);
+//        if(!startTimer)
+//        {
+//          updateTimeSpent();
+//          updateCalorieBurned();
+//          updateAvgSpeed(Tracking.getInstance().getAvgSpeed());
+//          resetGraphXMaxValue();
+//        }
+    }
+    
+    public void updateGraphSeries(DataPoint speed, DataPoint dist)
+    {
+          speedGraphSeries.addData(speed);
+          distanceGraphSeries.addData(dist);
     }
     
 //    public void setUpdateNewPoint()

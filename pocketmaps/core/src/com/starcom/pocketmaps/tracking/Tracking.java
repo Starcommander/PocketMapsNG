@@ -1,6 +1,7 @@
-package com.starcom.pocketmaps.map;
+package com.starcom.pocketmaps.tracking;
 
 import com.starcom.pocketmaps.Cfg;
+import com.starcom.pocketmaps.map.MapHandler;
 //import com.jjoe64.graphview.series.DataPoint;
 //import com.starcom.pocketmaps.fragments.AppSettings;
 //import com.junjunguo.pocketmaps.db.DBtrackingPoints;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.oscim.core.GeoPoint;
+import org.oscim.core.Point;
 
 /**
  * This file is part of PocketMaps
@@ -28,12 +30,13 @@ import org.oscim.core.GeoPoint;
  * Created by GuoJunjun <junjunguo.com> on August 16, 2015.
  */
 public class Tracking {
+	public enum TrackingStatus { None, Running, Pause, Stopped };
     private static Tracking tracking = new Tracking();
     private double avgSpeed, maxSpeed, distance;
-    private Location startLocation;
+    private Location lastLocation;
     private long timeStart, timeEnd;
 
-    private boolean isOnTracking;
+    TrackingStatus trackingStatus = TrackingStatus.None;
     private ArrayList<Location> dBtrackingPoints = new ArrayList<Location>();
 //    private List<TrackingListener> listeners;
 
@@ -46,13 +49,15 @@ public class Tracking {
     public static Tracking getInstance() {
         return tracking;
     }
+    
+    public TrackingStatus getStatus() { return trackingStatus; }
 
     /**
      * stop Tracking: is on tracking false
      */
     public void stopTracking() {
-        isOnTracking = false;
-        initAnalytics();
+    	trackingStatus = TrackingStatus.Stopped;
+//        initAnalytics();
 //        appSettings.updateAnalytics(0, 0); //TODO: View speed=0 distance=0
     }
 
@@ -64,64 +69,27 @@ public class Tracking {
         maxSpeed = 0; // km/h
         distance = 0; // meter
         timeStart = System.currentTimeMillis();
-        startLocation = null;
+        lastLocation = null;
+        dBtrackingPoints.clear();
+        trackingStatus = TrackingStatus.None;
     }
 
     /**
      * init and start tracking
      */
     public void startTracking() {
-        init();
         initAnalytics();
 //        MapHandler.getInstance().startTrack(); TODO: Reset 
-        isOnTracking = true;
-    }
-
-    public void init() {
-        dBtrackingPoints.clear();
-        isOnTracking = false;
+        trackingStatus = TrackingStatus.Running;
     }
     
     public void loadData(final File gpxFile) {
       try
       {
-        isOnTracking = false;
         initAnalytics();
-        init();
+        trackingStatus = TrackingStatus.Stopped;
         ToastMsg.getInstance().toastLong("loading ...");
         Threading.getInstance().invokeAsyncTask(() -> new GenerateGPX().readGpxFile(gpxFile), (o) ->  loadDataPost(o));
-//        new AsyncTask<Void, Void, ArrayList<Location>>() {
-//          @Override
-//          protected ArrayList<Location> doInBackground(Void... params)
-//          {
-//            try
-//            {
-//              return new GenerateGPX().readGpxFile(gpxFile);
-//            }
-//            catch (Exception e) { e.printStackTrace(); }
-//            return null;
-//          }
-//          @Override
-//          protected void onPostExecute(ArrayList<Location> posList)
-//          {
-//            if (posList == null) { return; } // On exception
-//            appSettings.openAnalyticsActivity(false);
-//            MapHandler.getMapHandler().startTrack(activity);
-//            boolean first = true;
-//            for (Location pos : posList)
-//            {
-//              if (first)
-//              { // Center on map.
-//                GeoPoint firstP = new GeoPoint(pos.getLatitude(), pos.getLongitude());
-//                MapHandler.getMapHandler().centerPointOnMap(firstP, 0, 0, 0);
-//                setTimeStart(pos.getTime());
-//                first = false;
-//              }
-//              MapHandler.getMapHandler().addTrackPoint(activity, new GeoPoint(pos.getLatitude(), pos.getLongitude()));
-//              addPoint(pos, appSettings);
-//            }
-//          }
-//        }.execute();
       }
       catch (Exception e)
       {
@@ -156,6 +124,10 @@ public class Tracking {
     public double getAvgSpeed() {
         return avgSpeed;
     }
+
+//    public void setAvgSpeed(double avgSpeed) {
+//        this.avgSpeed = avgSpeed;
+//    }
 
     /**
      * @return max speed in km/h
@@ -200,7 +172,7 @@ public class Tracking {
      * Tracking start time in milliseconds.
      * This function is used for loading old TrackingData.
      */
-    public void setTimeStart(long timeStart) {
+    private void setTimeStart(long timeStart) {
         this.timeStart = timeStart;
     }
     
@@ -208,7 +180,7 @@ public class Tracking {
      * Tracking end time in milliseconds.
      * This function is used for loading old TrackingData.
      */
-    public void setTimeEnd(long timeEnd) {
+    private void setTimeEnd(long timeEnd) {
       this.timeEnd = timeEnd;
   }
     
@@ -223,91 +195,64 @@ public class Tracking {
     }
 
     /**
-     * @return true if is on tracking
-     */
-    public boolean isTracking() {
-        return isOnTracking;
-    }
-
-    /**
      * add a location point to points list
      *
      * @param location
      */
-    private void addPoint(Location location) {
+    private Point addPoint(Location location) {
         dBtrackingPoints.add(location);
 //        dBtrackingPoints.addLocation(location);
 //        dBtrackingPoints.close();
-        updateDisSpeed(location);// update first
-        updateMaxSpeed(location);// update after updateDisSpeed
-        startLocation = location;
+        Point p = new Point();
+        p.x = updateDistAndAvgSpeed(location);// update first
+        p.y = updateMaxSpeed(location);// update after updateDisSpeed
+        lastLocation = location;
+        return p;
     }
     
     public void onLocationChanged(Location location)
     {
-    	if (isOnTracking)
+    	if (trackingStatus == TrackingStatus.Running)
     	{
-    		addPoint(location);
-    		long time = System.currentTimeMillis() - timeStart;
-    		TrackingPanel.getInstance().showData(dBtrackingPoints.size(), time);
+    		Point p = addPoint(location);
+//    		TrackingPanel.getInstance().showData(dBtrackingPoints.size(), time);
+    		TrackingPanel.getInstance().updateNewLocation(location, dBtrackingPoints.size(), getDurationInMilliS(location.getTime()),p.x, p.y);
     	}
     }
-
-    /**
-     * distance DataPoint series  DataPoint (x, y) x = increased time, y = increased distance
-     * <p/>
-     * Listener will handler the return data
-     */
-//    public void requestDistanceGraphSeries() {
-//    	dBtrackingPoints.stream().forEach(null); TODO: Implement if necessary
-//        new AsyncTask<URL, Integer, DataPoint[][]>() {
-//            protected DataPoint[][] doInBackground(URL... params) {
-//                try {
-//                    dBtrackingPoints.open();
-//                    DataPoint[][] dp = dBtrackingPoints.readGraphSeries();
-//                    dBtrackingPoints.close();
-//                    return dp;
-//                } catch (Exception e) {e.printStackTrace();}
-//                return null;
-//            }
-//
-//            protected void onPostExecute(DataPoint[][] dataPoints) {
-//                super.onPostExecute(dataPoints);
-//                broadcast(null, null, null, dataPoints);
-//            }
-//        }.execute();
-//    }
 
     /**
      * update distance and speed
      *
      * @param location
+     * @return The distanceToLastPoint
      */
-    private void updateDisSpeed(Location location) {
-        if (startLocation != null) {
-            double disPoints = startLocation.distanceTo(location);
-            distance += disPoints;
+    private double updateDistAndAvgSpeed(Location location) {
+        if (lastLocation != null) {
+            double distToLast = lastLocation.distanceTo(location);
+            distance += distToLast;
             long duration = getDurationInMilliS(location.getTime());
             avgSpeed = (distance) / (duration / (60 * 60));
 //            if (appSettings.getAppSettingsVP().getVisibility() == View.VISIBLE) { TODO: Implement this view
 //                appSettings.updateAnalytics(avgSpeed, distance);
 //            }
 //            broadcast(avgSpeed, null, distance, null); TODO: Implement if necessary
+            return distToLast;
         }
+        return 0;
     }
 
     /**
-     * @return duration in milli second
+     * @return duration in milliseconds until now
      */
-    public long getDurationInMilliS() {
+    private long getDurationInMilliS() {
       long now = System.currentTimeMillis();
         return (now - timeStart);
     }
     
     /**
-     * @return duration in milli second
+     * @return duration in milliseconds until endTime
      */
-    public long getDurationInMilliS(long endTime) {
+    private long getDurationInMilliS(long endTime) {
       return endTime - timeStart;
     }
 
@@ -329,12 +274,13 @@ public class Tracking {
      * update max speed and broadcast DataPoint for speeds and distances
      *
      * @param location
+     * @return the current speed.
      */
-    private void updateMaxSpeed(Location location) {
-        if (startLocation != null) {
+    private double updateMaxSpeed(Location location) {
+        if (lastLocation != null) {
             // velocity: m/s
             double velocity =
-                    (startLocation.distanceTo(location)) / ((location.getTime() - startLocation.getTime()) / (1000.0));
+                    (lastLocation.distanceTo(location)) / ((location.getTime() - lastLocation.getTime()) / (1000.0));
 //            broadcastNewPoint(); TODO: Implement if necessary
             //            TODO: improve noise reduce (Kalman filter)
             // TODO: http://dsp.stackexchange.com/questions/8860/more-on-kalman-filter-for-position-and-velocity
@@ -344,7 +290,9 @@ public class Tracking {
                 maxSpeed = (float) velocity;
 //                broadcast(null, maxSpeed, null, null); TODO: Implement if necessary
             }
+            return velocity;
         }
+        return 0;
     }
 
 

@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.starcom.system.Threading;
 import com.starcom.interfaces.IProgressListener;
 
@@ -92,6 +93,27 @@ public class Dialogs
 		dialog.button("OK", true);
 		if (cancel) { dialog.button("Cancel", false); }
 		return dialog;
+	}
+	
+	/** Generates a simple text-input dialog.
+	 * @param guiStage The guiStage where to attach.
+	 * @param title The Dialog title.
+	 * @param listener The listener for result-string or null on cancel, listener must not be null. */
+	public static Dialog genTextInputDialog(Stage guiStage, String title, Consumer<String> listener)
+	{
+		Dialog dialog = new Dialog(title, GuiUtil.getDefaultSkin(), "dialog")
+		{
+		    public void result(Object obj)
+		    {
+		    	listener.accept(obj == null ? null : obj.toString());
+		    }
+		};
+		TextField tf = new TextField("", GuiUtil.getDefaultSkin());
+		dialog.addActor(tf);
+		dialog.button("OK", tf.getText());
+		dialog.button("Cancel", null);
+		return dialog;
+		
 	}
 	
 	/** Shows a simple dialog.
