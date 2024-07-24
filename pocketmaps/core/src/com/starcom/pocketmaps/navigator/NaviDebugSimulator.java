@@ -6,12 +6,11 @@ import org.oscim.core.GeoPoint;
 
 import com.graphhopper.util.Instruction;
 import com.graphhopper.util.InstructionList;
-import com.starcom.pocketmaps.map.Tracking;
-
 import com.starcom.LoggerUtil;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.system.Threading;
 import com.starcom.navigation.Location;
+import com.starcom.pocketmaps.tracking.Tracking;
 
 public class NaviDebugSimulator
 {
