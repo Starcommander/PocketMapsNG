@@ -16,7 +16,7 @@ public class Location
 	}
 	public Location(float lat, float lon, float speed, float bearing)
 	{
-		set(lat, lon, speed, bearing, 0.0f, System.currentTimeMillis());
+		set(lat, lon, speed, bearing);
 	}
 	public float getSpeed() { return speed; }
 	public float getLatitude() { return lat; }
@@ -27,6 +27,10 @@ public class Location
 	public void set(Location other)
 	{
 		set(other.lat, other.lon, other.speed, other.bearing, other.alt, other.time);
+	}
+	public void set(float lat, float lon, float speed, float bearing)
+	{
+		set(lat, lon, speed, bearing, 0.0f, System.currentTimeMillis());
 	}
 	public void set(float lat, float lon, float speed, float bearing, float alt, long time)
 	{

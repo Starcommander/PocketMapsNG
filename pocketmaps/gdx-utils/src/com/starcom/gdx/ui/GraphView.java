@@ -78,12 +78,23 @@ public class GraphView
     	}
 	}
 	
+	/** Just draws a frame to image, that you get via getImage. **/
+	private void drawFrame(Pixmap pix, int width, int height)
+	{
+		pix.setColor(Color.BLACK);
+		int myWidth = width > 10 ? width-10 : width;
+		int myHeight = height > 10 ? height-10 : height;
+		int myX = width > 10 ? 5 : 0;
+		int myY = height > 10 ? 5 : 0;
+		pix.drawRectangle(0, 0, width, height);
+		pix.drawRectangle(myX, myY, myWidth, myHeight);
+	}
+	
 	/** Draws the graph for current data to the image. */
 	public void drawToImage(int width, int height)
 	{
-System.out.println("Draw l1=" + getScale().lineGraphSeriesList.size() + " l2=" + getSecondScale().lineGraphSeriesList.size());
         Pixmap pix = new Pixmap(width, height, Format.RGBA8888);
-        
+        drawFrame(pix, width,height);
         for (LineGraphSeries<?> s : getScale().lineGraphSeriesList)
         {
         	drawLines(pix, s.dataPoints, s.color, width, height);

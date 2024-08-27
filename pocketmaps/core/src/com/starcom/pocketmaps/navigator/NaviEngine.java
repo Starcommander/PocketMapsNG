@@ -126,7 +126,7 @@ gpsClient.watch(true, true);
   {
 	return "Status: Navigating" +
 			"\nWaypoints:" + (instructions==null ? "0":instructions.size()) +
-			"\nNearestPos:" + nearestP.arrPos +
+			"\nNearestIdx:" + nearestP.arrIdx +
 			"\n       Dist:" + nearestP.distance +
 			"\n       Status:" + nearestP.status +
 			"\n       DirOK:" + nearestP.isDirectionOk() +
@@ -228,6 +228,7 @@ gpsClient.watch(true, true);
     this.directTargetDir = directTargetDir;
   }
   
+  /** This is only called when path is calculated first time, or recalcPath. **/
   public void onUpdateInstructions(InstructionList instructions, Map<String, List<PathDetail>> pathDetails)
   {
     if (uiJob != UiJob.RecalcPath) { throw new IllegalStateException("Getting instructions but state is not RecalcPath!"); }
@@ -424,7 +425,7 @@ gpsClient.watch(true, true);
 //      navtop_curloc.setText(in.getCurStreet());
 //      navtop_nextloc.setText(in.getNextInstruction());
 //      navtop_image.setImageResource(in.getNextSignResource());
-      speedUtil.showTextSign(nearestP.arrPos);
+      speedUtil.showTextSign(nearestP.arrIdx);
       setTiltMult(in.getNextDistance());
     }
     else
@@ -471,14 +472,14 @@ gpsClient.watch(true, true);
   {
     if (uiJob == UiJob.RecalcPath) { return null; }
     if (uiJob == UiJob.Finished) { return null; }
-    nearestP.setBaseData(getNearestPoint(instructions.get(0), nearestP.arrPos, curPos));
+    nearestP.setBaseData(getNearestPoint(instructions.get(0), nearestP.arrIdx, curPos));
     
-    if (nearestP.arrPos > 0)
+    if (nearestP.arrIdx > 0)
     { // Check dist to line (backward)
-      double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrPos);
-      double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrPos);
-      double lat2 = instructions.get(0).getPoints().getLatitude(nearestP.arrPos-1);
-      double lon2 = instructions.get(0).getPoints().getLongitude(nearestP.arrPos-1);
+      double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx);
+      double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx);
+      double lat2 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx-1);
+      double lon2 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx-1);
       double lDist = GeoMath.distToLineSegment(curPos.getLatitude(), curPos.getLongitude(), lat1, lon1, lat2, lon2);
       if (lDist < nearestP.distance)
       {
@@ -486,12 +487,12 @@ gpsClient.watch(true, true);
         nearestP.status = PointPosData.Status.CurPosIsBackward;
       }
     }
-    if (nearestP.arrPos < instructions.get(0).getPoints().size()-1)
+    if (nearestP.arrIdx < instructions.get(0).getPoints().size()-1)
     { // Check dist to line (forward)
-      double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrPos);
-      double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrPos);
-      double lat2 = instructions.get(0).getPoints().getLatitude(nearestP.arrPos+1);
-      double lon2 = instructions.get(0).getPoints().getLongitude(nearestP.arrPos+1);
+      double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx);
+      double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx);
+      double lat2 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx+1);
+      double lon2 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx+1);
       double lDist = GeoMath.distToLineSegment(curPos.getLatitude(), curPos.getLongitude(), lat1, lon1, lat2, lon2);
       if (lDist < nearestP.distance)
       {
@@ -499,13 +500,13 @@ gpsClient.watch(true, true);
         nearestP.status = PointPosData.Status.CurPosIsForward;
       }
     }
-    else if (nearestP.arrPos == instructions.get(0).getPoints().size()-1 &&
+    else if (nearestP.arrIdx == instructions.get(0).getPoints().size()-1 &&
              instructions.size()>1)
     {
       if (instructions.get(1).getPoints().size() > 0)
       { // Check dist to line (forward to next instruction)
-        double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrPos);
-        double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrPos);
+        double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx);
+        double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx);
         double lat2 = instructions.get(1).getPoints().getLatitude(0);
         double lon2 = instructions.get(1).getPoints().getLongitude(0);
         double lDist = GeoMath.distToLineSegment(curPos.getLatitude(), curPos.getLongitude(), lat1, lon1, lat2, lon2);
@@ -596,95 +597,110 @@ log("NaviTask Start skip-next !!!!!!");
     }
   }
 
-  private static PointPosData getNearestPoint(Instruction instruction, int curPointPos, GeoPoint curPos)
+  /** Returns the nearest point from this instruction. **/
+  private static PointPosData getNearestPoint(Instruction instruction, int curPointIdx, GeoPoint curPos)
   {
-    int nextPointPos = curPointPos;
-    int nearestPointPos = curPointPos;
+    int nextPointIdx = curPointIdx;
+    int nearestPointIdx = curPointIdx;
     double nearestDist = Double.MAX_VALUE;
-    while (instruction.getPoints().size() > nextPointPos)
+    while (instruction.getPoints().size() > nextPointIdx)
     {
-      double lat = instruction.getPoints().getLatitude(nextPointPos);
-      double lon = instruction.getPoints().getLongitude(nextPointPos);
+      double lat = instruction.getPoints().getLatitude(nextPointIdx);
+      double lon = instruction.getPoints().getLongitude(nextPointIdx);
       double dist = GeoMath.fastDistance(curPos.getLatitude(), curPos.getLongitude(), lat, lon);
       if (dist < nearestDist)
       {
         nearestDist = dist;
-        nearestPointPos = nextPointPos;
+        nearestPointIdx = nextPointIdx;
       }
-      nextPointPos++;
+      nextPointIdx++;
     }
     PointPosData p = new PointPosData();
-    p.arrPos = nearestPointPos;
+    p.arrIdx = nearestPointIdx;
     p.distance = nearestDist;
     return p;
   }
-
+  
+  /** New instruction was reached.
+   * <br> - Maybe because curPos reached nextInstruction.
+   * <br> - Maybe because recalc finished.
+   * <br>This does:
+   * <br> - init the partDistanceScaler (compair calculated point-distances with instruction.distance)
+   * <br> - reset the pointsArrayPos to 0
+   * <br> - check for speaking necessary
+   * @return A NaviInstruction with pointIndex 0-1. **/
   private NaviInstruction getNewInstruction()
   {
-    nearestP.arrPos = 0;
+    nearestP.arrIdx = 0;
     nearestP.distance = Double.MAX_VALUE;
     uiJob = UiJob.UpdateInstruction;
-    if (instructions.size() > 0)
+    if (instructions.size() == 0)
     {
-      Instruction in = instructions.get(0);
-      long fullTime = countFullTime(in.getTime());
-      GeoPoint curPos = new GeoPoint(in.getPoints().getLat(0), in.getPoints().getLon(0));
-      double partDistance = countPartDistance(curPos, in, 0);
-      if (partDistance == 0) { partDistanceScaler = 1; }
-      else
-      {
-        partDistanceScaler = in.getDistance() / partDistance;
-      }
-      Instruction nextIn = null;
-      if (instructions.size() > 1) { nextIn = instructions.get(1); }
-      NaviInstruction nIn = new NaviInstruction(in, nextIn, fullTime);
-      if (speakDistanceCheck(in.getDistance()) && nearestP.isDirectionOk())
-      {
-        naviVoice.speak(nIn.getVoiceTextFallback(), nIn.getVoiceText());
-        naviVoiceSpoken = true;
-      }
-      else
-      {
-        naviVoiceSpoken = false;
-      }
-      return nIn;
+      uiJob = UiJob.Finished;
+      return null;
     }
-    uiJob = UiJob.Finished;
-    return null;
+    Instruction in = instructions.get(0);
+    long fullTime = countFullTime(in.getTime());
+    GeoPoint curPos = new GeoPoint(in.getPoints().getLat(0), in.getPoints().getLon(0));
+    double partDistance = countPartDistance(curPos, in, 0);
+    if (partDistance == 0) { partDistanceScaler = 1; }
+    else
+    {
+      partDistanceScaler = in.getDistance() / partDistance;
+    }
+    Instruction nextIn = null;
+    if (instructions.size() > 1) { nextIn = instructions.get(1); }
+    NaviInstruction nIn = new NaviInstruction(in, nextIn, fullTime);
+    if (speakDistanceCheck(in.getDistance()) && nearestP.isDirectionOk())
+    {
+      naviVoice.speak(nIn.getVoiceTextFallback(), nIn.getVoiceText());
+      naviVoiceSpoken = true;
+    }
+    else
+    {
+      naviVoiceSpoken = false;
+    }
+    return nIn;
   }
   
+  /** No new instruction was reached.
+   * <br>This does:
+   * <br> - calculate the partDistance using the partDistanceScaler
+   * <br> - check for speaking necessary
+   * @return A NaviInstruction with pointIndex 0-1. **/
   private NaviInstruction getUpdatedInstruction(GeoPoint curPos, PointPosData nearestP)
   {
     uiJob = UiJob.UpdateInstruction;
-    if (instructions.size() > 0)
+    if (instructions.size() == 0)
     {
-      Instruction in = instructions.get(0);
-      long partTime = 0;
-      double partDistance = countPartDistance(curPos, in, nearestP.arrPos);
-      partDistance = partDistance * partDistanceScaler;
-      if (in.getDistance() <= partDistance)
-      {
-        partDistance = in.getDistance();
-        partTime = in.getTime();
-      }
-      else
-      {
-        double partValue = partDistance / in.getDistance();
-        partTime = (long)(in.getTime() * partValue);
-      }
-      long fullTime = countFullTime(partTime);
-      Instruction nextIn = null;
-      if (instructions.size() > 1) { nextIn = instructions.get(1); }
-      NaviInstruction newIn = new NaviInstruction(in, nextIn, fullTime);
-      newIn.updateDist(partDistance);
-      if (!naviVoiceSpoken && nearestP.isDirectionOk() && speakDistanceCheck(partDistance))
-      {
-        naviVoice.speak(newIn.getVoiceTextFallback(), newIn.getVoiceText());
-        naviVoiceSpoken = true;
-      }
-      return newIn;
+      uiJob = UiJob.Finished;
+      return null;
     }
-    return null;
+    Instruction in = instructions.get(0);
+    long partTime = 0;
+    double partDistance = countPartDistance(curPos, in, nearestP.arrIdx);
+    partDistance = partDistance * partDistanceScaler;
+    if (in.getDistance() <= partDistance)
+    {
+      partDistance = in.getDistance();
+      partTime = in.getTime();
+    }
+    else
+    {
+      double partValue = partDistance / in.getDistance();
+      partTime = (long)(in.getTime() * partValue);
+    }
+    long fullTime = countFullTime(partTime);
+    Instruction nextIn = null;
+    if (instructions.size() > 1) { nextIn = instructions.get(1); }
+    NaviInstruction newIn = new NaviInstruction(in, nextIn, fullTime);
+    newIn.updateDist(partDistance);
+    if (!naviVoiceSpoken && nearestP.isDirectionOk() && speakDistanceCheck(partDistance))
+    {
+      naviVoice.speak(newIn.getVoiceTextFallback(), newIn.getVoiceText());
+      naviVoiceSpoken = true;
+    }
+    return newIn;
   }
   
   public void setNaviVoiceMute(boolean mute)
@@ -697,7 +713,7 @@ log("NaviTask Start skip-next !!!!!!");
   
   private void resetNewInstruction()
   {
-    nearestP.arrPos = 0;
+    nearestP.arrIdx = 0;
     nearestP.distance = Double.MAX_VALUE;
     uiJob = UiJob.UpdateInstruction;
     showInstruction(null);
@@ -763,7 +779,7 @@ log("NaviTask Start skip-next !!!!!!");
   static class PointPosData
   {
     public enum Status { CurPosIsExactly, CurPosIsBackward, CurPosIsForward, CurPosIsForwardNext };
-    public int arrPos;
+    public int arrIdx;
     public double distance;
     public Status status = Status.CurPosIsExactly;
     private boolean wrongDir = false;
@@ -772,8 +788,12 @@ log("NaviTask Start skip-next !!!!!!");
     {
       return (distance < MAX_WAY_TOLERANCE);
     }
+    
+    /** Returns true, if curPos has not reached the nearestPoint. **/
     public boolean isBackward() { return (status == Status.CurPosIsBackward); }
+    /** Returns true, if curPos has already reached the nearestPoint. **/
     public boolean isForward() { return (status == Status.CurPosIsForward); }
+    /** Returns true, if curPos has already reached the nearestPoint, and next point leads to next-instruction. **/
     public boolean isForwardNext() { return (status == Status.CurPosIsForwardNext); }
     public boolean isDirectionOk() { return (!wrongDir); }
     public void resetDirectionOk()
@@ -812,11 +832,12 @@ log("Compare bearing cur=" + bearingCur + " way=" + bearingOk + " wrong=" + wron
     
     public void setBaseData(PointPosData p)
     {
-      this.arrPos = p.arrPos;
+      this.arrIdx = p.arrIdx;
       this.distance = p.distance;
       this.status = p.status;
-      if (arrPos > 0)
+      if (arrIdx > 0)
       {
+    	  //TODO: What happens, when moving along the path, and then moving wrong direction along the path?
         resetDirectionOk();
       }
     }
