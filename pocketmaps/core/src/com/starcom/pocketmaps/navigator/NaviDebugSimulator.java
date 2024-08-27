@@ -20,6 +20,7 @@ public class NaviDebugSimulator
   private static volatile boolean debug_simulator_running = false;
   private static ArrayList<GeoPoint> debug_simulator_points = new ArrayList<GeoPoint>();
   private static NaviDebugSimulator instance = new NaviDebugSimulator();
+  private static Location lastLocTmp = new Location(0, 0, 0, 0);
   GeoPoint checkP = new GeoPoint(0,0);
   
   private NaviDebugSimulator() {}
@@ -57,15 +58,14 @@ public class NaviDebugSimulator
 		debug_simulator_run = false;
 		return;
 	}
-    final Location pLoc = new Location(0, 0, 0, 0);
-    final Location lastLoc = new Location(0, 0, 0, 0);
+    final Location curLoc = new Location(0, 0, 0, 0);
     debug_simulator_run = true;
-    runDelayed(pLoc, lastLoc, 0);
+    runDelayed(curLoc, 0);
   }
   
   public boolean isRunning() { return debug_simulator_running; }
   
-  private void runDelayed(final Location pLoc, final Location lastLoc, final int index)
+  private void runDelayed(final Location curLocFinal, final int index)
   {
 	  if (debug_simulator_points.isEmpty())
 	  {
@@ -74,21 +74,21 @@ public class NaviDebugSimulator
 		  return;
 	  }
 	  debug_simulator_running = true;
+	  lastLocTmp.set(curLocFinal);
 	  Threading.getInstance().invokeLater(() ->
       {
         if (!debug_simulator_run) { debug_simulator_running = false; return; } //Stopped
         GeoPoint p = debug_simulator_points.get(index);
         int newIndex = checkDistance(index, p);
         p = checkP;
-        lastLoc.set(pLoc);
-        pLoc.set((float)p.getLatitude(), (float)p.getLongitude(), 5.555f, 0, 0, 0L);
-        float bearing = lastLoc.bearingTo(pLoc);
-        pLoc.setBearing(bearing);
-        NaviEngine.getNaviEngine().onLocationChanged(pLoc);
-        log("Update position for Debug purpose! Lat=" + pLoc.getLatitude() + " Lon=" + pLoc.getLongitude());
+        Location curLoc = new Location((float)p.getLatitude(), (float)p.getLongitude(), 5.555f, 0);
+        float bearing = lastLocTmp.bearingTo(curLoc);
+        curLoc.setBearing(bearing);
+        NaviEngine.getNaviEngine().onLocationChanged(curLoc);
+        log("Update position for Debug purpose! Lat=" + curLoc.getLatitude() + " Lon=" + curLoc.getLongitude());
         if (debug_simulator_points.size() > newIndex)
         {
-          runDelayed(pLoc, lastLoc, newIndex);
+          runDelayed(curLoc, newIndex);
         }
         else
        	{
