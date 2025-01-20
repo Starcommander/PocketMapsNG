@@ -195,7 +195,7 @@ public class TrackingPanel
     		double fullDistance = Tracking.getInstance().getDistance();
     		int w = Gdx.graphics.getWidth();
     		int h = (int)(Gdx.graphics.getHeight()*0.4f);
-    		graph.updateGraphSeries(new DataPoint(fullDistance, speed), new DataPoint(fullDistance, distanceToLastPoint));
+    		graph.updateGraphSeries(new DataPoint((timeMS/1000), distanceToLastPoint), new DataPoint((timeMS/1000), fullDistance));
     		Threading.getInstance().invokeOnMainThread(() -> graph.getGraph().drawToImage(w,h));
 //    		graph.getGraph().getImage().layout();
 //    		graph.getGraph().drawToImage(Gdx.graphics.getWidth(), (int)(Gdx.graphics.getHeight()*0.4f));
