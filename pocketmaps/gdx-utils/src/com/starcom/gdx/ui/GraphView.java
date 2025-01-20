@@ -48,6 +48,32 @@ public class GraphView
 //		l.draw(batch, 0.0f);
 //	}
 	
+	private void drawThickLine(Pixmap pix, int x1, int y1, int x2, int y2, int thick, Color c)
+	{
+		float alpha = 1;
+		c = new Color(c); // Use a copy for manipulate.
+		int xLen = Math.abs(x1 - x2);
+		int yLen = Math.abs(y1 - y2);
+		if (xLen > yLen)
+		{
+			xLen = 0;
+			yLen = 1;
+		}
+		else
+		{
+			xLen = 1;
+			yLen = 0;
+		}
+		for (int i=0; i<thick; i++)
+		{
+			c.a = alpha;
+			pix.setColor(c);
+			pix.drawLine(x1 + (i*xLen), y1 + (i*yLen), x2 + (i*xLen), y2 + (i*yLen));
+			if (i != 0) { pix.drawLine(x1 - (i*xLen), y1 - (i*yLen), x2 - (i*xLen), y2 - (i*yLen)); }
+			alpha -= 0.1f; //TODO: Calculate or set?
+		}
+	}
+	
 	private void drawLines(Pixmap pix, ArrayList<DataPoint> dataPoints, long color, int width, int height)
 	{
     	long ccc = color; //TODO: Use this color and convert
@@ -73,8 +99,10 @@ public class GraphView
     		if (x2 == x1) {}
     		else
     		{
-    			pix.drawLine(x1, y1, x2, y2);
+    			drawThickLine(pix, x1, height-y1, x2, height-y2, 8, Color.BLACK);
     		}
+    		x1 = x2;
+    		y1 = y2;
     	}
 	}
 	
