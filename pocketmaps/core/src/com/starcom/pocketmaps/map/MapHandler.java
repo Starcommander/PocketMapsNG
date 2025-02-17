@@ -1,9 +1,7 @@
 package com.starcom.pocketmaps.map;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.oscim.backend.canvas.Color;
@@ -20,18 +18,13 @@ import org.oscim.layers.marker.MarkerSymbol;
 import org.oscim.map.Layers;
 import org.oscim.map.Map;
 import com.badlogic.gdx.Gdx;
-import com.graphhopper.GHRequest;
-import com.graphhopper.GHResponse;
-import com.graphhopper.GraphHopper;
-import com.graphhopper.PathWrapper;
-import com.graphhopper.routing.util.AllEdgesIterator;
-import com.graphhopper.util.Constants;
 import com.starcom.LoggerUtil;
 import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ToastMsg;
+import com.starcom.navigation.Enums.Vehicle;
+import com.starcom.navigation.MapRoutingEngine.NaviResponse;
+import com.starcom.navigation.MapRoutingEngine.Point;
 import com.starcom.pocketmaps.Cfg;
-import com.starcom.pocketmaps.Cfg.NavKeyB;
-import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.starcom.pocketmaps.navigator.Navigator;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.geocoding.Address;
@@ -39,11 +32,6 @@ import com.starcom.pocketmaps.views.MapList;
 import com.starcom.pocketmaps.views.NavSelect;
 import com.starcom.pocketmaps.views.TopPanel;
 import com.starcom.pocketmaps.views.VtmBitmap;
-import com.starcom.pocketmaps.util.TargetDirComputer;
-import com.graphhopper.util.Parameters.Algorithms;
-import com.graphhopper.util.Parameters.Routing;
-import com.graphhopper.util.PointList;
-import com.graphhopper.util.StopWatch;
 
 public class MapHandler
 {
@@ -61,7 +49,7 @@ public class MapHandler
 //  private String currentArea;
 //  File mapsFolder;
 ////  FloatingActionButton naviCenterBtn;
-  PointList trackingPointList = new PointList();
+//  PointList trackingPointList = new PointList();
 ////  private int customIcon = R.drawable.ic_my_location_dark_24dp;
   VtmBitmap customIcon = Icons.generateIconVtm(Icons.R.ic_my_location_dark_24dp); //TODO: VtmBitmap instead AwtBitmap
 //  private MapFileTileSource tileSource;
@@ -110,22 +98,6 @@ public class MapHandler
 	    map.layers().add(new MapEventsReceiver(map));
   }
   
-  /** Creates a graphhopper instance.
-   * @param mapFolder The path/to/continent_country
-   * @param result Result with graphhopper instance or Exception. */
-  public void createPathfinder(File mapFolder, Consumer result)
-  {
-	  logger.info("loading graph (" + Constants.VERSION + ") ... ");
-	  Threading.getInstance().invokeAsyncTask(() ->
-	  {
-		  GraphHopper tmpHopp = new GraphHopper().forMobile();
-          // Why is "shortest" missing in default config? Add!
-          tmpHopp.getCHFactoryDecorator().addCHProfileAsString("shortest");
-          tmpHopp.load(mapFolder.getAbsolutePath());
-          logger.info("found graph " + tmpHopp.getGraphHopperStorage().toString() + ", nodes:" + tmpHopp.getGraphHopperStorage().getNodes());
-          return tmpHopp;
-	  }, result);
-	  
 //	  
 //	  Threading.getInstance().invokeOnWorkerThread(() ->
 //	  {
@@ -179,7 +151,7 @@ public class MapHandler
 //              prepareInProgress = false;
 //          }
 //      }.execute();
-  }
+
 	  
 //public void loadMapx(File areaFolder, Map map) {
 //    // Map events receiver
@@ -246,14 +218,6 @@ public class MapHandler
 //          }
 //      }.execute();
 //  }
-  
-  public AllEdgesIterator getAllEdges(String searchCountry)
-  {
-    MapLayer mapLayer = MapList.getInstance().findMapLayerFromCountry(searchCountry);
-    if (mapLayer.getPathfinder()==null) { return null; }
-    if (mapLayer.getPathfinder().getGraphHopperStorage()==null) { return null; }
-    return mapLayer.getPathfinder().getGraphHopperStorage().getAllEdges();
-  }
 
   /**
    * center the LatLong point in the map and zoom map to zoomLevel
@@ -444,43 +408,19 @@ public class MapHandler
     private Object calcPathNow(final double fromLat, final double fromLon,
             final double toLat, final double toLon)
     {
-    	StopWatch sw = new StopWatch().start();
-        GHRequest req = new GHRequest(fromLat, fromLon, toLat, toLon).
-                setAlgorithm(Algorithms.DIJKSTRA_BI);
-        req.getHints().put(Routing.INSTRUCTIONS, Cfg.getBoolValue(Cfg.NavKeyB.DirectionsOn, true));
-        req.setVehicle(Cfg.getValue(Cfg.NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR));
-        req.setWeighting(Cfg.getValue(Cfg.NavKey.Weighting, "fastest"));
+        MapLayer ml = MapList.getInstance().findMapLayerFromLocation(new GeoPoint(toLat, toLon));
+        String vehicleS = Cfg.getValue(Cfg.NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR);
+        Vehicle vehicle = Vehicle.Car;
+        if (vehicleS.equals(Cfg.TRAVEL_MODE_BIKE)) { vehicle = Vehicle.Bike; }
+        if (vehicleS.equals(Cfg.TRAVEL_MODE_FOOT)) { vehicle = Vehicle.Foot; }
+        boolean speedLim = false;
         if (Cfg.getBoolValue(Cfg.NavKeyB.ShowingSpeedLimits, false) || Cfg.getBoolValue(Cfg.NavKeyB.SpeakingSpeedLimits, false))
         {
-            req.getPathDetails().add(com.graphhopper.routing.profiles.MaxSpeed.KEY);
-            req.getPathDetails().add(com.graphhopper.util.Parameters.Details.AVERAGE_SPEED);
+        	speedLim = true;
         }
-        GHResponse resp = null;
-        MapLayer ml = MapList.getInstance().findMapLayerFromLocation(new GeoPoint(toLat, toLon));
-        if (ml != null)
-        {
-        	GraphHopper hopper = ml.getPathfinder();
-        	if (hopper != null)
-        	{
-        		resp = hopper.route(req);
-        	}
-        }
-        if (resp==null || resp.hasErrors())
-        {
-          NaviEngine.getNaviEngine().setDirectTargetDir(true);
-          Throwable error;
-          if (resp != null) { error = resp.getErrors().get(0); }
-          else { error = new NullPointerException("Hopper is null!!!"); }
-          logger.warning("Multible errors, first: " + error);
-          resp = TargetDirComputer.getInstance().createTargetdirResponse(fromLat, fromLon, toLat, toLon);
-        }
-        else
-        {
-          NaviEngine.getNaviEngine().setDirectTargetDir(false);
-        }
-        float time = sw.stop().getSeconds();
-        logger.info("Calculating took " + time + "s.");
-        return resp;
+        NaviResponse resp = ml.getPathfinder().createResponse(fromLat, fromLon, toLat, toLon, vehicle, speedLim);
+        if (resp != null) { return resp; }
+        return ml.getPathfinder().createSimpleResponse(fromLat, fromLon, toLat, toLon, vehicle);
     }
 
     private void calcPathDone(Map map, Object response)
@@ -491,18 +431,12 @@ public class MapHandler
     	}
     	else
     	{
-    		GHResponse ghResp = (GHResponse) response;
-            if (!ghResp.hasErrors()) {
-                PathWrapper resp = ghResp.getBest();
+    		NaviResponse resp = (NaviResponse) response;
                 logUser("The route is " + (int) (resp.getDistance() / 100) / 10f
                         + "km long, time:" + resp.getTime() / 60000f + "min.");
                 updatePathLayer(map, resp.getPoints(), Color.MAGENTA, 4);
                 map.updateMap(true);
                 Navigator.getNavigator().setGhResponse(resp);
-            } else {
-                logUser("Multible errors: " + ghResp.getErrors().size());
-                logger.warning("Multible errors, first: " + ghResp.getErrors().get(0));
-            }
             calcPathActive.set(false);
         
     	}
@@ -524,16 +458,16 @@ public class MapHandler
         Threading.getInstance().invokeAsyncTask(() -> { return calcPathNow(fromLat, fromLon, toLat, toLon); }, (o) -> { calcPathDone(map, o); });
     }
     
-  private void updatePathLayer(Map map,PointList pointList, int color, int strokeWidth) {
+  private void updatePathLayer(Map map,ArrayList<Point> pointList, int color, int strokeWidth) {
       if (pathLayer==null) {
     	  pathLayer = createPathLayer(map, color, strokeWidth);
           map.layers().add(pathLayer);
       }
       ArrayList<GeoPoint> geoPoints = new ArrayList<>();
       //TODO: Search for a more efficient way
-      for (int i = 0; i < pointList.getSize(); i++)
+      for (int i = 0; i < pointList.size(); i++)
       {
-          geoPoints.add(new GeoPoint(pointList.getLatitude(i), pointList.getLongitude(i)));
+          geoPoints.add(new GeoPoint(pointList.get(i).lat, pointList.get(i).lon));
       }
       pathLayer.setPoints(geoPoints);
 System.out.println("We set " + geoPoints.size() + " points."); //TODO: Delete this line

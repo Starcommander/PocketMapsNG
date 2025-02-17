@@ -2,28 +2,23 @@ package com.starcom.pocketmaps.navigator;
 
 import org.oscim.core.GeoPoint;
 
-import com.graphhopper.GraphHopper;
-import com.graphhopper.routing.util.EdgeFilter;
-import com.graphhopper.storage.NodeAccess;
-import com.graphhopper.storage.index.QueryResult;
-import com.graphhopper.util.Instruction;
-import com.graphhopper.util.InstructionList;
 import com.starcom.LoggerUtil;
 import com.starcom.system.Threading;
+import com.starcom.navigation.GeoMath;
 import com.starcom.navigation.Location;
+import com.starcom.navigation.MapRoutingEngine;
+import com.starcom.navigation.MapRoutingEngine.Instruct;
+import com.starcom.navigation.MapRoutingEngine.NaviResponse;
+import com.starcom.navigation.MapRoutingEngine.Point;
 import com.starcom.navigation.gps.IClient;
 import com.starcom.navigation.gps.StaticClientImpl;
 import com.starcom.pocketmaps.Cfg;
-import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
-import com.starcom.pocketmaps.Icons.R;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapLayer;
-import com.starcom.pocketmaps.navigator.Navigator;
 import com.starcom.pocketmaps.text.Text;
 import com.starcom.pocketmaps.tracking.Tracking;
-import com.starcom.pocketmaps.util.GeoMath;
 //import com.starcom.pocketmaps.util.LightSensor;
 import com.starcom.pocketmaps.util.UnitCalculator;
 import com.starcom.pocketmaps.views.MapList;
@@ -31,24 +26,8 @@ import com.starcom.pocketmaps.views.NavTopPanel;
 import com.starcom.pocketmaps.views.SettingsView;
 import com.starcom.pocketmaps.views.TopPanel;
 
-import org.oscim.utils.async.AsyncExecutor;
-//import android.app.Activity;
-//import android.content.Context;
-//import androidx.annotation.WorkerThread;
-//import androidx.annotation.UiThread;
-//import android.location.Location;
-//import android.os.AsyncTask.Status;
-//import android.speech.tts.Voice;
-//import android.util.Log;
-//import android.view.View;
-//import android.widget.ImageView;
-//import android.widget.TextView;
-import org.oscim.utils.async.AsyncTask;
-import com.graphhopper.util.details.PathDetail;
 import com.starcom.pocketmaps.util.SpeedUtil;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class NaviEngine
 {
@@ -69,7 +48,7 @@ public class NaviEngine
   private Location pos, mCurrentLocation;
   final PointPosData nearestP = new PointPosData(); 
   private boolean active = false;
-  private InstructionList instructions;
+  private ArrayList<Instruct> instructions;
   private IClient gpsClient;
 //  private ImageView navtop_image;
 //  private TextView navtop_curloc;
@@ -212,8 +191,8 @@ gpsClient.watch(true, true);
     naviVoiceSpoken = false;
     uiJob = UiJob.Nothing;
 //    initFields(activity);
-    instructions = Navigator.getNavigator().getGhResponse().getInstructions();
-    speedUtil.updateList(Navigator.getNavigator().getGhResponse().getPathDetails());
+    instructions = Navigator.getNavigator().getResponse().getInstructions();
+    speedUtil.updateList(Navigator.getNavigator().getResponse().getMaxSpeedInfos(), Navigator.getNavigator().getResponse().getAveSpeedInfos());
     resetNewInstruction();
     if (instructions.size() > 0)
     {
@@ -229,30 +208,26 @@ gpsClient.watch(true, true);
   }
   
   /** This is only called when path is calculated first time, or recalcPath. **/
-  public void onUpdateInstructions(InstructionList instructions, Map<String, List<PathDetail>> pathDetails)
+  public void onUpdateInstructions(NaviResponse resp)
   {
     if (uiJob != UiJob.RecalcPath) { throw new IllegalStateException("Getting instructions but state is not RecalcPath!"); }
     if (!directTargetDir)
     {
       nearestP.checkDirectionOk(pos, instructions.get(0), naviVoice);
     }
-    this.instructions = instructions;
-    this.speedUtil.updateList(pathDetails);
+    this.instructions = resp.getInstructions();
+    this.speedUtil.updateList(resp.getMaxSpeedInfos(), resp.getAveSpeedInfos());
     getNewInstruction();
     uiJob = UiJob.UpdateInstruction;
   }
 
-  private GeoPoint findClosestStreet(GeoPoint fromPos)
+  private Point findClosestStreet(GeoPoint fromPos)
   {
     MapLayer ml = MapList.getInstance().findMapLayerFromLocation(fromPos);
-    if (ml == null) { return fromPos; } // No matching map loaded yet!
-    GraphHopper hopper = ml.getPathfinder();
-    if (hopper == null) { return fromPos; } // Not loaded yet!
-    QueryResult pos = hopper.getLocationIndex().findClosest(fromPos.getLatitude(), fromPos.getLongitude(), EdgeFilter.ALL_EDGES);
-    int n = pos.getClosestEdge().getBaseNode();
-    NodeAccess nodeAccess = hopper.getGraphHopperStorage().getNodeAccess();
-    GeoPoint gp = new GeoPoint(nodeAccess.getLat(n), nodeAccess.getLon(n));
-    return gp;
+    if (ml == null) { return new Point(fromPos.getLatitude(), fromPos.getLongitude(), 0); } // No matching map loaded yet!
+    Point p = new Point(fromPos.getLatitude(), fromPos.getLongitude(), 0);
+    ml.getPathfinder().findClosestStreet(p, p);
+    return p;
   }
   
 //  private void initFields(Activity activity)
@@ -476,10 +451,10 @@ gpsClient.watch(true, true);
     
     if (nearestP.arrIdx > 0)
     { // Check dist to line (backward)
-      double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx);
-      double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx);
-      double lat2 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx-1);
-      double lon2 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx-1);
+      double lat1 = instructions.get(0).points.get(nearestP.arrIdx).lat;
+      double lon1 = instructions.get(0).points.get(nearestP.arrIdx).lon;
+      double lat2 = instructions.get(0).points.get(nearestP.arrIdx-1).lat;
+      double lon2 = instructions.get(0).points.get(nearestP.arrIdx-1).lon;
       double lDist = GeoMath.distToLineSegment(curPos.getLatitude(), curPos.getLongitude(), lat1, lon1, lat2, lon2);
       if (lDist < nearestP.distance)
       {
@@ -487,12 +462,12 @@ gpsClient.watch(true, true);
         nearestP.status = PointPosData.Status.CurPosIsBackward;
       }
     }
-    if (nearestP.arrIdx < instructions.get(0).getPoints().size()-1)
+    if (nearestP.arrIdx < instructions.get(0).points.size()-1)
     { // Check dist to line (forward)
-      double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx);
-      double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx);
-      double lat2 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx+1);
-      double lon2 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx+1);
+      double lat1 = instructions.get(0).points.get(nearestP.arrIdx).lat;
+      double lon1 = instructions.get(0).points.get(nearestP.arrIdx).lon;
+      double lat2 = instructions.get(0).points.get(nearestP.arrIdx+1).lat;
+      double lon2 = instructions.get(0).points.get(nearestP.arrIdx+1).lon;
       double lDist = GeoMath.distToLineSegment(curPos.getLatitude(), curPos.getLongitude(), lat1, lon1, lat2, lon2);
       if (lDist < nearestP.distance)
       {
@@ -500,15 +475,15 @@ gpsClient.watch(true, true);
         nearestP.status = PointPosData.Status.CurPosIsForward;
       }
     }
-    else if (nearestP.arrIdx == instructions.get(0).getPoints().size()-1 &&
+    else if (nearestP.arrIdx == instructions.get(0).points.size()-1 &&
              instructions.size()>1)
     {
-      if (instructions.get(1).getPoints().size() > 0)
+      if (instructions.get(1).points.size() > 0)
       { // Check dist to line (forward to next instruction)
-        double lat1 = instructions.get(0).getPoints().getLatitude(nearestP.arrIdx);
-        double lon1 = instructions.get(0).getPoints().getLongitude(nearestP.arrIdx);
-        double lat2 = instructions.get(1).getPoints().getLatitude(0);
-        double lon2 = instructions.get(1).getPoints().getLongitude(0);
+        double lat1 = instructions.get(0).points.get(nearestP.arrIdx).lat;
+        double lon1 = instructions.get(0).points.get(nearestP.arrIdx).lon;
+        double lat2 = instructions.get(1).points.get(0).lat;
+        double lon2 = instructions.get(1).points.get(0).lon;
         double lDist = GeoMath.distToLineSegment(curPos.getLatitude(), curPos.getLongitude(), lat1, lon1, lat2, lon2);
         if (lDist < nearestP.distance)
         {
@@ -516,12 +491,12 @@ gpsClient.watch(true, true);
           nearestP.status = PointPosData.Status.CurPosIsForward;
         }
       }
-      if (instructions.get(1).getPoints().size() > 1)
+      if (instructions.get(1).points.size() > 1)
       { // Check dist to line (forward next instruction p1+p2)
-        double lat1 = instructions.get(1).getPoints().getLatitude(0);
-        double lon1 = instructions.get(1).getPoints().getLongitude(0);
-        double lat2 = instructions.get(1).getPoints().getLatitude(1);
-        double lon2 = instructions.get(1).getPoints().getLongitude(1);
+        double lat1 = instructions.get(1).points.get(0).lat;
+        double lon1 = instructions.get(1).points.get(0).lon;
+        double lat2 = instructions.get(1).points.get(1).lat;
+        double lon2 = instructions.get(1).points.get(1).lon;
         double lDist = GeoMath.distToLineSegment(curPos.getLatitude(), curPos.getLongitude(), lat1, lon1, lat2, lon2);
         if (lDist < nearestP.distance)
         {
@@ -539,20 +514,21 @@ gpsClient.watch(true, true);
     {
       double maxWayTolMeters = MAX_WAY_TOLERANCE_METER;
       if (directTargetDir) { maxWayTolMeters = maxWayTolMeters * 10.0; }
-      Instruction nearestNext = instructions.find(curPos.getLatitude(), curPos.getLongitude(), maxWayTolMeters);
+      Point p = new Point(curPos.getLatitude(), curPos.getLongitude(), 0);
+      Instruct nearestNext = MapRoutingEngine.findNearestInstruction(p, instructions, maxWayTolMeters);
       if (nearestNext == null)
       {
-        GeoPoint closestP = findClosestStreet(curPos);
-        nearestNext = instructions.find(closestP.getLatitude(), closestP.getLongitude(), maxWayTolMeters);
+        Point closestP = findClosestStreet(curPos);
+        nearestNext = MapRoutingEngine.findNearestInstruction(closestP, instructions, maxWayTolMeters);
       }
       if (nearestNext == null)
       {
         uiJob = UiJob.RecalcPath;
         recalcFrom = curPos;
-        Instruction lastInstruction = instructions.get(instructions.size()-1);
-        int lastPoint = lastInstruction.getPoints().size()-1;
-        double lastPointLat = lastInstruction.getPoints().getLat(lastPoint);
-        double lastPointLon = lastInstruction.getPoints().getLon(lastPoint);
+        Instruct lastInstruction = instructions.get(instructions.size()-1);
+        int lastPoint = lastInstruction.points.size()-1;
+        double lastPointLat = lastInstruction.points.get(lastPoint).lat;
+        double lastPointLon = lastInstruction.points.get(lastPoint).lon;
         recalcTo = new GeoPoint(lastPointLat, lastPointLon);
 log("NaviTask Start recalc !!!!!!");
         return null;
@@ -560,7 +536,7 @@ log("NaviTask Start recalc !!!!!!");
       else
       { // Forward to nearest instruction.
         int deleteCounter = 0;
-        Instruction lastDeleted = null;
+        Instruct lastDeleted = null;
         
         while (instructions.size()>0 && !instructions.get(0).equals(nearestNext))
         {
@@ -585,7 +561,7 @@ log("NaviTask Start update skip-mult-" + deleteCounter + " !!!!!!");
     }
     else if (nearestP.isForwardNext())
     {
-      speedUtil.updateInstructionDone(instructions.get(0).getPoints().size());
+      speedUtil.updateInstructionDone(instructions.get(0).points.size());
       instructions.remove(0);
 log("NaviTask Start skip-next !!!!!!");
       return getNewInstruction();
@@ -598,15 +574,15 @@ log("NaviTask Start skip-next !!!!!!");
   }
 
   /** Returns the nearest point from this instruction. **/
-  private static PointPosData getNearestPoint(Instruction instruction, int curPointIdx, GeoPoint curPos)
+  private static PointPosData getNearestPoint(Instruct instruction, int curPointIdx, GeoPoint curPos)
   {
     int nextPointIdx = curPointIdx;
     int nearestPointIdx = curPointIdx;
     double nearestDist = Double.MAX_VALUE;
-    while (instruction.getPoints().size() > nextPointIdx)
+    while (instruction.points.size() > nextPointIdx)
     {
-      double lat = instruction.getPoints().getLatitude(nextPointIdx);
-      double lon = instruction.getPoints().getLongitude(nextPointIdx);
+      double lat = instruction.points.get(nextPointIdx).lat;
+      double lon = instruction.points.get(nextPointIdx).lon;
       double dist = GeoMath.fastDistance(curPos.getLatitude(), curPos.getLongitude(), lat, lon);
       if (dist < nearestDist)
       {
@@ -639,19 +615,19 @@ log("NaviTask Start skip-next !!!!!!");
       uiJob = UiJob.Finished;
       return null;
     }
-    Instruction in = instructions.get(0);
-    long fullTime = countFullTime(in.getTime());
-    GeoPoint curPos = new GeoPoint(in.getPoints().getLat(0), in.getPoints().getLon(0));
+    Instruct in = instructions.get(0);
+    long fullTime = countFullTime(in.time);
+    GeoPoint curPos = new GeoPoint(in.points.get(0).lat, in.points.get(0).lon);
     double partDistance = countPartDistance(curPos, in, 0);
     if (partDistance == 0) { partDistanceScaler = 1; }
     else
     {
-      partDistanceScaler = in.getDistance() / partDistance;
+      partDistanceScaler = in.distance / partDistance;
     }
-    Instruction nextIn = null;
+    Instruct nextIn = null;
     if (instructions.size() > 1) { nextIn = instructions.get(1); }
     NaviInstruction nIn = new NaviInstruction(in, nextIn, fullTime);
-    if (speakDistanceCheck(in.getDistance()) && nearestP.isDirectionOk())
+    if (speakDistanceCheck(in.distance) && nearestP.isDirectionOk())
     {
       naviVoice.speak(nIn.getVoiceTextFallback(), nIn.getVoiceText());
       naviVoiceSpoken = true;
@@ -676,22 +652,22 @@ log("NaviTask Start skip-next !!!!!!");
       uiJob = UiJob.Finished;
       return null;
     }
-    Instruction in = instructions.get(0);
+    Instruct in = instructions.get(0);
     long partTime = 0;
     double partDistance = countPartDistance(curPos, in, nearestP.arrIdx);
     partDistance = partDistance * partDistanceScaler;
-    if (in.getDistance() <= partDistance)
+    if (in.distance <= partDistance)
     {
-      partDistance = in.getDistance();
-      partTime = in.getTime();
+      partDistance = in.distance;
+      partTime = in.time;
     }
     else
     {
-      double partValue = partDistance / in.getDistance();
-      partTime = (long)(in.getTime() * partValue);
+      double partValue = partDistance / in.distance;
+      partTime = (long)(in.time * partValue);
     }
     long fullTime = countFullTime(partTime);
-    Instruction nextIn = null;
+    Instruct nextIn = null;
     if (instructions.size() > 1) { nextIn = instructions.get(1); }
     NaviInstruction newIn = new NaviInstruction(in, nextIn, fullTime);
     newIn.updateDist(partDistance);
@@ -748,21 +724,21 @@ log("NaviTask Start skip-next !!!!!!");
     long fullTime = partTime;
     for (int i=1; i<instructions.size(); i++)
     {
-      fullTime += instructions.get(i).getTime();
+      fullTime += instructions.get(i).time;
     }
     return fullTime;
   }
   
   /** Counts the estimated rest-distance to next instruction. **/
-  private double countPartDistance(GeoPoint curPos, Instruction in, int nearestPointPos)
+  private double countPartDistance(GeoPoint curPos, Instruct in, int nearestPointPos)
   {
     double partDistance = 0;
     double lastLat = curPos.getLatitude();
     double lastLon = curPos.getLongitude();
-    for (int i=nearestPointPos+1; i<in.getPoints().size(); i++)
+    for (int i=nearestPointPos+1; i<in.points.size(); i++)
     {
-      double nextLat = in.getPoints().getLat(i);
-      double nextLon = in.getPoints().getLon(i);
+      double nextLat = in.points.get(i).lat;
+      double nextLon = in.points.get(i).lon;
       partDistance += GeoMath.fastDistance(lastLat, lastLon, nextLat, nextLon);
       lastLat = nextLat;
       lastLon = nextLon;
@@ -802,7 +778,7 @@ log("NaviTask Start skip-next !!!!!!");
       wrongDirHint = false;
       wrongDir = false;
     }
-    public void checkDirectionOk(Location pos, Instruction in, NaviVoice v)
+    public void checkDirectionOk(Location pos, Instruct in, NaviVoice v)
     {
       calculateWrongDir(pos, in);
       if (wrongDir)
@@ -813,13 +789,13 @@ log("NaviTask Start skip-next !!!!!!");
       }
     }
     
-    private void calculateWrongDir(Location pos, Instruction in)
+    private void calculateWrongDir(Location pos, Instruct in)
     {
-      if (in.getPoints().size()<2) { return; }
+      if (in.points.size()<2) { return; }
       if (!wrongDir)
       {
-        GeoPoint pathP1 = new GeoPoint(in.getPoints().getLat(0), in.getPoints().getLon(0));
-        GeoPoint pathP2 = new GeoPoint(in.getPoints().getLat(1), in.getPoints().getLon(1));
+        GeoPoint pathP1 = new GeoPoint(in.points.get(0).lat, in.points.get(0).lon);
+        GeoPoint pathP2 = new GeoPoint(in.points.get(1).lat, in.points.get(1).lon);
         double bearingOk = pathP1.bearingTo(pathP2);
         double bearingCur = pos.getBearing();
         double bearingDiff = bearingOk - bearingCur;

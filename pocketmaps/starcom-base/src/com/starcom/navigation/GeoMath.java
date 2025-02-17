@@ -1,4 +1,4 @@
-package com.starcom.pocketmaps.util;
+package com.starcom.navigation;
 
 public class GeoMath
 {

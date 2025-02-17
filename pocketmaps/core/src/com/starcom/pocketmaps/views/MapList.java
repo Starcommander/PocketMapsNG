@@ -2,45 +2,31 @@ package com.starcom.pocketmaps.views;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Vector;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
-import org.oscim.layers.tile.buildings.BuildingLayer;
-import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
-import org.oscim.map.Map;
-import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.source.mapfile.MapFileTileSource;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.graphhopper.GHResponse;
-import com.graphhopper.PathWrapper;
-import com.graphhopper.util.Instruction;
-import com.graphhopper.util.InstructionList;
 import com.starcom.LoggerUtil;
 import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
+import com.starcom.navigation.MapRoutingEngine.Instruct;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.tasks.Download;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.ConfType;
 import com.starcom.pocketmaps.Cfg.NavKey;
-import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapLayer;
 import com.starcom.pocketmaps.map.MapLayer.MapFileType;
 import com.starcom.pocketmaps.navigator.NaviEngine;
-import com.starcom.pocketmaps.navigator.Navigator;
 
 public class MapList
 {
@@ -270,13 +256,13 @@ public class MapList
 		ll.showAsWindow(GuiUtil.getStage());
 	}
 	
-	public static void viewDirectionList(InstructionList instL)
+	public static void viewDirectionList(ArrayList<Instruct> instL)
 	{
 		NavSelect.getInstance().setVisible(false,false);
 		ListSelect ll = new ListSelect("Directions", "Navigate", (b) -> NaviEngine.getNaviEngine().setNavigating(null, true));
-		for (Instruction inst : instL)
+		for (Instruct inst : instL)
 		{
-			ll.addElement(inst.getName(), (a,x,y) -> {});
+			ll.addElement(inst.name, (a,x,y) -> {});
 		}
 		ll.showAsWindow(GuiUtil.getStage());
 	}

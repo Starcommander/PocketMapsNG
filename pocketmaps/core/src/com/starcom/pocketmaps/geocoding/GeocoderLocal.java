@@ -9,16 +9,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
-import com.graphhopper.routing.util.AllEdgesIterator;
 import com.starcom.pocketmaps.Cfg;
-import com.starcom.pocketmaps.Cfg.NavKey;
-import com.starcom.pocketmaps.map.MapHandler;
-import com.starcom.pocketmaps.util.GeoMath;
 import com.starcom.pocketmaps.views.MapList;
 import com.starcom.LoggerUtil;
 import com.starcom.interfaces.IProgressListener;
 import com.starcom.interfaces.IProgressListener.Type;
 import com.starcom.pocketmaps.map.MapLayer.MapFileType;
+import com.starcom.navigation.MapRoutingEngine;
+import com.starcom.navigation.MapRoutingEngine.Edge;
+import com.starcom.navigation.MapRoutingEngine.ListIF;
+import com.starcom.navigation.GeoMath;
 
 public class GeocoderLocal
 {
@@ -48,7 +48,7 @@ public class GeocoderLocal
   public static boolean isPresent() { return true; }
   
   
-  public List<Address> getFromLocationName(String searchCountry, String searchS, int maxCount, IProgressListener progressListener) throws IOException
+  public List<Address> getFromLocationName(String searchCountry, String searchS, int maxCount, IProgressListener<String> progressListener) throws IOException
   {
     getSettings();
     progressListener.onProgress(Type.PROGRESS, "Searching city...");
@@ -237,49 +237,49 @@ public class GeocoderLocal
   }
   
   /** Search all edges for matching text. **/
-  ArrayList<Address> searchNodes(String searchCountry, String txt, int maxMatches, IProgressListener progressListener)
+  ArrayList<Address> searchNodes(String searchCountry, String txt, int maxMatches, IProgressListener<String> progressListener)
   {
     txt = txt.toLowerCase();
     ArrayList<Address> addressList = new ArrayList<Address>();
     StreetMatcher streetMatcher = new StreetMatcher(txt, bExplicitSearch);
     CityMatcher cityMatcher = streetMatcher;
     
-    AllEdgesIterator edgeList = MapHandler.getInstance().getAllEdges(searchCountry);
+    ListIF<MapRoutingEngine.Edge> edgeList = MapList.getInstance().findMapLayerFromCountry(searchCountry).getPathfinder().getAllEdges();
     if (edgeList == null) { return null; }
     logger.info("SEARCH_EDGE Start ...");
     int counter = 0;
     int lastProgress = 5;
-    while (edgeList.next())
+    Edge edge = new Edge();
+    while (edgeList.next(edge))
     {
       counter++;
       if (GeocoderGlobal.isStopRunningActions()) { return null; }
-      if (edgeList.getName().isEmpty()) { continue; }
-      if (edgeList.fetchWayGeometry(0).isEmpty()) { continue; }
-      int newProgress = (counter*100) / edgeList.length();
+      if (edge.name.isEmpty()) { continue; }
+      int newProgress = (counter*100) / edgeList.getSize();
       if (newProgress > lastProgress)
       {
-        progressListener.onProgress(IProgressListener.Type.PROGRESS, "" + ((counter*100) / edgeList.length()) + "%");
+        progressListener.onProgress(IProgressListener.Type.PROGRESS, "" + newProgress + "%");
         lastProgress = newProgress;
       }
-      if (streetMatcher.isMatching(edgeList.getName(), false))
+      if (streetMatcher.isMatching(edge.name, false))
       {
-    	logger.info("SEARCH_EDGE Status: " + counter + "/" + edgeList.length());
+    	logger.info("SEARCH_EDGE Status: " + counter + "/" + edgeList.getSize());
         boolean b = StreetMatcher.addToList(searchCountry,
                                             addressList,
-                                            edgeList.getName(),
-                                            edgeList.fetchWayGeometry(0).get(0).lat,
-                                            edgeList.fetchWayGeometry(0).get(0).lon,
+                                            edge.name,
+                                            edge.loc.getLatitude(),
+                                            edge.loc.getLongitude(),
                                             locale);
         if (b)
         {
-          String c = findNearestCity(searchCountry, edgeList.fetchWayGeometry(0).get(0).lat, edgeList.fetchWayGeometry(0).get(0).lon);
+          String c = findNearestCity(searchCountry, edge.loc.getLatitude(), edge.loc.getLongitude());
           if (bMultiMatchOnly && !cityMatcher.isMatching(c, false))
           {
             addressList.remove(addressList.size()-1);
           }
           else
           {
-        	logger.info("SEARCH_EDGE found=" + edgeList.getName() + " on " + c);
+        	logger.info("SEARCH_EDGE found=" + edge.name + " on " + c);
             addressList.get(addressList.size()-1).locality = c;
           }
         }

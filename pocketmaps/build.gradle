@@ -98,8 +98,8 @@ project(":html") {
 project(":core") {
     apply plugin: "java-library"
 
-
     dependencies {
+        api project(':routing-engine')
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.kotcrab.vis:vis-ui:1.4.11"
         api "org.mapsforge:vtm:$vtmVersion"
@@ -108,7 +108,27 @@ project(":core") {
         api project(':gdx-utils')
         api project(':starcom-base')
         implementation 'org.json:json:20231013'
-        implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '0.13.0') {
+    }
+}
+
+project(":starcom-base") {
+    apply plugin: "java-library"
+}
+
+project(":routing-engine") {
+    apply plugin: "java-library"
+    dependencies {
+        api project(':starcom-base')
+    }
+}
+
+project(":routing-engine-gh") {
+    apply plugin: "java-library"
+
+    dependencies {
+        api project(':routing-engine')
+        api project(':starcom-base')
+        implementation(group: 'com.graphhopper', name: 'graphhopper-core', version: '1.0') {
           exclude group: 'com.google.protobuf', module: 'protobuf-java'
           exclude group: 'org.openstreetmap.osmosis', module: 'osmosis-osm-binary'
           exclude group: 'org.apache.xmlgraphics', module: 'xmlgraphics-commons'
