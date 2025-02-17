@@ -1,6 +1,5 @@
 package com.starcom.pocketmaps.map;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.File;
 
@@ -13,10 +12,9 @@ import org.oscim.map.Map;
 import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 
-import com.graphhopper.GraphHopper;
 import com.starcom.LoggerUtil;
+import com.starcom.navigation.MapRoutingEngine;
 import com.starcom.pocketmaps.map.MapHandler.MapEventsReceiver;
-import com.starcom.pocketmaps.map.MapLayer.MapFileType;
 import com.starcom.pocketmaps.views.TopPanel;
 
 public class MapLayer
@@ -28,7 +26,7 @@ public class MapLayer
 	private VectorTileLayer vtLayer;
 	MapFileTileSource tileSource;
 	private String mapFile;
-	private GraphHopper graphHopper;
+	private MapRoutingEngine graphHopper;
 	private Map map;
 	private MapEventsReceiver mer;
 	
@@ -52,17 +50,8 @@ public class MapLayer
         mer = MapHandler.getInstance().new MapEventsReceiver(map);
     	map.layers().add(mer);
         File mapDir = mapFileF.getParentFile().getAbsoluteFile();
-        MapHandler.getInstance().createPathfinder(mapDir, (o) ->
-        {
-        	if (o instanceof GraphHopper)
-        	{
-        		graphHopper = (GraphHopper)o;
-        	}
-        	else
-        	{
-        		logger.log(Level.SEVERE, "Unable to generate Pathfinder" + o);
-        	}
-        });
+        graphHopper = MapRoutingEngine.createInstance();
+        graphHopper.init(mapDir);
 	}
 	
 //	public Map getMap() { return map; }
@@ -95,7 +84,7 @@ public class MapLayer
 			return new File(mapFile).getName().split("_")[0]; // any/path/europe_austria.map -> europe
 		}
 	}
-	public GraphHopper getPathfinder() { return graphHopper; }
+	public MapRoutingEngine getPathfinder() { return graphHopper; }
 	public void dispose()
 	{
 		boolean dTL = map.layers().remove(mer);

@@ -3,7 +3,7 @@ package com.starcom.pocketmaps.geocoding;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.starcom.pocketmaps.util.GeoMath;
+import com.starcom.navigation.GeoMath;
 
 public class StreetMatcher extends CityMatcher
 {

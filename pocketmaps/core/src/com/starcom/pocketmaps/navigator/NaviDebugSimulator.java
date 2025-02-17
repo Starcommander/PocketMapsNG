@@ -4,13 +4,11 @@ import java.util.ArrayList;
 
 import org.oscim.core.GeoPoint;
 
-import com.graphhopper.util.Instruction;
-import com.graphhopper.util.InstructionList;
 import com.starcom.LoggerUtil;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.system.Threading;
 import com.starcom.navigation.Location;
-import com.starcom.pocketmaps.tracking.Tracking;
+import com.starcom.navigation.MapRoutingEngine.Instruct;
 
 public class NaviDebugSimulator
 {
@@ -32,7 +30,7 @@ public class NaviDebugSimulator
   
   public void stopDebugSimulator() { debug_simulator_run = false; }
   
-  public void updateRoute(InstructionList instructions)
+  public void updateRoute(ArrayList<Instruct> instructions)
   {
     if (debug_simulator_running) { return; }
     if (instructions == null || (instructions.size() == 0))
@@ -40,11 +38,11 @@ public class NaviDebugSimulator
     	return;
     }
     debug_simulator_points.clear();
-      for (Instruction ins : instructions)
+      for (Instruct ins : instructions)
       {
-        for (int i=0; i<ins.getPoints().size(); i++)
+        for (int i=0; i<ins.points.size(); i++)
         {
-          debug_simulator_points.add(new GeoPoint(ins.getPoints().getLat(i),ins.getPoints().getLon(i)));
+          debug_simulator_points.add(new GeoPoint(ins.points.get(i).lat,ins.points.get(i).lon));
         }
       }
   }
