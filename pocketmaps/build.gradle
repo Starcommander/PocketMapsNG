@@ -49,6 +49,7 @@ project(":desktop") {
 
     dependencies {
         implementation project(":core")
+        implementation project(':routing-engine-gh')
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "org.mapsforge:vtm-desktop:$vtmVersion"

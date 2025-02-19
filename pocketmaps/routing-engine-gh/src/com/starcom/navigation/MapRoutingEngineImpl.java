@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 //import org.oscim.core.GeoPoint;
 
 import com.starcom.LoggerUtil;
+import com.starcom.navigation.Enums.Vehicle;
 //import com.starcom.pocketmaps.navigator.NodeAccess;
 //import com.starcom.pocketmaps.navigator.QueryResult;
 //import com.starcom.pocketmaps.Cfg;
@@ -32,6 +33,7 @@ import com.graphhopper.GHRequest;
 //import com.starcom.pocketmaps.util.PointList;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
+import com.graphhopper.config.Profile;
 import com.graphhopper.routing.util.AllEdgesIterator;
 import com.graphhopper.routing.util.EdgeFilter;
 import com.graphhopper.storage.NodeAccess;
@@ -45,6 +47,7 @@ import com.graphhopper.util.Parameters.Algorithms;
 import com.graphhopper.util.Parameters.Routing;
 import com.graphhopper.util.StopWatch;
 import com.graphhopper.util.details.PathDetail;
+import com.graphhopper.routing.ev.MaxSpeed;
 
 public class MapRoutingEngineImpl implements MapRoutingEngine
 {
@@ -117,10 +120,7 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 	    p = new Point(toLat, toLon, 0);
 	    points.add(p);
 	    ArrayList<Instruct> insL = new ArrayList<>();
-	    Instruct ins = new Instruct();
-	    ins.distance = distance;
-	    ins.sign = Sign.Finish;
-	    ins.points = points;
+	    Instruct ins = new Instruct(points, distance, Sign.Finish, "Simple direction", timeMs);
 	    insL.add(ins);
 	    NaviResponse resp = new NaviResponse()
 	    {
@@ -175,13 +175,20 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 		Threading.getInstance().invokeAsyncTask(() ->
 		{
 			GraphHopper tmpHopp = new GraphHopper().forMobile();
-	        // Why is "shortest" missing in default config? Add!
+// Why is "shortest" missing in default config? Add!
 //TODO: How to add shortest in V1.0 of graphhopper? Or even necessary?
-//			tmpHopp.getCHPreparationHandler().addCHConfig(CHConfig.edgeBased("shortest", Weigh))
-//	        tmpHopp.getCHFactoryDecorator().addCHProfileAsString("shortest");
-	        tmpHopp.load(mapFolder.getAbsolutePath());
-	        logger.info("found graph " + tmpHopp.getGraphHopperStorage().toString() + ", nodes:" + tmpHopp.getGraphHopperStorage().getNodes());
-	        return tmpHopp;
+//tmpHopp.getCHPreparationHandler().addCHConfig(CHConfig.edgeBased("shortest", Weigh))
+//tmpHopp.getCHFactoryDecorator().addCHProfileAsString("shortest");
+			Profile car = new Profile(Vehicle.Car.toString().toLowerCase());
+			car.setVehicle(car.getName());
+			Profile bike = new Profile(Vehicle.Bike.toString().toLowerCase());
+			bike.setVehicle(bike.getName());
+			Profile foot = new Profile(Vehicle.Foot.toString().toLowerCase());
+			foot.setVehicle(foot.getName());
+			tmpHopp.setProfiles(car, bike, foot);
+			tmpHopp.load(mapFolder.getAbsolutePath());
+			logger.info("found graph " + tmpHopp.getGraphHopperStorage().toString() + ", nodes:" + tmpHopp.getGraphHopperStorage().getNodes());
+			return tmpHopp;
 		}, (o) -> setEngine(o));
 	}
 	
@@ -205,7 +212,7 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 	}
 
 	@Override
-	public NaviResponse createResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle, boolean includeSpeedLimits)
+	public NaviResponse createResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle)
 	{
 		if (hopper == null) { return null; }
 
@@ -213,14 +220,11 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
         GHRequest req = new GHRequest(fromLat, fromLon, toLat, toLon).
                 setAlgorithm(Algorithms.DIJKSTRA_BI);
         req.getHints().putObject(Routing.INSTRUCTIONS, true); //TODO: Cfg.getBoolValue(Cfg.NavKeyB.DirectionsOn, true)
-//        req.setVehicle(vehicle.toString().toLowerCase()); //TODO: Howto set the vehicle in graphhopper 1.0?
+        req.setProfile(vehicle.toString().toLowerCase());
+        req.getPathDetails().add(MaxSpeed.KEY);
 //        req.setWeighting(Cfg.getValue(Cfg.NavKey.Weighting, "fastest")); //TODO: Howto set the weightning in graphhopper 1.0?
-//        if (Cfg.getBoolValue(Cfg.NavKeyB.ShowingSpeedLimits, false) || Cfg.getBoolValue(Cfg.NavKeyB.SpeakingSpeedLimits, false))
-        if (includeSpeedLimits)
-        {
-            //req.getPathDetails().add(com.graphhopper.routing.profiles.MaxSpeed.KEY); //TODO: Howto get maxSpeed in graphhopper 1.0?
-            req.getPathDetails().add(com.graphhopper.util.Parameters.Details.AVERAGE_SPEED);
-        }
+        req.getPathDetails().add(com.graphhopper.util.Parameters.Details.AVERAGE_SPEED);
+
         GHResponse resp = null;
 //        MapLayer ml = MapList.getInstance().findMapLayerFromLocation(new GeoPoint(toLat, toLon));
 //        if (ml != null)
@@ -263,6 +267,7 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 	ArrayList<PathInfo> convertDetails(List<PathDetail> d)
 	{
 		ArrayList<PathInfo> iList = new ArrayList<PathInfo>();
+		if (d==null) { return iList; }
 		for (PathDetail i : d)
 		{
 			PathInfo inf = new PathInfo();
@@ -282,17 +287,24 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 		ArrayList<Instruct> newInstructions = new ArrayList<>();
 		for (Instruction inst : res.getBest().getInstructions())
 		{
-			Instruct i = new Instruct();
-			i.points = convertPointList(inst.getPoints());
-			i.distance = inst.getDistance();
-			i.time = inst.getTime();
-			i.name = inst.getName();
+			Instruct i = new Instruct(convertPointList(inst.getPoints()), inst.getDistance(), Sign.Finish, inst.getName(), inst.getTime());
 			i.annotation = inst.getAnnotation().getMessage();
 			switch(inst.getSign())
 			{
 				case Instruction.FINISH: i.sign = Sign.Finish; break;
+				case Instruction.LEAVE_ROUNDABOUT: i.sign = Sign.LeaveRoundabout; break;
+				case Instruction.TURN_SHARP_LEFT: i.sign = Sign.TurnSharpLeft; break;
+				case Instruction.TURN_LEFT: i.sign = Sign.TurnLeft; break;
+				case Instruction.TURN_SLIGHT_LEFT: i.sign = Sign.TurnSlightLeft; break;
+				case Instruction.CONTINUE_ON_STREET: i.sign = Sign.ContinueOnStreet; break;
+				case Instruction.TURN_SLIGHT_RIGHT: i.sign = Sign.TurnSlightRight; break;
 				case Instruction.TURN_RIGHT: i.sign = Sign.TurnRight; break;
-			} //TODO: finish the list!
+				case Instruction.TURN_SHARP_RIGHT: i.sign = Sign.TurnSharpRight; break;
+				case Instruction.REACHED_VIA: i.sign = Sign.ReachedVia; break;
+				case Instruction.USE_ROUNDABOUT: i.sign = Sign.UseRoundabout; break;
+				case Instruction.KEEP_RIGHT: i.sign = Sign.KeepRight; break;
+				case Instruction.KEEP_LEFT: i.sign = Sign.KeepLeft; break;
+			}
 			newInstructions.add(i);
 		}
 		ArrayList<PathInfo> maxSpeedList = convertDetails(res.getBest().getPathDetails().get("max_speed"));
