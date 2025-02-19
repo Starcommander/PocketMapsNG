@@ -45,7 +45,7 @@ public interface MapRoutingEngine
 	/** Creates a simple line reponse, when map is missing. */
 	public NaviResponse createSimpleResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle);
 	/** Creates a routing reponse. May return null in case of errors or still not ready. */
-	public NaviResponse createResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle, boolean includeSpeedLimits);
+	public NaviResponse createResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle);
 	
 	/** May return null, if nothing is in range. */
 	public static Instruct findNearestInstruction(Point pFrom, ArrayList<Instruct> list, double maxRange)
@@ -130,6 +130,14 @@ public interface MapRoutingEngine
 		public String name;
 		public long time;
 		public String annotation;
+		public Instruct(ArrayList<Point> points, double distance, Sign sign, String name, long time)
+		{
+			this.points = points;
+			this.distance = distance;
+			this.sign = sign;
+			this.name = name;
+			this.time = time;
+		}
 	}
 
 	public static interface ListIF<T>

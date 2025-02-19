@@ -413,12 +413,7 @@ public class MapHandler
         Vehicle vehicle = Vehicle.Car;
         if (vehicleS.equals(Cfg.TRAVEL_MODE_BIKE)) { vehicle = Vehicle.Bike; }
         if (vehicleS.equals(Cfg.TRAVEL_MODE_FOOT)) { vehicle = Vehicle.Foot; }
-        boolean speedLim = false;
-        if (Cfg.getBoolValue(Cfg.NavKeyB.ShowingSpeedLimits, false) || Cfg.getBoolValue(Cfg.NavKeyB.SpeakingSpeedLimits, false))
-        {
-        	speedLim = true;
-        }
-        NaviResponse resp = ml.getPathfinder().createResponse(fromLat, fromLon, toLat, toLon, vehicle, speedLim);
+        NaviResponse resp = ml.getPathfinder().createResponse(fromLat, fromLon, toLat, toLon, vehicle);
         if (resp != null) { return resp; }
         return ml.getPathfinder().createSimpleResponse(fromLat, fromLon, toLat, toLon, vehicle);
     }
