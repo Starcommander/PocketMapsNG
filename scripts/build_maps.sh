@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ##############################################################################
 ##
 ##  Starcommander@github.com
@@ -38,6 +40,7 @@ HOPPER_REP="https://github.com/graphhopper/graphhopper.git"
 HOPPER_TAG="tags/1.0"
 GEO_TMP="/tmp/geofabrik-list.txt"
 GEO_URL="http://download.geofabrik.de/"
+OSM_URL="https://github.com/openstreetmap/osmosis/releases/download/0.49.2/osmosis-0.49.2.tar"
 MAP_URL="http://ftp-stud.hs-esslingen.de/pub/Mirrors/download.mapsforge.org/maps/v5/"
 MAP_URL_ZIP_ALASKA="http://ftp.gwdg.de/pub/misc/openstreetmap/openandromaps//maps/usa/Alaska.zip"
 MAP_DIR="/tmp/graphhopper_1-0/maps-osm/"
@@ -133,11 +136,14 @@ goto_osmosis()
     return
   fi
   mkdir -p "$WORK_DIR/osmosis"
-  # VERSION_USED: osmosis-0.46.tgz and plugin mapsforge-map-writer-master-20171203.163155-186-jar-with-dependencies.jar
-  wget http://bretth.dev.openstreetmap.org/osmosis-build/osmosis-latest.tgz -O "$WORK_DIR/osmosis/osmosis-latest.tgz"
+  # VERSION_USED: osmosis-0.49.2.tar and plugin mapsforge-map-writer-master-20171203.163155-186-jar-with-dependencies.jar
+  local osm_name=$(basename -s .tar "$OSM_URL")
+  wget "$OSM_URL" -O "$WORK_DIR/osmosis/${osm_name}.tar"
   cd "$WORK_DIR/osmosis"
-  tar xvfz osmosis-latest.tgz
-  rm osmosis-latest.tgz
+  tar -xf "${osm_name}.tar"
+  mv ${osm_name}/* .
+  rm ${osm_name}.tar
+  rmdir ${osm_name}
   chmod a+x bin/osmosis
 }
 
@@ -343,6 +349,8 @@ import_map() # Args: map_url_rel
   fi
   if [ ! -f "$MAP_DIR$gh_map_zip" ]; then
     cd "$MAP_DIR$gh_map_dir"
+    echo "map-version: $MAP_REV" > versions.yml
+    echo "hopper-tag: $HOPPER_TAG" >> versions.yml
     zip -r "$WORK_DIR$gh_map_zip" *
     rm -r -f "$MAP_DIR/$gh_map_dir" # Cleanup
     rm "$MAP_DIR/$map_file" # Cleanup

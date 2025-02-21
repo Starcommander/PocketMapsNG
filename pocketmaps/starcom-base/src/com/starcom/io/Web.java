@@ -9,14 +9,14 @@ import com.starcom.interfaces.IProgressListener.Type;
 
 public class Web
 {
-	public static void downloadTextfileLater(String textFileUrl, IProgressListener<Object> callback)
+	public static void downloadTextfileLater(String textFileUrl, IProgressListener<String> callback)
 	{
 		Thread t = new Thread(() ->
 		{
-			callback.onProgress(Type.PROGRESS, 50);
+			callback.onProgress(Type.PROGRESS, "50");
 			String result = downloadTextfile(textFileUrl);
 			if (result == null) { callback.onProgress(Type.ERROR, "Error on downloading."); }
-			callback.onProgress(Type.SUCCESS, result);
+			else { callback.onProgress(Type.SUCCESS, result); }
 		});
 		t.start();
 	}
