@@ -14,6 +14,7 @@ import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.interfaces.IProgressListener.Type;
 import com.starcom.navigation.Location;
+import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.navigator.NaviEngine;
@@ -108,17 +109,23 @@ public class TopPanel
 		}
 		else if (action.equals("Download Maps"))
 		{
-			String url = "http://vsrv15044.customer.xenway.de/maps/map_url-0.13.0_0.json";
-
-			com.starcom.io.Web.downloadTextfileLater(url, (t,o) ->
+			String mapdataVersion = Cfg.getMapdataVersion();
+			if (mapdataVersion == null)
 			{
-				if (t == Type.ERROR)
+				ToastMsg.getInstance().toastLong("Error getting necessary version for dl maplist");
+				return;
+			}
+			String url = "http://vsrv15044.customer.xenway.de/maps/map_url-" + mapdataVersion + ".json";
+
+			com.starcom.io.Web.downloadTextfileLater(url, (type,txt) ->
+			{
+				if (type == Type.ERROR)
 				{
-					ToastMsg.getInstance().toastLong(o.toString());
+					ToastMsg.getInstance().toastLong(txt + " V=" + mapdataVersion);
 				}
-				else if (t == Type.SUCCESS)
+				else if (type == Type.SUCCESS)
 				{
-					MapList.viewMapsDownload(o.toString());}
+					MapList.viewMapsDownload(txt);}
 				}
 			);
 		}

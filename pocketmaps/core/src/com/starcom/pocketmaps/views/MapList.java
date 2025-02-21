@@ -1,6 +1,7 @@
 package com.starcom.pocketmaps.views;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -229,8 +230,22 @@ public class MapList
 			return;
 		}
 		ListSelect ll = new ListSelect("DownloadMaps");
-		org.json.JSONArray arr = jsonObj.getJSONArray("maps-0.13.0_0"); //TODO: Dynamic version?
-		//Image mapImage = new Image(new Texture("icon_pocketmaps.png"));
+		String mapdataVersion = Cfg.getMapdataVersion();
+		if (mapdataVersion == null)
+		{
+			ToastMsg.getInstance().toastLong("Error getting necessary version for maplist");
+			return;
+		}
+		org.json.JSONArray arr;
+		try
+		{
+			arr = jsonObj.getJSONArray("maps-" + mapdataVersion);
+		}
+		catch (JSONException jsonEx)
+		{
+			ToastMsg.getInstance().toastLong("Missing compatible maps for: " + mapdataVersion);
+			return;
+		}
 		Texture mapTextureTop = new Texture("icon_pocketmaps_top.png");
 		Texture mapTextureBot = new Texture("icon_pocketmaps_bot.png");
 		for (int i = 0; i < arr.length(); i++)

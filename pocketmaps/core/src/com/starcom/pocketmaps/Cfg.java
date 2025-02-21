@@ -1,12 +1,15 @@
 package com.starcom.pocketmaps;
 
 import java.io.File;
+import java.io.IOException;
+import com.starcom.io.ManifestReader;
+import com.starcom.navigation.Enums;
 
 public class Cfg
 {
-	public final static String TRAVEL_MODE_BIKE = "bike";
-	public final static String TRAVEL_MODE_CAR = "car";
-	public final static String TRAVEL_MODE_FOOT = "foot";
+	public final static String TRAVEL_MODE_BIKE = Enums.Vehicle.Bike.toString().toLowerCase();
+	public final static String TRAVEL_MODE_CAR = Enums.Vehicle.Car.toString().toLowerCase();
+	public final static String TRAVEL_MODE_FOOT = Enums.Vehicle.Foot.toString().toLowerCase();
 	public enum NavKey { TravelMode, Weighting, TtsEngine, TtsWantedVoice, MapSelection }
 	public enum NavKeyB { DirectionsOn, IsImperialUnit, ShowingSpeedLimits, SpeakingSpeedLimits, TtsOn, Debugging, GpsOn }
 	public enum GeoKeyI { SearchBits }
@@ -79,10 +82,27 @@ public class Cfg
 	}
 	
 	/** Stores the settings with name.
-	 * @param fname The name of configruation-type, should use an enum instead string */
+	 * @param fname The name of configuration-type, should use an enum instead string */
 	public static boolean save(ConfType fname)
 	{
 		return Settings.save(fname.toString());
+	}
+
+	/** Returns a version that has to match the versions of mapdata.
+	 * @return The version, or null, if any manifest information is missing. */
+	public static String getMapdataVersion()
+	{
+		try
+		{
+			String ghVersion = ManifestReader.readFirstMainAttribute("NaviRouterVersion");
+			String mapVersion = ManifestReader.readFirstMainAttribute("MapVersion");
+			if (ghVersion != null && mapVersion != null)
+			{
+				return mapVersion + "-" + ghVersion + "_0";
+			}
+		}
+		catch (IOException e) { e.printStackTrace(); }
+		return null;
 	}
 
 }
