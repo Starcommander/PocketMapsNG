@@ -327,10 +327,6 @@ import_map() # Args: map_url_rel
       rm -r "$unzip_dir"
     else
       ./bin/osmosis --rb file="$MAP_DIR$map_file" --mapfile-writer type=hd file="$MAP_DIR$gh_map_dir/$gh_map_file"
-      if [ "$?" != "0" ]; then
-        echo "Osmosis returned an error, clearing file."
-        rm "$MAP_DIR$gh_map_dir/$gh_map_file"
-      fi
     fi
     check_exist "$MAP_DIR$gh_map_dir/$gh_map_file"
     ./bin/osmosis --rb file="$MAP_DIR$map_file" \
@@ -338,19 +334,15 @@ import_map() # Args: map_url_rel
                   --tf reject-ways \
                   --tf accept-nodes place=city,town,village \
                   --write-xml "$MAP_DIR$gh_map_dir/cityNodes.osm"
-    if [ "$?" != "0" ]; then
-      echo "Osmosis for cityNodes returned an error, clearing file." | tee -a "$LOG_FILE"
-      echo "" > "$MAP_DIR$gh_map_dir/cityNodes.osm"
-    else
-      echo "Generate City nodes for $gh_map_dir" >> "$LOG_FILE"
-      printCityNodes "$MAP_DIR$gh_map_dir/cityNodes.osm" > "$MAP_DIR$gh_map_dir/city_nodes.txt"
-    fi
+    echo "Generate City nodes for $gh_map_dir" >> "$LOG_FILE"
+    printCityNodes "$MAP_DIR$gh_map_dir/cityNodes.osm" > "$MAP_DIR$gh_map_dir/city_nodes.txt"
     rm "$MAP_DIR$gh_map_dir/cityNodes.osm"
   fi
   if [ ! -f "$MAP_DIR$gh_map_zip" ]; then
     cd "$MAP_DIR$gh_map_dir"
     echo "map-version: $MAP_REV" > versions.yml
     echo "hopper-tag: $HOPPER_TAG" >> versions.yml
+    echo "build-date: $start_time" >> versions.yml
     zip -r "$WORK_DIR$gh_map_zip" *
     rm -r -f "$MAP_DIR/$gh_map_dir" # Cleanup
     rm "$MAP_DIR/$map_file" # Cleanup
