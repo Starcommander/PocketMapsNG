@@ -123,6 +123,18 @@ project(":starcom-base") {
     apply plugin: "java-library"
 }
 
+project(":tts-engine") {
+    apply plugin: "java-library"
+}
+
+project(":tts-engine-espeakcmd") {
+    apply plugin: "java-library"
+    dependencies {
+        api project(':starcom-base')
+        api project(':tts-engine')
+    }
+}
+
 project(":routing-engine") {
     apply plugin: "java-library"
     dependencies {

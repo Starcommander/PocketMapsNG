@@ -1,10 +1,7 @@
 package com.starcom.gdx.io;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -26,7 +23,7 @@ public class Web
 	 * @param target The target FileHandle got by Storage.getFileHandle(s).
 	 * @param fileLength The lengh of the file to download, or -1.
 	 * @return The request, that can be canceled by Gdx.net.cancleHttpRequest(q) */
-	public static HttpRequest download(String url, FileHandle target, IProgressListener callback)
+	public static HttpRequest download(String url, FileHandle target, IProgressListener<Object> callback)
 	{
 		HttpRequest rq = new HttpRequest();
 		rq.setMethod(HttpMethods.GET);
