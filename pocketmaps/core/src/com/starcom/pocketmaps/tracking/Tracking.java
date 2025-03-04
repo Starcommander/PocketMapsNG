@@ -79,7 +79,7 @@ public class Tracking {
      */
     public void startTracking() {
         initAnalytics();
-//        MapHandler.getInstance().startTrack(); TODO: Reset 
+        MapHandler.getInstance().startTrack();
         trackingStatus = TrackingStatus.Running;
     }
     
@@ -113,7 +113,7 @@ public class Tracking {
             setTimeStart(pos.getTime());
             first = false;
           }
-//          MapHandler.getInstance().addTrackPoint(new GeoPoint(pos.getLatitude(), pos.getLongitude())); TODO: Add
+          MapHandler.getInstance().addTrackPoint(new GeoPoint(pos.getLatitude(), pos.getLongitude()));
           addPoint(pos);
         }
     }
@@ -195,9 +195,10 @@ public class Tracking {
     }
 
     /**
-     * add a location point to points list
+     * Generate point and update pointlist and avgSpeed and maxSpeed
      *
-     * @param location
+     * @param location The new location.
+     * @return A point that stores dist and speed.
      */
     private Point addPoint(Location location) {
         dBtrackingPoints.add(location);
@@ -216,7 +217,8 @@ public class Tracking {
     	{
     		Point p = addPoint(location);
 //    		TrackingPanel.getInstance().showData(dBtrackingPoints.size(), time);
-    		TrackingPanel.getInstance().updateNewLocation(location, dBtrackingPoints.size(), getDurationInMilliS(location.getTime()),p.x, p.y);
+    		TrackingPanel.getInstance().updateTrackingData(dBtrackingPoints.size(), getDurationInMilliS(location.getTime()),p.x, p.y);
+    		MapHandler.getInstance().addTrackPoint(new GeoPoint(location.getLatitude(), location.getLongitude()));
     	}
     }
 

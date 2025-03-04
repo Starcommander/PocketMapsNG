@@ -40,9 +40,11 @@ public interface VoiceEngine
 
   public void setEngine(String selectedEngine);
 
-  public void setVoice(String selectedVoice);
+  public void setVoice(Voice selectedVoice);
 
-  public void shutdownTts();
+  public void init();
+  
+  public void shutdown();
 
   public boolean isReady();
 
@@ -53,7 +55,7 @@ public interface VoiceEngine
 
   public ArrayList<String> getEngineList();
 
-  public ArrayList<String> getVoiceList();
+  public ArrayList<Voice> getVoiceList();
 
 //TODO: getVoiceListAvailable + downloadVoice
 
