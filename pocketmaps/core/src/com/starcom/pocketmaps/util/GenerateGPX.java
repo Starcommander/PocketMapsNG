@@ -37,7 +37,7 @@ public class GenerateGPX {
      * GPX opening tag
      */
     private final String TAG_GPX =
-            "<gpx" + " version=\"1.1\"" + " creator=\"PocketMaps by JunjunGuo.com - http://github.com/junjunguo/PocketMaps/\"" +
+            "<gpx" + " version=\"1.1\"" + " creator=\"Paul Kashofer - https://github.com/Starcommander/PocketMapsNG\\\"" +
                     " xmlns=\"http://www.topografix.com/GPX/1/1\"" +
                     " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" +
                     " xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx" +
@@ -59,7 +59,7 @@ public class GenerateGPX {
     public void writeGpxFile(String trackName,ArrayList<Location> db, File gpxFile) throws IOException {
 
         String METADATA = "  <metadata>\n" +
-                "    <link href=\"https://github.com/Starcommander/PocketMaps\">\n" +
+                "    <link href=\"https://github.com/Starcommander/PocketMapsNG\">\n" +
                 "      <text>Pocket Maps: Free offline maps with routing functions and more</text>\n" +
                 "    </link>\n" +
                 "    <time>" + DF.format(System.currentTimeMillis()) + "</time>\n" +

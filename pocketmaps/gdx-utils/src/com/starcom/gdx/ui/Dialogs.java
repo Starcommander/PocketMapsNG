@@ -101,16 +101,16 @@ public class Dialogs
 	 * @param listener The listener for result-string or null on cancel, listener must not be null. */
 	public static Dialog genTextInputDialog(Stage guiStage, String title, Consumer<String> listener)
 	{
+		TextField tf = new TextField("", GuiUtil.getDefaultSkin());
 		Dialog dialog = new Dialog(title, GuiUtil.getDefaultSkin(), "dialog")
 		{
 		    public void result(Object obj)
 		    {
-		    	listener.accept(obj == null ? null : obj.toString());
+		    	listener.accept(obj == null ? null : tf.getText());
 		    }
 		};
-		TextField tf = new TextField("", GuiUtil.getDefaultSkin());
-		dialog.addActor(tf);
-		dialog.button("OK", tf.getText());
+		dialog.getContentTable().add(tf);
+		dialog.button("OK", "");
 		dialog.button("Cancel", null);
 		return dialog;
 		

@@ -113,7 +113,7 @@ public class SettingsView
 			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), a, true, false);
 			a = Address.fromGeoPoint(new GeoPoint(48.432029,16.494454));
 			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), a, false, true);
-			MapHandler.getInstance().centerPointOnMap(a.toGeoPoint(), 5, 0, 0);
+			MapHandler.getInstance().centerPointOnMap(a.toGeoPoint(), 8, 0, 0);
 		}
 		else if (selection == SEL_DEBUG_STAT)
 		{

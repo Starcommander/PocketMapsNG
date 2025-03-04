@@ -355,7 +355,10 @@ public class Tracking {
     public void saveAsGPX(final String name) {
         final File trackFolder = new File("/tmp/track"); // TODO: Set from Cfg
         trackFolder.mkdirs();
-        final File gpxFile = new File(trackFolder, name);
+        final File gpxFile = new File(trackFolder, name + ".gpx"); //TODO: Check already existing first
+        final File gpxFileTmp = new File(trackFolder, name + ".tmp");
+System.out.println("GPX tmp: " + gpxFileTmp);
+System.out.println("GPX file: " + gpxFile);
         if (!gpxFile.exists()) {
             try {
                 gpxFile.createNewFile();
@@ -365,11 +368,12 @@ public class Tracking {
         }
         Threading.getInstance().invokeAsyncTask(() ->
         {
-        	new GenerateGPX().writeGpxFile(name, dBtrackingPoints, gpxFile);
+        	new GenerateGPX().writeGpxFile(name, dBtrackingPoints, gpxFileTmp);
         	return null;
         }, (o) ->
         {
-        	if (gpxFile.exists()) { gpxFile.renameTo(new File(trackFolder, name + ".gpx")); }
+        	if (gpxFileTmp.exists()) { gpxFileTmp.renameTo(gpxFile); }
+        	else {} //TODO: Error
         });
 //        new AsyncTask<Object, Object, Object>() {
 //            protected Object doInBackground(Object... params) {

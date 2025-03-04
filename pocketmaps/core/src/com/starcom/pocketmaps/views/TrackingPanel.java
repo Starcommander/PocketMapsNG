@@ -100,7 +100,7 @@ public class TrackingPanel
 	{
 		if (aSaveBut.getText().toString().equals(B_SAVE))
 		{
-			Dialog d = Dialogs.genTextInputDialog(GuiUtil.getStage(), "Enter filename", (f) -> saveAnalytics(f));
+			Dialog d = Dialogs.genTextInputDialog(GuiUtil.getStage(), "Enter filename", (f) -> Tracking.getInstance().saveAsGPX(f));
 			d.show(GuiUtil.getStage());
 		}
 		else // B_LOAD
@@ -112,14 +112,6 @@ public class TrackingPanel
 			}
 			l.showAsWindow(GuiUtil.getStage());
 		}
-	}
-	
-	private void saveAnalytics(String fileName)
-	{
-		FileHandle trDir = Storage.getFileHandle(TR_PATH);
-		if (!trDir.isDirectory()) { trDir.mkdirs(); }
-		FileHandle trF = Storage.getFileHandle(TR_PATH + "/" + fileName);
-		Tracking.getInstance().saveAsGPX(trF.path());
 	}
 	
 	private void showAnalytics()
