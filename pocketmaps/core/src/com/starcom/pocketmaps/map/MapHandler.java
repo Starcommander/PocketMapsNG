@@ -360,7 +360,7 @@ public class MapHandler
     	{
 
       	  polylineTrack = createPathLayer(map, 0x9900cc33, 4);
-            map.layers().add(pathLayer);
+            map.layers().add(polylineTrack);
     	}
         //trackingPointList.clear();
         if (polylineTrack != null) { polylineTrack.clearPath(); }
