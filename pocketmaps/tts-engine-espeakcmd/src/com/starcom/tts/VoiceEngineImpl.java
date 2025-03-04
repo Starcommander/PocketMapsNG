@@ -3,11 +3,12 @@ package com.starcom.tts;
 import com.starcom.system.ProcessUtil;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class VoiceEngineImpl implements VoiceEngine
 {
 	String selectedEngine = "espeak";
-	String selectedVoice = null;
+	Voice selectedVoice = null;
 
 	@Override
 	public void setEngine(String selectedEngine)
@@ -15,14 +16,12 @@ public class VoiceEngineImpl implements VoiceEngine
 		// Nothing to do.
 	}
 
+
 	@Override
-	public void setVoice(String selectedVoice)
+	public void setVoice(Voice selectedVoice)
 	{
 		this.selectedVoice = selectedVoice;
 	}
-
-	@Override
-	public void shutdownTts() {}
 
 	@Override
 	public boolean isReady()
@@ -39,7 +38,7 @@ public class VoiceEngineImpl implements VoiceEngine
 		}
 		else
 		{
-			ProcessUtil.exec(true, "speak-ng", "-v", selectedVoice, txt);
+			ProcessUtil.exec(true, "speak-ng", "-v", selectedVoice.getName(), txt);
 		}
 	}
 
@@ -57,15 +56,33 @@ public class VoiceEngineImpl implements VoiceEngine
 	}
 
 	@Override
-	public ArrayList<String> getVoiceList()
+	public ArrayList<Voice> getVoiceList()
 	{
-		ArrayList<String> a = new ArrayList<String>();
+		ArrayList<Voice> a = new ArrayList<>();
 		String table = ProcessUtil.execStdOut("espeak-ng", "--voices");
-		for (String voice : ProcessUtil.getTableCollumn(ProcessUtil.convertTable(table), "VoiceName"))
+		int idxName = -1; // VoiceName
+		int idxLoc = -1;
+		for (String line[] : ProcessUtil.convertTable(table))
 		{
-			a.add(voice);
+			if (idxName == -1)
+			{
+				for (int i=0; i<line.length; i++)
+				{
+					if (line[i].equals("VoiceName")) { idxName = i; }
+					else if (line[i].equals("Language")) { idxLoc = i; }
+				}
+				if (idxName == -1) { return a; }
+				if (idxLoc == -1) { return a; }
+			}
+			a.add(new Voice(new Locale(line[idxLoc]), line[idxName]));
 		}
 		return a;
 	}
+
+	@Override
+	public void init() {}
+
+	@Override
+	public void shutdown() {}
 
 }

@@ -1,5 +1,9 @@
 package com.starcom.pocketmaps.views;
 
+import java.util.Locale;
+
+import org.oscim.core.GeoPoint;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -9,6 +13,8 @@ import com.starcom.gdx.ui.ListSelect;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.ConfType;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
+import com.starcom.pocketmaps.geocoding.Address;
+import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.navigator.NaviDebugSimulator;
 import com.starcom.pocketmaps.navigator.NaviEngine;
 
@@ -17,7 +23,9 @@ public class SettingsView
 	private static final String SEL_DEBUG_BUTTON = "Debugging";
 	private static final String SEL_DEBUG_SIMU = "DebugSimulation";
 	private static final String SEL_DEBUG_STAT = "DebugStatistics";
+	private static final String SEL_DEBUG_ROUTE = "FastDebugRoute";
 	private static final String SEL_GPS_ON = "GPS on";
+	private static final String SEL_TTS_ON = "Voice on";
 	
 	Actor debugButton;
 	Window debugStatWindow;
@@ -56,6 +64,10 @@ public class SettingsView
 		{
 			addDebugSettings(ll);
 		}
+		boolean bool = Cfg.getBoolValue(NavKeyB.GpsOn, true);
+		ll.addCheckboxElement(SEL_GPS_ON, bool, (a,x,y) -> onSelect(SEL_GPS_ON));
+		bool = Cfg.getBoolValue(NavKeyB.TtsOn, true);
+		ll.addCheckboxElement(SEL_TTS_ON, bool, (a,x,y) -> onSelect(SEL_TTS_ON));
 		ll.showAsWindow(GuiUtil.getStage());
 	}
 	
@@ -72,8 +84,8 @@ public class SettingsView
 		ll.addCheckboxElement(SEL_DEBUG_SIMU, bool, (a,x,y) -> onSelect(SEL_DEBUG_SIMU));
 		bool = debugStatWindow != null && debugStatWindow.hasParent();
 		ll.addCheckboxElement(SEL_DEBUG_STAT, bool, (a,x,y) -> onSelect(SEL_DEBUG_STAT));
-		bool = Cfg.getBoolValue(NavKeyB.GpsOn, true);
-		ll.addCheckboxElement(SEL_GPS_ON, bool, (a,x,y) -> onSelect(SEL_GPS_ON));
+		bool = false;
+		ll.addCheckboxElement(SEL_DEBUG_ROUTE, bool, (a,x,y) -> onSelect(SEL_DEBUG_ROUTE));
 	}
 	protected void onSelect(String selection)
 	{
@@ -95,6 +107,14 @@ public class SettingsView
 				NaviDebugSimulator.getSimu().startDebugSimulator();
 			}
 		}
+		else if (selection == SEL_DEBUG_ROUTE)
+		{
+			Address a = Address.fromGeoPoint(new GeoPoint(48.171116,16.288825));
+			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), a, true, false);
+			a = Address.fromGeoPoint(new GeoPoint(48.432029,16.494454));
+			MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), a, false, true);
+			MapHandler.getInstance().centerPointOnMap(a.toGeoPoint(), 5, 0, 0);
+		}
 		else if (selection == SEL_DEBUG_STAT)
 		{
 			if (debugStatWindow != null && debugStatWindow.hasParent())
@@ -110,6 +130,12 @@ public class SettingsView
 		{
 			boolean bool = Cfg.getBoolValue(NavKeyB.GpsOn, true);
 			Cfg.setBoolValue(NavKeyB.GpsOn, !bool);
+			Cfg.save(ConfType.Navigation);
+		}
+		else if (selection == SEL_TTS_ON)
+		{
+			boolean bool = Cfg.getBoolValue(NavKeyB.TtsOn, true);
+			Cfg.setBoolValue(NavKeyB.TtsOn, !bool);
 			Cfg.save(ConfType.Navigation);
 		}
 	}

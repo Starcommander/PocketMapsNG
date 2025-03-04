@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -99,7 +100,8 @@ public class TrackingPanel
 	{
 		if (aSaveBut.getText().toString().equals(B_SAVE))
 		{
-			Dialogs.genTextInputDialog(GuiUtil.getStage(), "Enter filename", (f) -> saveAnalytics(f));
+			Dialog d = Dialogs.genTextInputDialog(GuiUtil.getStage(), "Enter filename", (f) -> saveAnalytics(f));
+			d.show(GuiUtil.getStage());
 		}
 		else // B_LOAD
 		{
@@ -108,6 +110,7 @@ public class TrackingPanel
 			{
 				l.addElement(f.name(), (a,x,y) -> Tracking.getInstance().loadData(f.file()));
 			}
+			l.showAsWindow(GuiUtil.getStage());
 		}
 	}
 	
@@ -182,7 +185,7 @@ public class TrackingPanel
 		this.visible = visible;
 	}
 
-    public void updateNewLocation(Location l, int pCount, long timeMS, double distanceToLastPoint, double speed)
+    public void updateTrackingData(int pCount, long timeMS, double distanceToLastPoint, double speed)
     {
 		statLab.setText("Count:" + pCount + " Time:" + (timeMS/1000) + "s");
         updateDistance(Tracking.getInstance().getDistance());
@@ -197,8 +200,8 @@ public class TrackingPanel
     		int h = (int)(Gdx.graphics.getHeight()*0.4f);
     		graph.updateGraphSeries(new DataPoint((timeMS/1000), distanceToLastPoint), new DataPoint((timeMS/1000), fullDistance));
     		Threading.getInstance().invokeOnMainThread(() -> graph.getGraph().drawToImage(w,h));
-//    		graph.getGraph().getImage().layout();
-//    		graph.getGraph().drawToImage(Gdx.graphics.getWidth(), (int)(Gdx.graphics.getHeight()*0.4f));
+    		graph.getGraph().getImage().layout();  //TODO: untested
+    		graph.getGraph().drawToImage(Gdx.graphics.getWidth(), (int)(Gdx.graphics.getHeight()*0.4f)); //TODO: untested
     	}
     }
     

@@ -114,51 +114,21 @@ gpsClient.watch(true, true);
   }
   
   public IClient getGpsClient() { return gpsClient; }
-  
+
   /** Ensures, that voice is initialized. Use forceReset for switching engine **/
-  public void naviVoiceInit(Object appContext, boolean forceReset)
+  private void naviVoiceInit(Object appContext, boolean forceReset)
   {
     if (naviVoice == null)
     {
-      naviVoice = new NaviVoice(appContext);
+      naviVoice = new NaviVoice();
     }
     else if (forceReset)
     {
       naviVoice.shutdownTts();
-      naviVoice = new NaviVoice(appContext);
+      naviVoice = new NaviVoice();
     }
   }
-  
-  public ArrayList<String> naviVoiceList(Object appContext)
-  {
-      naviVoiceInit(appContext, false);
-      return naviVoice.getVoiceListCompat();
-  }
-  
-  public ArrayList<String> naviVoiceEngineList(Object appContext)
-  {
-      naviVoiceInit(appContext, false);
-      return naviVoice.getEngineList();
-  }
-  
-  public void naviVoiceSpeak(Object appContext, String fallbackTxt, String txt, boolean forceResetVoice)
-  {
-      naviVoiceInit(appContext, false);
-      if (forceResetVoice) { naviVoice.curVoice = null; }
-      naviVoice.speak(fallbackTxt, txt);
-  }
-  
-  public boolean naviVoiceIsTtsReady(Object appContext)
-  {
-      naviVoiceInit(appContext, false);
-      return naviVoice.isTtsReady();
-  }
-  
-  public String getNaviVoiceError()
-  {
-      return naviVoice.getError();
-  }
-  
+
   public void setNavigating(Object activity, boolean active)
   {
     this.active = active;
@@ -249,7 +219,10 @@ gpsClient.watch(true, true);
         this.mapUpdatesAllowed = allowed;
         if (allowed)
         {
-          MapHandler.getInstance().centerPointOnMap(new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
+          if (pos != null)
+          {
+        	  MapHandler.getInstance().centerPointOnMap(new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
+          }
           MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_navigation_black_24dp));
         }
         else

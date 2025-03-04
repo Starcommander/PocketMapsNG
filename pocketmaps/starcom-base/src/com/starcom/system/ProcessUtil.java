@@ -17,7 +17,7 @@ public class ProcessUtil
 	 * @return The standard output stream as string, or null on error. */
 	public static String execStdOut(String... command)
 	{
-		return execInternal(true, command);
+		return execInternal(false, command);
 	}
 	
 	/** Executes the command, redirects out and err.
@@ -64,7 +64,7 @@ public class ProcessUtil
 	{
 		ArrayList<String[]> lines = new ArrayList<>();
 		if (table==null) { return lines; }
-		table.lines().forEach((l) -> lines.add(l.split("[ \\t\\n]+")));
+		table.lines().forEach((l) -> lines.add(l.trim().split("[ \\t\\n]+")));
 		return lines;
 	}
 	

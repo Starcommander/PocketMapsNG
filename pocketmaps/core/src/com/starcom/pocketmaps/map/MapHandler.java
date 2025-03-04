@@ -44,12 +44,12 @@ public class MapHandler
   private ItemizedLayer itemizedLayer;
   private ItemizedLayer customLayer;
   private PathLayer pathLayer;
-//  private PathLayer polylineTrack;
+  private PathLayer polylineTrack;
   private MapHandlerListener mapHandlerListener = null;
 //  private String currentArea;
 //  File mapsFolder;
 ////  FloatingActionButton naviCenterBtn;
-//  PointList trackingPointList = new PointList();
+//  ArrayList<Point> trackingPointList = new ArrayList<>();
 ////  private int customIcon = R.drawable.ic_my_location_dark_24dp;
   VtmBitmap customIcon = Icons.generateIconVtm(Icons.R.ic_my_location_dark_24dp); //TODO: VtmBitmap instead AwtBitmap
 //  private MapFileTileSource tileSource;
@@ -350,27 +350,36 @@ public class MapHandler
     /**
      * start tracking : reset polylineTrack & trackingPointList & remove polylineTrack if exist
      */
-//    public void startTrack(Activity activity) {
+    public void startTrack() {
 //        if (polylineTrack != null) {
-//            removeLayer(mapView.map().layers(), polylineTrack);
+//            removeLayer(TopPanel.getInstance().getGdxMap().layers(), polylineTrack);
 //        }
 //        polylineTrack = null;
-//        trackingPointList.clear();
-//        if (polylineTrack != null) { polylineTrack.clearPath(); }
-//        polylineTrack = updatePathLayer(activity, polylineTrack, trackingPointList, 0x99003399, 4);
+    	Map map = TopPanel.getInstance().getGdxMap();
+    	if (polylineTrack == null)
+    	{
+
+      	  polylineTrack = createPathLayer(map, 0x9900cc33, 4);
+            map.layers().add(pathLayer);
+    	}
+        //trackingPointList.clear();
+        if (polylineTrack != null) { polylineTrack.clearPath(); }
+        //updatePathLayer(map, trackingPointList, 0x99003399, 4);
 //        NaviEngine.getNaviEngine().startDebugSimulator(activity, true);
-//    }
+    }
 
     /**
      * add a tracking point
      *
      * @param point
      */
-//    public void addTrackPoint(Map map, GeoPoint point) {
-//      trackingPointList.add(point.getLatitude(), point.getLongitude());
-//      updatePathLayer(map, polylineTrack, trackingPointList, 0x9900cc33, 4);
-//      map.updateMap(true);
-//    }
+    public void addTrackPoint(GeoPoint point) {
+      //trackingPointList.add(new Point(point.getLatitude(), point.getLongitude(), 0.0));
+      //updatePathLayer(map, polylineTrack, trackingPointList, 0x9900cc33, 4);
+      polylineTrack.addPoint(point);
+//      polylineTrack.setPoints(polylineTrack.getPoints());
+      TopPanel.getInstance().getGdxMap().updateMap(true);
+    }
     
   /**
    * remove a layer from map layers
@@ -453,6 +462,7 @@ public class MapHandler
         Threading.getInstance().invokeAsyncTask(() -> { return calcPathNow(fromLat, fromLon, toLat, toLon); }, (o) -> { calcPathDone(map, o); });
     }
     
+    /** Updates all points into navigation path */
   private void updatePathLayer(Map map,ArrayList<Point> pointList, int color, int strokeWidth) {
       if (pathLayer==null) {
     	  pathLayer = createPathLayer(map, color, strokeWidth);

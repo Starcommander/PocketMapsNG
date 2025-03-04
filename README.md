@@ -3,6 +3,10 @@ PocketMaps offline navigation with maps an more.
 This project is in alpha state intended to replace the android-only app.  
 See https://github.com/junjunguo/PocketMaps
 
+**Folders:**
+- pocketmaps: The pocketmaps navi engine.
+- scripts: Scripts for generating maps and more.
+
 **This redesign should provide additional features:**
 - Should work on all platforms (uses libgdx)
 - Allows to show multiple maps at once
@@ -11,10 +15,10 @@ See https://github.com/junjunguo/PocketMaps
 - Downloading maps -> works
 - Selecting / unselecting maps -> works
 - Processing a route -> works
-- Navigating -> in progress
-- TODO: Settings and tools.
-- TODO: Voice
-- TODO: Tracking
+- Navigating -> works.
+- Voice -> works
+- Settings -> done
+- Tracking -> in progress
 - TODO: Release for PC and Android,...
 - TODO: GUI redesign
 - TODO: BT-Transfer

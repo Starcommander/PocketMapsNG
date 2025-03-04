@@ -51,6 +51,7 @@ project(":desktop") {
     dependencies {
         implementation project(":core")
         implementation project(':routing-engine-gh')
+        implementation project(':tts-engine-espeakcmd')
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "org.mapsforge:vtm-desktop:$vtmVersion"
@@ -102,6 +103,7 @@ project(":core") {
 
     dependencies {
         api project(':routing-engine')
+        api project(':tts-engine')
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.kotcrab.vis:vis-ui:1.4.11"
         api "org.mapsforge:vtm:$vtmVersion"
