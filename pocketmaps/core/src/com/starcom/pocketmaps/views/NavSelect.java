@@ -15,6 +15,7 @@ import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapHandlerListener;
+import com.starcom.pocketmaps.navigator.NaviEngine;
 
 public class NavSelect implements MapHandlerListener
 {
@@ -94,7 +95,21 @@ public class NavSelect implements MapHandlerListener
 		}
 		else if (selection.equals(SEL_FROM_LATLON))
 		{
-			PmDialogs.showLatLonDialog((p) -> onEnterLocation(p,from));
+			PmDialogs.showLatLonDialog((p) -> onEnterLocation(p,from, true));
+		}
+		else if (selection.equals(SEL_CUR_LOC))
+		{
+			if (NaviEngine.getNaviEngine().getCurrentLocation() == null)
+			{
+				ToastMsg.getInstance().toastShort("No current location found");
+			}
+			else
+			{
+				float lat = NaviEngine.getNaviEngine().getCurrentLocation().getLatitude();
+				float lon = NaviEngine.getNaviEngine().getCurrentLocation().getLongitude();
+				GeoPoint p = new GeoPoint(lat,lon);
+				onEnterLocation(p, from, false);
+			}
 		}
 	}
 	
@@ -102,6 +117,7 @@ public class NavSelect implements MapHandlerListener
 	
 	private void onClearLocation(boolean isStart)
 	{
+		((TextButton)aX).setText("X");
 		MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), null, isStart, false);
 		if (isStart)
 		{
@@ -117,10 +133,10 @@ public class NavSelect implements MapHandlerListener
 		}
 	}
 	
-	private void onEnterLocation(GeoPoint latLon, boolean isStart)
+	private void onEnterLocation(GeoPoint latLon, boolean isStart, boolean doCenter)
 	{
 		MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), Address.fromGeoPoint(latLon), isStart, true);
-		MapHandler.getInstance().centerPointOnMap(latLon, 0, 0, 0);
+		if (doCenter) { MapHandler.getInstance().centerPointOnMap(latLon, 0, 0, 0); }
 	}
 
 	@Override public void onPressLocation(GeoPoint latLon)
@@ -158,16 +174,30 @@ public class NavSelect implements MapHandlerListener
 	public void setVisible(boolean visible, boolean withTopPanelSwitch)
 	{
 		if (this.visible == visible) { return; }
+		this.visible = visible;
 		if (visible)
 		{
+			if (MapHandler.getInstance().getStartEndPoint(true) != null && MapHandler.getInstance().getStartEndPoint(false) != null)
+			{
+				((TextButton)aX).setText("[restart]");
+			}
+			else
+			{
+				((TextButton)aX).setText("X");
+			}
 			if (withTopPanelSwitch) { TopPanel.getInstance().setVisible(false); }
 			GuiUtil.addActor(al);
 		}
 		else
 		{
+			if (((TextButton)aX).getText().toString().equals("[restart]"))
+			{
+				NaviEngine.getNaviEngine().setNavigating(true);
+				al.remove();
+				return;
+			}
 			if (withTopPanelSwitch) { TopPanel.getInstance().setVisible(true); }
 			al.remove();
 		}
-		this.visible = visible;
 	}
 }

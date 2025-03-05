@@ -116,7 +116,7 @@ gpsClient.watch(true, true);
   public IClient getGpsClient() { return gpsClient; }
 
   /** Ensures, that voice is initialized. Use forceReset for switching engine **/
-  private void naviVoiceInit(Object appContext, boolean forceReset)
+  private void naviVoiceInit(boolean forceReset)
   {
     if (naviVoice == null)
     {
@@ -129,7 +129,7 @@ gpsClient.watch(true, true);
     }
   }
 
-  public void setNavigating(Object activity, boolean active)
+  public void setNavigating(boolean active)
   {
     this.active = active;
 //    if (active && lightSensor==null)
@@ -142,7 +142,7 @@ gpsClient.watch(true, true);
 //      lightSensor = null;
 //    }
     speedUtil.setEnabled(active && Cfg.getBoolValue(NavKeyB.ShowingSpeedLimits, false));
-    naviVoiceInit(activity, false);
+    naviVoiceInit(false);
     if (!active)
     {
       NavTopPanel.getInstance().setVisible(false);
@@ -222,6 +222,10 @@ gpsClient.watch(true, true);
           if (pos != null)
           {
         	  MapHandler.getInstance().centerPointOnMap(new GeoPoint(pos.getLatitude(), pos.getLongitude()), BEST_NAVI_ZOOM, 0, 0);
+          }
+          else
+          {
+        	  MapHandler.getInstance().centerPointOnMap(MapHandler.getInstance().getStartEndPoint(true), BEST_NAVI_ZOOM, 0, 0);
           }
           MapHandler.getInstance().setCustomPointIcon(Icons.generateIconVtm(Icons.R.ic_navigation_black_24dp));
         }
