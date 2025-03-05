@@ -1,13 +1,13 @@
 package com.starcom.pocketmaps.views;
 
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.starcom.gdx.ui.AbsLayout;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
 import com.starcom.pocketmaps.Icons;
 import com.starcom.pocketmaps.Icons.R;
+import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -18,7 +18,7 @@ public class NavTopPanel
 	private static NavTopPanel instance = new NavTopPanel();
 	
 	AbsLayout topPanel = new AbsLayout(0, 0, 1, 0.2f);
-	AbsLayout botPanel = new AbsLayout(0, 0.8f, 1, 0.2f);
+	AbsLayout relPanel = new AbsLayout(0, 0.8f, 1, 0.2f);
 	private final Label topStreetLabel = new Label("Street123", GuiUtil.getDefaultSkin());
 	private final Label topInstructionLabel = new Label("---", GuiUtil.getDefaultSkin());
 	private final Label topDistanceLabel = new Label("0 m", GuiUtil.getDefaultSkin());
@@ -50,10 +50,9 @@ public class NavTopPanel
 	private void onStopNaviSelected()
 	{
 		setVisible(false);
-		TopPanel.getInstance().setVisible(true);
-		NaviEngine.getNaviEngine().setNavigating(null, false);
-		com.starcom.pocketmaps.map.MapHandler.getInstance().setCustomPoint(null);
-		com.starcom.pocketmaps.map.MapHandler.getInstance().resetTilt(0);
+		NaviEngine.getNaviEngine().setNavigating(false);
+		MapHandler.getInstance().setCustomPoint(null);
+		MapHandler.getInstance().resetTilt(0);
 	}
 	
 	private void onCenterButtonPressed()
@@ -77,31 +76,34 @@ public class NavTopPanel
 	public void setVisible(boolean visible)
 	{
 		if (this.visible == visible) { return; }
+		this.visible = visible;
 		if (visible)
 		{
 //			Actor pan = GuiUtil.genPanel(0, (int)(Gdx.graphics.getHeight() * 0.86f), Gdx.graphics.getWidth(), (int)(Gdx.graphics.getHeight() * 0.15f));
 //			GuiUtil.getStage().addActor(pan);
 			GuiUtil.getStage().addActor(topPanel);
-			GuiUtil.getStage().addActor(botPanel);
+			GuiUtil.getStage().addActor(relPanel);
 			if (Cfg.getBoolValue(NavKeyB.ShowingSpeedLimits, true))
 			{
-				botPanel.addChild(speedLabel, 0, 0, 0.3f, 1);
+				relPanel.addChild(speedLabel, 0, 0, 0.3f, 1);
 			}
+			TopPanel.getInstance().setVisible(false);
+			NavSelect.getInstance().setVisible(false, false);
 		}
 		else
 		{
 			topPanel.remove();
-			botPanel.clearChild(centerButton); // Ensure not showing.
-			botPanel.clearChild(speedLabel); // Ensure not showing.
-			botPanel.remove();
+			relPanel.clearChild(centerButton); // Ensure not showing.
+			relPanel.clearChild(speedLabel); // Ensure not showing.
+			relPanel.remove();
+			NavSelect.getInstance().setVisible(true, false);
 		}
-		this.visible = visible;
 	}
 	
 	public void showNaviCenterButton()
 	{
-		botPanel.clearChild(centerButton); // Ensure not already showing.
-		botPanel.addChild(centerButton, 0.7f, 0.2f, 0.2f, 0.4f);
+		relPanel.clearChild(centerButton); // Ensure not already showing.
+		relPanel.addChild(centerButton, 0.7f, 0.2f, 0.2f, 0.4f);
 	}
 	
 //	void initBottomPanel()

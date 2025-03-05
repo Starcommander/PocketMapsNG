@@ -302,6 +302,12 @@ public class MapHandler
     return result;
   }
   
+  public GeoPoint getStartEndPoint(boolean start)
+  {
+	  if (start) { return startMarker; }
+	  return endMarker;
+  }
+  
   public void recalcPath(Map map)
   {
     calcPath(map, startMarker.getLatitude(), startMarker.getLongitude(), endMarker.getLatitude(), endMarker.getLongitude());

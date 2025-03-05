@@ -274,7 +274,7 @@ public class MapList
 	public static void viewDirectionList(ArrayList<Instruct> instL)
 	{
 		NavSelect.getInstance().setVisible(false,false);
-		ListSelect ll = new ListSelect("Directions", "Navigate", (b) -> NaviEngine.getNaviEngine().setNavigating(null, true));
+		ListSelect ll = new ListSelect("Directions", "Navigate", (b) -> NaviEngine.getNaviEngine().setNavigating(true));
 		for (Instruct inst : instL)
 		{
 			ll.addElement(inst.name, (a,x,y) -> {});

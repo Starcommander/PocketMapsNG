@@ -73,7 +73,7 @@ public class Navigator {
         }
         else
         {
-        	NaviEngine.getNaviEngine().setNavigating(null, true);
+        	NaviEngine.getNaviEngine().setNavigating(true);
         }
     }
 
