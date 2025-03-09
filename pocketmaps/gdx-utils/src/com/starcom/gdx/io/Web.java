@@ -28,6 +28,7 @@ public class Web
 		HttpRequest rq = new HttpRequest();
 		rq.setMethod(HttpMethods.GET);
 		rq.setUrl(url);
+		callback.onProgress(Type.PROGRESS, "Downloading...");
 		HttpResponseListener rs = new HttpResponseListener() {
 
 			@Override

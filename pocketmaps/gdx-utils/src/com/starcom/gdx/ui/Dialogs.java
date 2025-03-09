@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar.ProgressBarStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -18,8 +19,9 @@ public class Dialogs
      * @param guiStage The GuiStage.
      * @param onSuccess Runnable for success, or null.
      * @param onError Listener for error, or null.
+     * @return The ProgressListener, where Progress-Object as Integer/Float is used for procentual Progress, otherwise as toString text.
      * @throws IllegalStateException when this function is executed in a worker Thread. */
-	public static IProgressListener showProgress(Stage guiStage, Runnable onSuccess, Consumer<Object> onError)
+	public static IProgressListener<Object> showProgress(Stage guiStage, Runnable onSuccess, Consumer<Object> onError)
 	{
 		if (!Threading.getInstance().isMainThread())
 		{
@@ -38,8 +40,11 @@ public class Dialogs
 		bar.setPosition(100, 100);
 		bar.setSize(290, bar.getPrefHeight());
 		bar.setAnimateDuration(0.5f);
+		Label label = new Label("", GuiUtil.getDefaultSkin());
+		label.setPosition(100, 150);
 		guiStage.addActor(bar);
-		return new IProgressListener()
+		guiStage.addActor(label);
+		return new IProgressListener<Object>()
 		{
 			int lastPerc = -1;
 			@Override
@@ -47,12 +52,25 @@ public class Dialogs
 			{
 				if (type == Type.PROGRESS)
 				{
-					Integer perc = (Integer)txt;
-					if (perc != lastPerc) { bar.setValue(perc); }
+					if (txt instanceof Integer)
+					{
+						Integer perc = (Integer)txt;
+						if (perc != lastPerc) { bar.setValue(perc); }
+					}
+					else if (txt instanceof Float)
+					{
+						Float perc = (Float)txt;
+						if (perc != lastPerc) { bar.setValue(perc); }
+					}
+					else
+					{
+						label.setText(txt.toString());
+					}
 				}
 				else if (type == Type.SUCCESS)
 				{
 					bar.remove();
+					label.remove();
 					if (onSuccess != null)
 					{
 						onSuccess.run();
@@ -61,10 +79,12 @@ public class Dialogs
 				else if (type == Type.CANCEL)
 				{
 					bar.remove();
+					label.remove();
 				}
 				else if (type == Type.ERROR)
 				{
 					bar.remove();
+					label.remove();
 					if (onError != null)
 					{
 						onError.accept(txt);

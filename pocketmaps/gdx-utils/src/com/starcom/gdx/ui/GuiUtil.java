@@ -72,7 +72,18 @@ public class GuiUtil
 	{
 		return new ClickListener()
 		{
+			@Override
 			public void clicked (InputEvent event, float x, float y) { l.click(event.getListenerActor(), x, y); }
+		};
+	}
+	
+	/** Same as wrapClickListener, but fires changeEvent with x and y as 0. */
+	public static ChangeListener wrapChangeListener(IClickListener<Actor> l)
+	{
+		return new ChangeListener()
+		{
+			@Override
+			public void changed(ChangeEvent event, Actor actor) { l.click(actor, 0, 0); }
 		};
 	}
 	

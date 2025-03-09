@@ -3,10 +3,7 @@ package com.starcom.pocketmaps.views;
 import org.oscim.core.GeoPoint;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.starcom.gdx.ui.AbsLayout;
@@ -77,7 +74,7 @@ public class NavSelect implements MapHandlerListener
 		if (selection.equals(SEL_POS_ON_MAP))
 		{
 			setVisible(false, false);
-			ToastMsg.getInstance().toastShort("Touch on Map to choose your start Location");
+			ToastMsg.getInstance().toastShort("Touch on Map to choose your Location");
 			if (from)
 			{
 				tabAction = TabAction.StartPoint;

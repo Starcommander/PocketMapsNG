@@ -44,7 +44,7 @@ public class TopPanel
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
 		Actor aPan = GuiUtil.genPanel(x, y, w, h);
-		Actor aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 20, "AAA", "Maps...", "Navigate...", "Settings...", "Tracking...", "DebugSimpleDialog", "DebugFastNav");
+		Actor aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 20, "Maps...", "Navigate...", "Settings...", "Tracking...");
 		al = new AbsLayout(0, 0, 1, 0.1f);
 		al.setMinHeight(30);
 		al.addChild(aPan, 0, 0, 1, 1);
@@ -137,19 +137,9 @@ public class TopPanel
 		{
 			MapList.getInstance().viewMapsSelect(MapAction.Delete);
 		}
-		else if (action.equals("DebugSimpleDialog"))
-		{
-			Dialogs.showDialog(GuiUtil.getStage(), "Title", "msg", false, (o) -> System.out.println("Pressed " + o));
-		}
 		else if (action.equals("Tracking..."))
 		{
 			TrackingPanel.getInstance().setVisible(true, true);
-		}
-		else if (action.equals("DebugFastNav"))
-		{
-			MapHandler.getInstance().setStartEndPoint(getInstance().getGdxMap(), Address.fromGeoPoint(new GeoPoint(47.730f,13.417f)), true, false);
-			MapHandler.getInstance().setStartEndPoint(getInstance().getGdxMap(), Address.fromGeoPoint(new GeoPoint(47.734f,13.424f)), false, true);
-			getInstance().setVisible(false);
 		}
 	}
 	
