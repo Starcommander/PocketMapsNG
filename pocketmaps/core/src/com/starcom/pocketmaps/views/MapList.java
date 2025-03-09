@@ -210,6 +210,8 @@ public class MapList
 		Cfg.save(ConfType.Navigation);
 	}
 
+	/** Shows the dialog with maps that are available.
+	 * @param json The maps available on server as json content. */
 	public static void viewMapsDownload(String json)
 	{
 		int w = Gdx.graphics.getWidth();
@@ -230,6 +232,7 @@ public class MapList
 			return;
 		}
 		ListSelect ll = new ListSelect("DownloadMaps");
+		ll.showFilter(true);
 		String mapdataVersion = Cfg.getMapdataVersion();
 		if (mapdataVersion == null)
 		{
@@ -265,6 +268,7 @@ public class MapList
 			table.add(new Image(mapTextureBot)).left();
 			table.add(new Label("Map size: " + msize, GuiUtil.getDefaultSkin())).width(w/3);
 			table.add(new Label(mcont, GuiUtil.getDefaultSkin())).width(w/3);
+			table.setUserObject(jo.getString("name"));
 			
 			ll.addElement(table, (a, x, y) -> Download.downloadMapNow(GuiUtil.getStage(), mdate, mname));
 		}

@@ -34,11 +34,12 @@ public class Unzip
 		return fullSize;
 	}
 	
-	public static void unzip(File zipFile, File destDir, IProgressListener callback)
+	public static void unzip(File zipFile, File destDir, IProgressListener<Object> callback)
 	{
        	long fullSize = calculateExtractedSize(zipFile);
        	long writtenSize = 0;
         byte[] buffer = new byte[1024];
+        callback.onProgress(Type.PROGRESS, "Unzipping...");
         try(ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile)))
         {
         	ZipEntry zipEntry = zis.getNextEntry();
