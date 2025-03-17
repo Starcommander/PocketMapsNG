@@ -28,7 +28,7 @@ public class Navigator {
     /**
      * get from MapHandler calculate path
      */
-    private NaviResponse ghResponse;
+    private NaviResponse naviResponse;
     /**
      * navigator is on or off
      */
@@ -38,7 +38,7 @@ public class Navigator {
 
 
     private Navigator() {
-        this.ghResponse = null;
+        this.naviResponse = null;
         this.on = false;
 //        this.listeners = new ArrayList<>();
     }
@@ -58,18 +58,18 @@ public class Navigator {
     }
 
     public NaviResponse getResponse() {
-        return ghResponse;
+        return naviResponse;
     }
 
-    public void setGhResponse(NaviResponse ghResponse) {
-        this.ghResponse = ghResponse;
+    public void setNaviResponse(NaviResponse naviResponse) {
+        this.naviResponse = naviResponse;
         if (NaviEngine.getNaviEngine().isNavigating())
         {
-            NaviEngine.getNaviEngine().onUpdateInstructions(ghResponse);
+            NaviEngine.getNaviEngine().onUpdateInstructions(naviResponse);
         }
         else if (Cfg.getBoolValue(NavKeyB.DirectionsOn, false))
         {
-            MapList.viewDirectionList(ghResponse.getInstructions());
+            MapList.viewDirectionList(naviResponse.getInstructions());
         }
         else
         {
@@ -165,8 +165,8 @@ public class Navigator {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if (ghResponse.getInstructions() != null) {
-            for (Instruct i : ghResponse.getInstructions()) {
+        if (naviResponse.getInstructions() != null) {
+            for (Instruct i : naviResponse.getInstructions()) {
               sb.append("------>\ntime <long>: " + i.time);
               sb.append("\n");
               sb.append("name: street name" + i.name);
@@ -194,30 +194,30 @@ public class Navigator {
     public int getTravelModeResId(boolean dark) {
         if (dark)
         {
-          if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_FOOT))
+          if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_FOOT))
           {
             return R.ic_directions_walk_orange_24dp.getInt();
           }
-          else if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_BIKE))
+          else if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_BIKE))
           {
             return R.ic_directions_bike_orange_24dp.getInt();
           }
-          else if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_CAR))
+          else if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_CAR))
           {
             return R.ic_directions_car_orange_24dp.getInt();
           }
         }
         else
         {
-          if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_FOOT))
+          if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_FOOT))
           {
             return R.ic_directions_walk_white_24dp.getInt();
           }
-          else if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_BIKE))
+          else if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_BIKE))
           {
             return R.ic_directions_bike_white_24dp.getInt();
           }
-          else if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_CAR))
+          else if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_CAR))
           {
             return R.ic_directions_car_white_24dp.getInt();
           }
@@ -227,15 +227,15 @@ public class Navigator {
     
     public int getTravelModeArrayIndex()
     {
-      if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_FOOT))
+      if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_FOOT))
       {
         return 0;
       }
-      else if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_BIKE))
+      else if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_BIKE))
       {
         return 1;
       }
-      else if (Cfg.getValue(NavKey.TravelMode, null).toString().equals(Cfg.TRAVEL_MODE_CAR))
+      else if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).toString().equals(Cfg.TRAVEL_MODE_CAR))
       {
         return 2;
       }

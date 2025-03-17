@@ -3,6 +3,7 @@ package com.starcom.pocketmaps.geocoding;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import org.osmdroid.location.GeocoderNominatim;
@@ -14,6 +15,7 @@ public class GeocoderGlobal
 {
   Logger logger = LoggerUtil.get(GeocoderGlobal.class);
   private static boolean stopping = false;
+  private static EngineInterface googleSearchEngine;
   Locale locale;
   
   public GeocoderGlobal(Locale locale)
@@ -31,8 +33,19 @@ public class GeocoderGlobal
     return stopping;
   }
   
+  public static void setGoogleEngine(EngineInterface searchEngine)
+  {
+	  googleSearchEngine = searchEngine;
+  }
+  
   public List<Address> find_google(String searchS)
   {
+	  if (googleSearchEngine == null)
+	  {
+		  logger.warning("Google search engine is not implemented.");
+		  return null;
+	  }
+	  return googleSearchEngine.findAdresses(searchS);
 //    stopping = false;
 //    log("Google geocoding started");
 //    Geocoder geocoder = new Geocoder(context, locale);
@@ -46,14 +59,12 @@ public class GeocoderGlobal
 //    {
 //      e.printStackTrace();
 //    }
-	//TODO: Implement this
-    return null;
+	//TODO: Add this on android implementation
   }
   
   public List<Address> find_osm(String searchS)
   {
     stopping = false;
-    logger.info("OSM geocoding started");
     logger.info("OSM geocoding started");
     GeocoderNominatim geocoder = new GeocoderNominatim(locale);
     if (!GeocoderNominatim.isPresent()) { return null; }
@@ -69,7 +80,7 @@ public class GeocoderGlobal
     return null;
   }
   
-  public List<Address> find_local(String searchCountry, String searchS, IProgressListener progressListener)
+  public List<Address> find_local(String searchCountry, String searchContinent, String searchS, IProgressListener<String> progressListener)
   {
     stopping = false;
     logger.info("Offline geocoding started");
@@ -77,7 +88,7 @@ public class GeocoderGlobal
     if (!GeocoderLocal.isPresent()) { return null; }
     try
     {
-      List<Address> result = geocoder.getFromLocationName(searchCountry, searchS, 50, progressListener);
+      List<Address> result = geocoder.getFromLocationName(searchCountry, searchContinent, searchS, 50, progressListener);
       return result;
     }
     catch (IOException e)
@@ -85,5 +96,10 @@ public class GeocoderGlobal
       e.printStackTrace();
     }
     return null;
+  }
+  
+  public static interface EngineInterface
+  {
+	  public List<Address> findAdresses(String searchS);
   }
 }

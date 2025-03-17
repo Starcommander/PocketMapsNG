@@ -100,11 +100,20 @@ public class GuiUtil
 	/** Creates a dropDown menu. */
 	public static SelectBox<String> genDropDown(Consumer<String> l, int x, int y, String ...items)
 	{
+		return genDropDown(l, x, y, false, items);
+	}
+	public static SelectBox<String> genDropDown(Consumer<String> l, int x, int y, boolean withStatus, String ...items)
+	{
 		SelectBox<String> selectBox = new SelectBox<String>(GuiUtil.getDefaultSkin())
 		{
 			@Override
 			public void draw (Batch batch, float parentAlpha)
 			{
+				if (withStatus)
+				{
+					super.draw(batch, parentAlpha);
+					return;
+				}
 				validate();
 
 				Drawable background = getBackgroundDrawable();

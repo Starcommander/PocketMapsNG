@@ -169,7 +169,7 @@ public class GeocoderNominatim {
                     + "&bounded=1";
         }
         log.debug("GeocoderNominatim::getFromLocationName:" + url);
-        String result = Web.downloadTextfile(url);// BonusPackHelper.requestStringFromUrl(url); //TODO: Test this.
+        String result = Web.downloadTextfile(url);// BonusPackHelper.requestStringFromUrl(url);
         //log.debug(result);
         if (result == null)
             throw new IOException();

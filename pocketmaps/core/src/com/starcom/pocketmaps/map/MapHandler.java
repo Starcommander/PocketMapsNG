@@ -1,6 +1,7 @@
 package com.starcom.pocketmaps.map;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -424,6 +425,7 @@ public class MapHandler
             final double toLat, final double toLon)
     {
         MapLayer ml = MapList.getInstance().findMapLayerFromLocation(new GeoPoint(toLat, toLon));
+        //TODO: ml may be null in case of no map found.
         String vehicleS = Cfg.getValue(Cfg.NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR);
         Vehicle vehicle = Vehicle.Car;
         if (vehicleS.equals(Cfg.TRAVEL_MODE_BIKE)) { vehicle = Vehicle.Bike; }
@@ -442,11 +444,18 @@ public class MapHandler
     	else
     	{
     		NaviResponse resp = (NaviResponse) response;
+    		if (resp.isSimpleLine())
+    		{
+    			logUser("Failed to create route, using simple line instead.");
+    		}
+    		else
+    		{
                 logUser("The route is " + (int) (resp.getDistance() / 100) / 10f
                         + "km long, time:" + resp.getTime() / 60000f + "min.");
+    		}
                 updatePathLayer(map, resp.getPoints(), Color.MAGENTA, 4);
                 map.updateMap(true);
-                Navigator.getNavigator().setGhResponse(resp);
+                Navigator.getNavigator().setNaviResponse(resp);
             calcPathActive.set(false);
         
     	}
@@ -481,20 +490,19 @@ public class MapHandler
           geoPoints.add(new GeoPoint(pointList.get(i).lat, pointList.get(i).lon));
       }
       pathLayer.setPoints(geoPoints);
-System.out.println("We set " + geoPoints.size() + " points."); //TODO: Delete this line
 //PolyParser.addDebugLineX(map, geoPoints);
   }
   
-  public void joinPathLayerToPos(double lat, double lon) //TODO: This function may be useful
+  public void updateSimpleLinePath(double lat, double lon)
   {
-//    try
-//    {
-//      List<GeoPoint> geoPoints = new ArrayList<>();
-//      geoPoints.add(new GeoPoint(lat,lon));
-//      geoPoints.add(pathLayer.getPoints().get(1));
-//      pathLayer.setPoints(geoPoints);
-//    }
-//    catch (Exception e) { logger.severe("Error: " + e); }
+    try
+    {
+      List<GeoPoint> geoPoints = new ArrayList<>();
+      geoPoints.add(new GeoPoint(lat,lon));
+      geoPoints.add(pathLayer.getPoints().get(1));
+      pathLayer.setPoints(geoPoints);
+    }
+    catch (Exception e) { logger.severe("Error: " + e); }
   }
     
   private PathLayer createPathLayer(Map map, int color, int strokeWidth)

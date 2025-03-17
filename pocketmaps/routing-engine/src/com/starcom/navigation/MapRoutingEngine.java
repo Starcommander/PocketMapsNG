@@ -4,6 +4,12 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
+import com.starcom.navigation.MapRoutingEngine.Instruct;
+import com.starcom.navigation.MapRoutingEngine.NaviResponse;
+import com.starcom.navigation.MapRoutingEngine.PathInfo;
+import com.starcom.navigation.MapRoutingEngine.Point;
+import com.starcom.navigation.MapRoutingEngine.Sign;
+
 public interface MapRoutingEngine
 {
 	public static MapRoutingEngine createInstance()
@@ -42,8 +48,73 @@ public interface MapRoutingEngine
 	/** Free all resources. */
 	public void close();
 	
+	//if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).equals(Cfg.TRAVEL_MODE_BIKE)) { hours = hours * 3.0; }
+	//if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).equals(Cfg.TRAVEL_MODE_FOOT)) { hours = hours * 9.0; }
 	/** Creates a simple line reponse, when map is missing. */
-	public NaviResponse createSimpleResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle);
+	public default NaviResponse createSimpleResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle)
+	{
+	    double distance = GeoMath.fastDistance(fromLat, fromLon, toLat, toLon) * GeoMath.METER_PER_DEGREE;
+	    double distKm = distance / 1000.0;
+	    double hours = distKm / 50; // 50km == 1h
+	    if (vehicle == Enums.Vehicle.Bike) { hours = hours * 3.0; }
+	    if (vehicle == Enums.Vehicle.Foot) { hours = hours * 9.0; }
+	    long timeMs = (long)(hours * 60.0 * 60.0 * 1000.0);
+	    ArrayList<Point> points = new ArrayList<Point>();
+	    Point p = new Point(fromLat, fromLon, 0);
+	    points.add(p);
+	    p = new Point(toLat, toLon, 0);
+	    points.add(p);
+	    ArrayList<Instruct> insL = new ArrayList<>();
+	    Instruct ins = new Instruct(points, distance, Sign.Finish, "Simple direction", timeMs);
+	    insL.add(ins);
+	    NaviResponse resp = new NaviResponse()
+	    {
+			@Override
+			public double getDistance()
+			{
+				return distance;
+			}
+
+			@Override
+			public long getTime()
+			{
+				return timeMs;
+			}
+
+			@Override
+			public ArrayList<Point> getPoints()
+			{
+				return points;
+			}
+
+			@Override
+			public ArrayList<Instruct> getInstructions()
+			{
+				return insL;
+			}
+
+			@Override
+			public ArrayList<PathInfo> getMaxSpeedInfos()
+			{
+				return new ArrayList<>();
+			}
+
+			@Override
+			public ArrayList<PathInfo> getAveSpeedInfos()
+			{
+				return new ArrayList<>();
+			}
+
+			@Override
+			public boolean isSimpleLine()
+			{
+				return true;
+			}
+	    	
+	    };
+	    return resp;
+	}
+	
 	/** Creates a routing reponse. May return null in case of errors or still not ready. */
 	public NaviResponse createResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle);
 	
@@ -104,6 +175,7 @@ public interface MapRoutingEngine
 		public ArrayList<Instruct> getInstructions();
 		public ArrayList<PathInfo> getMaxSpeedInfos();
 		public ArrayList<PathInfo> getAveSpeedInfos();
+		public boolean isSimpleLine();
 	}
 	
 	public static class PathInfo

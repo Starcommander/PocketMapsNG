@@ -7,8 +7,6 @@ set -e
 ##  Starcommander@github.com
 ##  Pauls script to download and convert (and upload) all maps!
 ##  The only manual steps:
-##  - Import the mapfile-writer
-##  - - See also https://github.com/mapsforge/mapsforge-creator
 ##  - Install: zip git wget curl tee bc xmlstarlet openjdk
 ##  - Maybe you have to increase MEMORY_USE
 ##
@@ -20,6 +18,8 @@ set -e
 ##  Download existing map file, or create the map file with osmosis tool:
 ##  - osmosis --rb file=/tmp/berlin.osm.pbf --mapfile-writer file=/tmp/berlin.map
 ##  - - See also http://wiki.openstreetmap.org/wiki/Osmosis/Installation
+##  - Import the mapfile-writer
+##  - - See also https://github.com/mapsforge/mapsforge-creator
 ##  Create file city_nodes.txt for limited OfflineSearch (Geocoding)
 ##  Compress the content of mapdir-gh to mapdir.ghz
 ##  Copy map and create entry into json list and html file (server mode)
@@ -124,6 +124,19 @@ goto_graphhopper()
   goto_graphhopper_mem
 }
 
+include_mapwriter()
+{
+  mkdir plugins
+  git clone https://github.com/mapsforge/mapsforge.git mf
+  cd mf
+  cat settings.gradle > settings.gradle.ori
+  cat settings.gradle.ori | grep -v android > settings.gradle
+  ./gradlew mapsforge-map-writer:fatJar
+  cd ..
+  find mf/ -name "*-jar-with-dependencies.jar" -exec cp '{}' plugins/
+  rm -r -f mf
+}
+
 goto_osmosis()
 {
   local work_tmp_dir="$WORK_DIR/osmosis_tmp"
@@ -145,6 +158,7 @@ goto_osmosis()
   rm ${osm_name}.tar
   rmdir ${osm_name}
   chmod a+x bin/osmosis
+  include_mapwriter
 }
 
 printCityNodeLine() # args: key value
@@ -304,7 +318,7 @@ import_map() # Args: map_url_rel
   check_exist "$MAP_DIR$map_file"
   if [ ! -d "$MAP_DIR$gh_map_dir" ]; then
     goto_graphhopper
-    ./graphhopper.sh import "$MAP_DIR$map_file"
+    ./graphhopper.sh --action import --input "$MAP_DIR$map_file"
     if [ "$?" != "0" ]; then
       echo "Graphhopper returned an error!"
     elif [ -d "$MAP_DIR$gh_map_name"-latest.osm-gh ]; then
@@ -412,6 +426,15 @@ import_map() # Args: map_url_rel
     echo "Replacing in html." | tee -a "$LOG_FILE"
     $cur_connect "sed -i -e \"s#$html_key#$html_line$html_post#g\" \"$html_file\""
   fi
+}
+
+limit_highways_only() # Args: mapfile.osm.pbf mapfile-reduced.osm.pbf
+{
+./bin/osmosis --rb file="$1" \
+                  --tf reject-relations \
+                  --tf accept-ways highway=primary \
+                  --used-node \
+                  --write-pbf file="$2"
 }
 
 sort_html()

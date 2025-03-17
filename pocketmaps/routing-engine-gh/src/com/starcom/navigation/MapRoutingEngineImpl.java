@@ -103,68 +103,6 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 		return compatList;
 	}
 
-	//if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).equals(Cfg.TRAVEL_MODE_BIKE)) { hours = hours * 3.0; }
-	//if (Cfg.getValue(NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR).equals(Cfg.TRAVEL_MODE_FOOT)) { hours = hours * 9.0; }
-	@Override
-	public NaviResponse createSimpleResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle)
-	{
-	    double distance = GeoMath.fastDistance(fromLat, fromLon, toLat, toLon) * GeoMath.METER_PER_DEGREE;
-	    double distKm = distance / 1000.0;
-	    double hours = distKm / 50; // 50km == 1h
-	    if (vehicle == Enums.Vehicle.Bike) { hours = hours * 3.0; }
-	    if (vehicle == Enums.Vehicle.Foot) { hours = hours * 9.0; }
-	    long timeMs = (long)(hours * 60.0 * 60.0 * 1000.0);
-	    ArrayList<Point> points = new ArrayList<Point>();
-	    Point p = new Point(fromLat, fromLon, 0);
-	    points.add(p);
-	    p = new Point(toLat, toLon, 0);
-	    points.add(p);
-	    ArrayList<Instruct> insL = new ArrayList<>();
-	    Instruct ins = new Instruct(points, distance, Sign.Finish, "Simple direction", timeMs);
-	    insL.add(ins);
-	    NaviResponse resp = new NaviResponse()
-	    {
-
-			@Override
-			public double getDistance()
-			{
-				return distance;
-			}
-
-			@Override
-			public long getTime()
-			{
-				return timeMs;
-			}
-
-			@Override
-			public ArrayList<Point> getPoints()
-			{
-				return points;
-			}
-
-			@Override
-			public ArrayList<Instruct> getInstructions()
-			{
-				return insL;
-			}
-
-			@Override
-			public ArrayList<PathInfo> getMaxSpeedInfos()
-			{
-				return new ArrayList<>();
-			}
-
-			@Override
-			public ArrayList<PathInfo> getAveSpeedInfos()
-			{
-				return new ArrayList<>();
-			}
-	    	
-	    };
-	    return resp;
-	}
-	
 	/** Creates a graphhopper instance.
 	 * @param mapFolder The path/to/continent_country
 	 * @param result Result with graphhopper instance or Exception. */
@@ -174,6 +112,7 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 		logger.info("loading graph ... ");
 		Threading.getInstance().invokeAsyncTask(() ->
 		{
+			logger.info("Loading map routing data start: " + mapFolder);
 			GraphHopper tmpHopp = new GraphHopper().forMobile();
 // Why is "shortest" missing in default config? Add!
 //TODO: How to add shortest in V1.0 of graphhopper? Or even necessary?
@@ -187,7 +126,8 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 			foot.setVehicle(foot.getName());
 			tmpHopp.setProfiles(car, bike, foot);
 			tmpHopp.load(mapFolder.getAbsolutePath());
-			logger.info("found graph " + tmpHopp.getGraphHopperStorage().toString() + ", nodes:" + tmpHopp.getGraphHopperStorage().getNodes());
+			logger.fine("Found graph: " + tmpHopp.getGraphHopperStorage().toString() + ", nodes:" + tmpHopp.getGraphHopperStorage().getNodes());
+			logger.info("Loading map routing data finish: " + mapFolder);
 			return tmpHopp;
 		}, (o) -> setEngine(o));
 	}
@@ -214,7 +154,11 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 	@Override
 	public NaviResponse createResponse(double fromLat, double fromLon, double toLat, double toLon, Enums.Vehicle vehicle)
 	{
-		if (hopper == null) { return null; }
+		if (hopper == null)
+		{
+			logger.warning("Failed to create response, as hopper is null.");
+			return null;
+		}
 
     	StopWatch sw = new StopWatch().start();
         GHRequest req = new GHRequest(fromLat, fromLon, toLat, toLon).
@@ -281,6 +225,7 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 	
 	private NaviResponse convertResponse(GHResponse res)
 	{
+		if (res == null) { return null; }
 		ArrayList<Point> pl = convertPointList(res.getBest().getPoints());
 		long time = res.getBest().getTime();
 		double dist = res.getBest().getDistance();
@@ -346,6 +291,12 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 			{
 				return aveSpeedList;
 			}
+
+			@Override
+			public boolean isSimpleLine()
+			{
+				return false;
+			}
 		};
 		return nv;
 	}
@@ -353,7 +304,6 @@ public class MapRoutingEngineImpl implements MapRoutingEngine
 	@Override
 	public void findClosestStreet(Point from, Point store)
 	{
-		if (store == null) { store = new Point(); }
 	    QueryResult pos = hopper.getLocationIndex().findClosest(from.lat, from.lon, EdgeFilter.ALL_EDGES);
 	    int n = pos.getClosestEdge().getBaseNode();
 	    NodeAccess nodeAccess = hopper.getGraphHopperStorage().getNodeAccess();
