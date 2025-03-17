@@ -25,7 +25,7 @@ public class Download
 
 	private static void unzipMapNow(Stage guiStage, String mname)
 	{
-		IProgressListener callback = Dialogs.showProgress(guiStage, () ->
+		IProgressListener<Object> callback = Dialogs.showProgress(guiStage, () ->
 		{
 			getMapsPath(mname + ".part").moveTo(getMapsPath(mname));
 			getMapsPath(mname + ".ghz").delete();

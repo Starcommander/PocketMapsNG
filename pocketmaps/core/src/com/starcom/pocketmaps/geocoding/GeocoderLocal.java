@@ -48,21 +48,21 @@ public class GeocoderLocal
   public static boolean isPresent() { return true; }
   
   
-  public List<Address> getFromLocationName(String searchCountry, String searchS, int maxCount, IProgressListener<String> progressListener) throws IOException
+  public List<Address> getFromLocationName(String searchCountry, String searchContinent, String searchS, int maxCount, IProgressListener<String> progressListener) throws IOException
   {
     getSettings();
     progressListener.onProgress(Type.PROGRESS, "Searching city...");
     ArrayList<Address> addrList = new ArrayList<Address>();
     if (bCityNodes && !bMultiMatchOnly)
     {
-      ArrayList<Address> nodes = findCity(searchCountry, searchS, maxCount);
+      ArrayList<Address> nodes = findCity(searchCountry, searchContinent, searchS, maxCount);
       if (nodes == null) { return null; }
       addrList.addAll(nodes);
     }
     progressListener.onProgress(Type.PROGRESS, "Searching streets...");
     if (addrList.size() < maxCount && bStreetNodes)
     {
-      ArrayList<Address> nodes = searchNodes(searchCountry, searchS, maxCount - addrList.size(), progressListener);
+      ArrayList<Address> nodes = searchNodes(searchCountry, searchContinent, searchS, maxCount - addrList.size(), progressListener);
       if (nodes == null) { return null; }
       addrList.addAll(nodes);
     }
@@ -79,9 +79,9 @@ public class GeocoderLocal
   }
   
   /** For more information of street-matches. **/
-  private String findNearestCity(String searchCountry, double lat, double lon)
+  private String findNearestCity(String searchCountry, String searchContinent, double lat, double lon)
   {
-	String mapsPath = new File(MapList.getInstance().findMapLayerFromCountry(searchCountry).getMapFile(MapFileType.FullPath)).getParent();
+	String mapsPath = new File(MapList.getInstance().findMapLayerFromCountry(searchCountry, searchContinent).getMapFile(MapFileType.FullPath)).getParent();
     mapsPath = new File(mapsPath, "city_nodes.txt").getPath();
     String nearestName = null;
     double nearestDist = 0;
@@ -131,12 +131,12 @@ public class GeocoderLocal
     return nearestName;
   }
   
-  private ArrayList<Address> findCity(String searchCountry, String searchS, int maxCount) throws IOException
+  private ArrayList<Address> findCity(String searchCountry, String searchContinent, String searchS, int maxCount) throws IOException
   {
     ArrayList<Address> result = new ArrayList<Address>();
     CityMatcher cityMatcher = new CityMatcher(searchS, bExplicitSearch);
 
-	String mapsPath = new File(MapList.getInstance().findMapLayerFromCountry(searchCountry).getMapFile(MapFileType.FullPath)).getParent();
+	String mapsPath = new File(MapList.getInstance().findMapLayerFromCountry(searchCountry, searchContinent).getMapFile(MapFileType.FullPath)).getParent();
     mapsPath = new File(mapsPath, "city_nodes.txt").getPath();
     Address curAddress = new Address(locale);
     try(FileReader r = new FileReader(mapsPath);
@@ -237,14 +237,14 @@ public class GeocoderLocal
   }
   
   /** Search all edges for matching text. **/
-  ArrayList<Address> searchNodes(String searchCountry, String txt, int maxMatches, IProgressListener<String> progressListener)
+  ArrayList<Address> searchNodes(String searchCountry, String searchContinent, String txt, int maxMatches, IProgressListener<String> progressListener)
   {
     txt = txt.toLowerCase();
     ArrayList<Address> addressList = new ArrayList<Address>();
     StreetMatcher streetMatcher = new StreetMatcher(txt, bExplicitSearch);
     CityMatcher cityMatcher = streetMatcher;
     
-    ListIF<MapRoutingEngine.Edge> edgeList = MapList.getInstance().findMapLayerFromCountry(searchCountry).getPathfinder().getAllEdges();
+    ListIF<MapRoutingEngine.Edge> edgeList = MapList.getInstance().findMapLayerFromCountry(searchCountry, searchContinent).getPathfinder().getAllEdges();
     if (edgeList == null) { return null; }
     logger.info("SEARCH_EDGE Start ...");
     int counter = 0;
@@ -272,7 +272,7 @@ public class GeocoderLocal
                                             locale);
         if (b)
         {
-          String c = findNearestCity(searchCountry, edge.loc.getLatitude(), edge.loc.getLongitude());
+          String c = findNearestCity(searchCountry, searchContinent, edge.loc.getLatitude(), edge.loc.getLongitude());
           if (bMultiMatchOnly && !cityMatcher.isMatching(c, false))
           {
             addressList.remove(addressList.size()-1);

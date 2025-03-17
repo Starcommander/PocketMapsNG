@@ -6,9 +6,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.starcom.gdx.ui.AbsLayout;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.gdx.ui.ToastMsg;
+import com.starcom.navigation.Enums.Vehicle;
+import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapHandlerListener;
@@ -27,6 +30,7 @@ public class NavSelect implements MapHandlerListener
 	private TabAction tabAction = TabAction.None;
 
 	private Actor aPan, aFromDD, aToDD, aFromL, aToL, aFromLTxt, aToLTxt, aX, aFromX, aToX;
+	SelectBox<String> aTravelModeDD;
 	AbsLayout al;
 	private boolean visible;
 	
@@ -54,15 +58,22 @@ public class NavSelect implements MapHandlerListener
 		GuiUtil.setEnabled(aToX, false);
 		aX = GuiUtil.genButton("X", (int)(w*0.9f), h/2, (a,xx,yy) -> setVisible(false, true));
 		
+		aTravelModeDD = GuiUtil.genDropDown((o) -> onDropDown("TM:" + o.toString(), true), x, y, true, Vehicle.Car.toString(), Vehicle.Bike.toString(), Vehicle.Foot.toString());
+		String travelMode = Cfg.getValue(Cfg.NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR);
+		aTravelModeDD.setSelected(travelMode);
+		
 		al.addChild(aFromL, 0.0f, 0.1f, 0.6f, 0.3f);
 		al.addChild(aToL, 0.0f, 0.6f, 0.6f, 0.3f);
 		al.addChild(aFromLTxt, 0.1f, 0.1f, 0.6f, 0.3f);
 		al.addChild(aToLTxt, 0.1f, 0.6f, 0.6f, 0.3f);
-		al.addChild(aFromDD, 0.3f, 0.1f, 0.3f, 0.3f);
-		al.addChild(aToDD, 0.3f, 0.6f, 0.3f, 0.3f);
-		al.addChild(aFromX, 0.8f, 0.1f, 0.1f, 0.3f);
-		al.addChild(aToX, 0.8f, 0.6f, 0.1f, 0.3f);
+		al.addChild(aFromDD, 0.1f, 0.1f, 0.5f, 0.3f);
+		al.addChild(aToDD, 0.1f, 0.6f, 0.5f, 0.3f);
+		al.addChild(aFromX, 0.65f, 0.1f, 0.1f, 0.3f);
+		al.addChild(aToX, 0.65f, 0.6f, 0.1f, 0.3f);
 		al.addChild(aX, 0.9f, 0.0f, 0.1f, 0.3f);
+		al.addChild(aTravelModeDD, 0.9f, 0.4f, 0.1f, 0.6f);
+		aToLTxt.remove(); // Hide allows to reAddChild.
+		aFromLTxt.remove(); // Hide allows to reAddChild.
 	}
 	
 	public static NavSelect getInstance() { return instance; }
@@ -108,6 +119,28 @@ public class NavSelect implements MapHandlerListener
 				onEnterLocation(p, from, false);
 			}
 		}
+		else if (selection.startsWith("TM:"))
+		{
+			if (selection.endsWith(Vehicle.Car.toString()))
+			{
+				Cfg.setValue(Cfg.NavKey.TravelMode, Cfg.TRAVEL_MODE_CAR);
+			}
+			else if (selection.endsWith(Vehicle.Bike.toString()))
+			{
+				Cfg.setValue(Cfg.NavKey.TravelMode, Cfg.TRAVEL_MODE_BIKE);
+			}
+			else if (selection.endsWith(Vehicle.Foot.toString()))
+			{
+				Cfg.setValue(Cfg.NavKey.TravelMode, Cfg.TRAVEL_MODE_FOOT);
+			}
+			Cfg.save(Cfg.ConfType.Navigation);
+			GeoPoint s = MapHandler.getInstance().getStartEndPoint(true);
+			GeoPoint e = MapHandler.getInstance().getStartEndPoint(false);
+			if (s != null && e != null)
+			{
+				onEnterLocation(e, false, true);
+			}
+		}
 	}
 	
 
@@ -118,15 +151,15 @@ public class NavSelect implements MapHandlerListener
 		MapHandler.getInstance().setStartEndPoint(TopPanel.getInstance().getGdxMap(), null, isStart, false);
 		if (isStart)
 		{
-			Label l = (Label)aFromLTxt;
-			l.setText(EMPTY_LOC);
 			GuiUtil.setEnabled(aFromX, false);
+			al.reAddChild(aFromDD);
+			aFromLTxt.remove();
 		}
 		else
 		{
-			Label l = (Label)aToLTxt;
-			l.setText(EMPTY_LOC);
 			GuiUtil.setEnabled(aToX, false);
+			al.reAddChild(aToDD);
+			aToLTxt.remove();
 		}
 	}
 	
@@ -157,11 +190,15 @@ public class NavSelect implements MapHandlerListener
 		{
 			((Label)aFromLTxt).setText(a.toNiceString());
 			GuiUtil.setEnabled(aFromX, true);
+			aFromDD.remove();
+			al.reAddChild(aFromLTxt);
 		}
 		else
 		{
 			((Label)aToLTxt).setText(a.toNiceString());
 			GuiUtil.setEnabled(aToX, true);
+			aToDD.remove();
+			al.reAddChild(aToLTxt);
 		}
 	}
 

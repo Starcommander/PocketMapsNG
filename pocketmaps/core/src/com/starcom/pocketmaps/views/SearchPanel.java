@@ -22,6 +22,7 @@ import com.starcom.LoggerUtil;
 import com.starcom.gdx.ui.GuiUtil;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 
@@ -32,7 +33,8 @@ public class SearchPanel
     enum Engines { OpenStreetMaps, GoogleMaps, Offline }
     Engines selectedEngine = Engines.OpenStreetMaps;
     private TextField txtField;
-    private Actor engineDD;
+    private SelectBox<String> engineDD;
+    private SelectBox<String> mapDD;
     private Window dialog;
     private boolean visible;
     private boolean isStart;
@@ -47,7 +49,7 @@ public class SearchPanel
     private SearchPanel() {
     	float ww = Gdx.graphics.getWidth();
         txtField = new TextField("", GuiUtil.getDefaultSkin());
-        engineDD = GuiUtil.genDropDown(o -> this.onEngineDropDown(o.toString()), 0, 0,
+        engineDD = GuiUtil.genDropDown(o -> this.onEngineDropDown(o.toString()), 0, 0, true,
         		Engines.OpenStreetMaps.toString(),
         		Engines.GoogleMaps.toString(),
         		Engines.Offline.toString());
@@ -56,6 +58,7 @@ public class SearchPanel
         dialog.add(engineDD).colspan(2);
         dialog.row();
         dialog.add(txtField).width(ww * 0.8f).expand().colspan(2);
+        setupTxtField();
         dialog.row();
         dialog.add(genOfflinePanel()).colspan(2);
         dialog.row();
@@ -64,15 +67,16 @@ public class SearchPanel
         dialog.setSize(ww * 0.8f, Gdx.graphics.getHeight() * 0.8f);
         dialog.setX(ww * 0.1f);
         dialog.setY(Gdx.graphics.getHeight() * 0.1f);
-        
+    	String sel = Cfg.getValue(Cfg.GeoKey.SearchEngine, Engines.OpenStreetMaps.toString());
+    	engineDD.setSelected(sel);
     }
     
     private void setupTxtField()
-    { //TODO Clear this, if not doing anything
+    { //TODO Clear this, if not doing anything (Test on android)
     	txtField.getOnscreenKeyboard().show(true);
     }
     
-    private Table genOfflinePanel()
+    private void updateMapDD()
     {
     	ArrayList<String> maps = new ArrayList<>();
     	for (MapLayer m : MapList.getInstance().mapLayers)
@@ -90,8 +94,16 @@ public class SearchPanel
     			maps.add(name);
     		}
     	}
+    	mapDD.clearItems();
+    	mapDD.setItems(maps.toArray(new String[0]));
+    }
+    
+    private Table genOfflinePanel()
+    {
     	int sel = Cfg.getIntValue(Cfg.GeoKeyI.SearchBits, 6);
-    	offlinePanel.add(GuiUtil.genDropDown((o) -> onOfflineCountrySelect(o.toString()), 0, 0, maps.toArray(new String[0])));
+    	mapDD = GuiUtil.genDropDown((o) -> onOfflineCountrySelect(o), 0, 0, true, new String[0]);
+    	updateMapDD();
+    	offlinePanel.add(mapDD);
     	offlinePanel.row();
     	boolean isSelected = (sel & GeocoderLocal.BIT_MULT) != 0;
     	offlinePanel.add(GuiUtil.genCheckBox((o) -> onOfflineCheckbox(GeocoderLocal.BIT_MULT, o), 0, 0, "MultiMatchOnly [very slow]", isSelected));
@@ -128,6 +140,7 @@ public class SearchPanel
     
     private void onOfflineCountrySelect(String continentCountry)
     {
+    	if (continentCountry == null) { return; } // On init the country is null.
     	offlineContinent = continentCountry.split("_")[0];
     	offlineCountry = continentCountry.split("_")[1];
     	Cfg.setValue(GeoKey.OfflineCountry, continentCountry);
@@ -139,6 +152,7 @@ public class SearchPanel
             return;
         }
         if (visible) {
+        	updateMapDD();
             GuiUtil.getStage().addActor((Actor)this.dialog);
         }
         else {
@@ -158,6 +172,8 @@ public class SearchPanel
     	{
     		offlinePanel.setVisible(false);
     	}
+    	Cfg.setValue(Cfg.GeoKey.SearchEngine, engine);
+    	Cfg.save(ConfType.Geocoding);
     }
     
     private void onSearch(final String txt) {
@@ -178,13 +194,12 @@ public class SearchPanel
             }
             else if (selectedEngine == Engines.Offline)
             {
-            	Cfg.save(ConfType.Geocoding); //TODO: Only offline, or hints also on others?
-            	list = new GeocoderGlobal(Locale.getDefault()).find_local(offlineCountry, txt, (t,o) -> onOfflineSearch(t,o.toString())); //TODO: update this.
+            	Cfg.save(ConfType.Geocoding); //TODO: Only on offline, or hints also on others?
+            	list = new GeocoderGlobal(Locale.getDefault()).find_local(offlineCountry, offlineContinent, txt, (t,o) -> onOfflineSearch(t,o.toString()));
             }
             else if (selectedEngine == Engines.GoogleMaps)
             {
             	list = new GeocoderGlobal(Locale.getDefault()).find_google(txt);
-            	throw new IllegalStateException("No engine implemented: " + selectedEngine);
             }
             else
             {
@@ -202,6 +217,6 @@ public class SearchPanel
     
     private void onOfflineSearch(Type t, String txt)
     {
-    	System.out.println("Progress offlineSearch " + t + ": " + txt);
+    	System.out.println("Progress offlineSearch " + t + ": " + txt); //TODO: Update this, show visible progress.
     }
 }

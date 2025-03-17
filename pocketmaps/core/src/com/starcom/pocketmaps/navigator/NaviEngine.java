@@ -170,22 +170,16 @@ gpsClient.watch(true, true);
     }
   }
   
-  /** This allows to update pathLayer, when instructions is just a line from target to curLoc.
-   *  @param directTargetDir True to update pathLayer, join to curPos. **/
-  public void setDirectTargetDir(boolean directTargetDir)
-  {
-    this.directTargetDir = directTargetDir;
-  }
-  
   /** This is only called when path is calculated first time, or recalcPath. **/
   public void onUpdateInstructions(NaviResponse resp)
   {
     if (uiJob != UiJob.RecalcPath) { throw new IllegalStateException("Getting instructions but state is not RecalcPath!"); }
+    this.instructions = resp.getInstructions();
+    this.directTargetDir = resp.isSimpleLine();
     if (!directTargetDir)
     {
       nearestP.checkDirectionOk(pos, instructions.get(0), naviVoice);
     }
-    this.instructions = resp.getInstructions();
     this.speedUtil.updateList(resp.getMaxSpeedInfos(), resp.getAveSpeedInfos());
     getNewInstruction();
     uiJob = UiJob.UpdateInstruction;
@@ -314,7 +308,7 @@ gpsClient.watch(true, true);
   private void updateDirectTargetDir(GeoPoint curPos)
   {
     if (!directTargetDir) { return; }
-    MapHandler.getInstance().joinPathLayerToPos(curPos.getLatitude(), curPos.getLongitude());
+    MapHandler.getInstance().updateSimpleLinePath(curPos.getLatitude(), curPos.getLongitude());
   }
   
   private Object naviEngineTaskExecuteBG(GeoPoint geo)

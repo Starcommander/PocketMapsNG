@@ -64,12 +64,13 @@ public class MapList
 		return null;
 	}
 	
-	public MapLayer findMapLayerFromCountry(String countryName)
+	public MapLayer findMapLayerFromCountry(String countryName, String contName)
 	{
 		for (MapLayer l : mapLayers)
 		{
 			String cName = l.getMapFile(MapFileType.Country);
-			if (cName.equals(countryName)) { return l; }
+			String curContName = l.getMapFile(MapFileType.Continent);
+			if (cName.equals(countryName) && curContName.equals(contName)) { return l; }
 		}
 		return null;
 	}

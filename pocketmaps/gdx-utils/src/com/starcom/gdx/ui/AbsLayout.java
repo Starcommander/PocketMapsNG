@@ -39,7 +39,7 @@ public class AbsLayout extends WidgetGroup
 		this.minHeight = minHeight;
 	}
 	
-	/** Adds a child with relative location and size.
+	/** Adds a child with abs location and size.
 	 * @return The layoutModel for further modification. */
 	public AbsUserObj addChild(Actor actor, float x, float y, float w, float h)
 	{
@@ -53,7 +53,23 @@ public class AbsLayout extends WidgetGroup
 		return uObj;
 	}
 	
-	/** Replaces a child and uses relative location and size.
+	/** Adds a child with abs location and size, that was already added, but removed.
+	 * @return The layoutModel for further modification. */
+	public AbsUserObj reAddChild(Actor actor)
+	{
+		if (actor.getUserObject() == null)
+		{
+			throw new IllegalStateException("Actor is missing an AbsUserObj!");
+		}
+		if (!(actor.getUserObject() instanceof AbsUserObj))
+		{
+			throw new IllegalStateException("Actors UserObject is no AbsUserObj: " + actor.getUserObject());
+		}
+		super.addActor(actor);
+		return (AbsUserObj)actor.getUserObject();
+	}
+	
+	/** Replaces a child and uses abs location and size.
 	 * @return The layoutModel for further modification. */
 	public AbsUserObj replaceChild(int index, Actor actor, float x, float y, float w, float h)
 	{

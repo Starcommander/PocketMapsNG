@@ -7,13 +7,13 @@ import com.starcom.navigation.Enums;
 
 public class Cfg
 {
-	public final static String TRAVEL_MODE_BIKE = Enums.Vehicle.Bike.toString().toLowerCase();
-	public final static String TRAVEL_MODE_CAR = Enums.Vehicle.Car.toString().toLowerCase();
-	public final static String TRAVEL_MODE_FOOT = Enums.Vehicle.Foot.toString().toLowerCase();
+	public final static String TRAVEL_MODE_BIKE = Enums.Vehicle.Bike.toString();
+	public final static String TRAVEL_MODE_CAR = Enums.Vehicle.Car.toString();
+	public final static String TRAVEL_MODE_FOOT = Enums.Vehicle.Foot.toString();
 	public enum NavKey { TravelMode, Weighting, TtsEngine, TtsWantedVoice, MapSelection }
 	public enum NavKeyB { DirectionsOn, IsImperialUnit, ShowingSpeedLimits, SpeakingSpeedLimits, TtsOn, Debugging, GpsOn }
 	public enum GeoKeyI { SearchBits }
-	public enum GeoKey { OfflineCountry }
+	public enum GeoKey { OfflineCountry, SearchEngine }
 	public enum ConfType { Navigation, Geocoding } //TODO: old used 'base' unuseable, better 'SearchHints'
 	
 	public static void setDirectory(File newDir)
