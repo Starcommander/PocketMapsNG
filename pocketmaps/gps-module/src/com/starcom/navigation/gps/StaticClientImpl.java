@@ -12,7 +12,7 @@ import com.ivkos.gpsd4j.messages.reports.TPVReport;
 public class StaticClientImpl implements IClient
 {
 	private static final Logger log = LoggerFactory.getLogger(StaticClientImpl.class);
-	private Consumer<ErrorMessage> errorHandler = System.out::println;
+	private static Consumer<ErrorMessage> errorHandler = System.out::println;
 	private static Consumer<TPVReport> tpvHandler;
 	private static boolean watching = false;
 private static TPVReport lastTpvReport;
@@ -49,9 +49,17 @@ private static boolean available = false;
 		}
 	}
 
+	/** This is called by native location service when error occurred. */
+	public static void onErrorOccured(String info)
+	{
+		ErrorMessage msg = new ErrorMessage() { @Override public String getMessage() { return info; } };
+		errorHandler.accept(msg);
+	}
+
 	@Override
 	public void sendPollCommand(Consumer<PollMessage> responseHandler)
 	{
+		if (lastTpvReport==null) { return; } //TODO: Any action instead of just looking for last one.
 		responseHandler.accept(new StaticPollMessage(lastTpvReport));
 	}
 

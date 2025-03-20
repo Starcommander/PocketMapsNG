@@ -1,6 +1,7 @@
 package com.starcom.pocketmaps.navigator;
 
-import com.graphhopper.util.Instruction;
+import com.starcom.navigation.MapRoutingEngine.Instruct;
+import com.starcom.navigation.MapRoutingEngine.Sign;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Icons.R;
 import com.starcom.pocketmaps.Cfg.NavKey;
@@ -18,16 +19,16 @@ public class NaviInstruction
   long fullTime;
   String fullTimeString;
   double nextDistance;
-  int nextSign;
+  Sign nextSign;
   int nextSignResource;
   Text naviText;
   
-  public NaviInstruction(Instruction in, Instruction nextIn, long fullTime)
+  public NaviInstruction(Instruct in, Instruct nextIn, long fullTime)
   {
     naviText = Text.getInstance();
     if (nextIn != null)
     {
-      nextSign = nextIn.getSign();
+      nextSign = nextIn.sign;
       nextSignResource = Navigator.getNavigator().getDirectionSignHuge(nextIn);
       nextInstruction = Navigator.getNavigator().getDirectionDescription(nextIn, true);
       nextInstructionShort = Navigator.getNavigator().getDirectionDescription(nextIn, false);
@@ -35,17 +36,17 @@ public class NaviInstruction
     }
     else
     {
-      nextSign = in.getSign(); // Finished?
+      nextSign = in.sign; // Finished?
       nextSignResource = Navigator.getNavigator().getDirectionSignHuge(in);
       nextInstruction = Navigator.getNavigator().getDirectionDescription(in, true);
       nextInstructionShort = Navigator.getNavigator().getDirectionDescription(in, false);
       nextInstructionShortFallback = Navigator.getNavigator().getDirectionDescriptionFallback(in, false);
     }
     if (nextSignResource == 0) { nextSignResource = R.ic_2x_continue_on_street.getInt(); }
-    nextDistance = in.getDistance();
+    nextDistance = in.distance;
     this.fullTime = fullTime;
     fullTimeString = Navigator.getTimeString(fullTime);
-    curStreet = in.getName();
+    curStreet = in.name;
     if (curStreet == null) { curStreet = ""; }
   }
   
@@ -57,7 +58,7 @@ public class NaviInstruction
   /** @return A nice time string (hours and minutes) from timeMS */
   public String getFullTimeString() { return fullTimeString; }
   public int getNextSignResource() { return nextSignResource; }
-  public int getNextSign() { return nextSign; }
+  public Sign getNextSign() { return nextSign; }
   public String getCurStreet() { return curStreet; }
   public String getNextInstruction() { return nextInstruction; }
   /** Returns a nice string representation of nextDistance with unit included. */

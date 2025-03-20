@@ -1,1 +1,1 @@
-include 'desktop', 'ios', 'core', 'android', 'gps-module'
+include 'desktop', 'routing-engine', 'routing-engine-gh', 'android', 'core', 'gps-module', 'gdx-utils', 'starcom-base', 'tts-engine', 'tts-engine-espeakcmd'

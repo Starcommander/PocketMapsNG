@@ -1,8 +1,8 @@
 package com.starcom.pocketmaps.util;
 
-import com.graphhopper.util.details.PathDetail;
 import com.starcom.pocketmaps.navigator.Navigator;
 import com.starcom.pocketmaps.views.NavTopPanel;
+import com.starcom.navigation.MapRoutingEngine.PathInfo;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.NavKey;
 import com.starcom.pocketmaps.Cfg.NavKeyB;
@@ -17,8 +17,8 @@ import java.util.Map;
  */
 public class SpeedUtil
 {
-    List<PathDetail> maxSpeedList;
-    List<PathDetail> aveSpeedList;
+	ArrayList<PathInfo> maxSpeedList;
+	ArrayList<PathInfo> aveSpeedList;
     
 //    TextView view;
     boolean enabled = false;
@@ -50,10 +50,10 @@ public class SpeedUtil
 //    }
     
     /** Resets the path-list, and sets the progress (pointsDone) to 0. */
-    public void updateList(Map<String, List<PathDetail>> pathDetails)
+    public void updateList(ArrayList<PathInfo> maxSpeedList, ArrayList<PathInfo> aveSpeedList)
     {
-        maxSpeedList = pathDetails.get("max_speed");
-        aveSpeedList = pathDetails.get("average_speed");
+        this.maxSpeedList = maxSpeedList;
+        this.aveSpeedList = aveSpeedList;
         pointsDone = 0;
     }
     
@@ -67,19 +67,19 @@ public class SpeedUtil
     {
         if (maxSpeedList == null) { return "---"; }
         if (aveSpeedList == null) { return "---"; }
-        for (PathDetail curDetail : maxSpeedList)
+        for (PathInfo curDetail : maxSpeedList)
         {
-            if (curDetail.getFirst() > pos) { continue; }
-            if (curDetail.getLast() < pos) { continue; }
-            if (curDetail.getValue()==null) { continue; }
-            return "" + getUnitIntValue(Double.parseDouble(curDetail.getValue().toString()));
+            if (curDetail.first > pos) { continue; }
+            if (curDetail.last < pos) { continue; }
+            if (curDetail.value==null) { continue; }
+            return "" + getUnitIntValue(Double.parseDouble(curDetail.value.toString()));
         }
-        for (PathDetail curDetail : aveSpeedList)
+        for (PathInfo curDetail : aveSpeedList)
         {
-            if (curDetail.getFirst() > pos) { continue; }
-            if (curDetail.getLast() < pos) { continue; }
-            if (curDetail.getValue()==null) { continue; }
-            return "" + getUnitIntValue(Double.parseDouble(curDetail.getValue().toString())) + "?";
+            if (curDetail.first > pos) { continue; }
+            if (curDetail.last < pos) { continue; }
+            if (curDetail.value==null) { continue; }
+            return "" + getUnitIntValue(Double.parseDouble(curDetail.value.toString())) + "?";
         }
         return "---";
     }

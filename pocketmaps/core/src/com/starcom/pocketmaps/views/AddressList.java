@@ -2,11 +2,8 @@ package com.starcom.pocketmaps.views;
 
 import java.util.List;
 
-import org.oscim.core.GeoPoint;
-
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.gdx.ui.ListSelect;
-import com.starcom.interfaces.IObjectListener;
 import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.map.MapHandler;
 

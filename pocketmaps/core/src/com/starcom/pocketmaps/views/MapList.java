@@ -1,46 +1,33 @@
 package com.starcom.pocketmaps.views;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Vector;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.GeoPoint;
-import org.oscim.layers.tile.buildings.BuildingLayer;
-import org.oscim.layers.tile.vector.VectorTileLayer;
-import org.oscim.layers.tile.vector.labeling.LabelLayer;
-import org.oscim.map.Map;
-import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.source.mapfile.MapFileTileSource;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.graphhopper.GHResponse;
-import com.graphhopper.PathWrapper;
-import com.graphhopper.util.Instruction;
-import com.graphhopper.util.InstructionList;
 import com.starcom.LoggerUtil;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
+import com.starcom.navigation.MapRoutingEngine.Instruct;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.pocketmaps.tasks.Download;
 import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.Cfg.ConfType;
 import com.starcom.pocketmaps.Cfg.NavKey;
-import com.starcom.pocketmaps.map.MapHandler;
 import com.starcom.pocketmaps.map.MapLayer;
 import com.starcom.pocketmaps.map.MapLayer.MapFileType;
 import com.starcom.pocketmaps.navigator.NaviEngine;
-import com.starcom.pocketmaps.navigator.Navigator;
 
 public class MapList
 {
@@ -77,12 +64,13 @@ public class MapList
 		return null;
 	}
 	
-	public MapLayer findMapLayerFromCountry(String countryName)
+	public MapLayer findMapLayerFromCountry(String countryName, String contName)
 	{
 		for (MapLayer l : mapLayers)
 		{
 			String cName = l.getMapFile(MapFileType.Country);
-			if (cName.equals(countryName)) { return l; }
+			String curContName = l.getMapFile(MapFileType.Continent);
+			if (cName.equals(countryName) && curContName.equals(contName)) { return l; }
 		}
 		return null;
 	}
@@ -223,6 +211,8 @@ public class MapList
 		Cfg.save(ConfType.Navigation);
 	}
 
+	/** Shows the dialog with maps that are available.
+	 * @param json The maps available on server as json content. */
 	public static void viewMapsDownload(String json)
 	{
 		int w = Gdx.graphics.getWidth();
@@ -243,8 +233,23 @@ public class MapList
 			return;
 		}
 		ListSelect ll = new ListSelect("DownloadMaps");
-		org.json.JSONArray arr = jsonObj.getJSONArray("maps-0.13.0_0"); //TODO: Dynamic version?
-		//Image mapImage = new Image(new Texture("icon_pocketmaps.png"));
+		ll.showFilter(true);
+		String mapdataVersion = Cfg.getMapdataVersion();
+		if (mapdataVersion == null)
+		{
+			ToastMsg.getInstance().toastLong("Error getting necessary version for maplist");
+			return;
+		}
+		org.json.JSONArray arr;
+		try
+		{
+			arr = jsonObj.getJSONArray("maps-" + mapdataVersion);
+		}
+		catch (JSONException jsonEx)
+		{
+			ToastMsg.getInstance().toastLong("Missing compatible maps for: " + mapdataVersion);
+			return;
+		}
 		Texture mapTextureTop = new Texture("icon_pocketmaps_top.png");
 		Texture mapTextureBot = new Texture("icon_pocketmaps_bot.png");
 		for (int i = 0; i < arr.length(); i++)
@@ -264,19 +269,20 @@ public class MapList
 			table.add(new Image(mapTextureBot)).left();
 			table.add(new Label("Map size: " + msize, GuiUtil.getDefaultSkin())).width(w/3);
 			table.add(new Label(mcont, GuiUtil.getDefaultSkin())).width(w/3);
+			table.setUserObject(jo.getString("name"));
 			
 			ll.addElement(table, (a, x, y) -> Download.downloadMapNow(GuiUtil.getStage(), mdate, mname));
 		}
 		ll.showAsWindow(GuiUtil.getStage());
 	}
 	
-	public static void viewDirectionList(InstructionList instL)
+	public static void viewDirectionList(ArrayList<Instruct> instL)
 	{
 		NavSelect.getInstance().setVisible(false,false);
-		ListSelect ll = new ListSelect("Directions", "Navigate", (b) -> NaviEngine.getNaviEngine().setNavigating(null, true));
-		for (Instruction inst : instL)
+		ListSelect ll = new ListSelect("Directions", "Navigate", (b) -> NaviEngine.getNaviEngine().setNavigating(true));
+		for (Instruct inst : instL)
 		{
-			ll.addElement(inst.getName(), (a,x,y) -> {});
+			ll.addElement(inst.name, (a,x,y) -> {});
 		}
 		ll.showAsWindow(GuiUtil.getStage());
 	}

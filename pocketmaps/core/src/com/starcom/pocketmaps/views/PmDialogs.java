@@ -1,5 +1,6 @@
 package com.starcom.pocketmaps.views;
 
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import org.oscim.core.GeoPoint;
@@ -10,14 +11,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.starcom.LoggerUtil;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.gdx.ui.ToastMsg;
-import com.starcom.interfaces.IObjectListener;
 import com.starcom.pocketmaps.text.Text;
 
 public class PmDialogs
 {
 	static Logger logger = LoggerUtil.get(PmDialogs.class);
 	
-	public static void showLatLonDialog(IObjectListener<GeoPoint> listener)
+	public static void showLatLonDialog(Consumer<GeoPoint> listener)
 	{
 		TextField latTF = new TextField("", GuiUtil.getDefaultSkin());
 		TextField lonTF = new TextField("", GuiUtil.getDefaultSkin());
@@ -64,7 +64,7 @@ public class PmDialogs
 		    	logger.info("User entered lat=" + lat + " lon=" + lon + " and pressed ok.");
 		    	if (listener != null)
 		    	{
-		    		listener.run(new GeoPoint(lat,lon));
+		    		listener.accept(new GeoPoint(lat,lon));
 		    	}
 		    }
 		};

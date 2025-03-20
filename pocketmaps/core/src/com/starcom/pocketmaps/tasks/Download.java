@@ -4,7 +4,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.starcom.gdx.io.Storage;
 import com.starcom.gdx.io.Web;
-import com.starcom.gdx.system.Threading;
+import com.starcom.system.Threading;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.interfaces.IProgressListener;
@@ -25,7 +25,7 @@ public class Download
 
 	private static void unzipMapNow(Stage guiStage, String mname)
 	{
-		IProgressListener callback = Dialogs.showProgress(guiStage, () ->
+		IProgressListener<Object> callback = Dialogs.showProgress(guiStage, () ->
 		{
 			getMapsPath(mname + ".part").moveTo(getMapsPath(mname));
 			getMapsPath(mname + ".ghz").delete();

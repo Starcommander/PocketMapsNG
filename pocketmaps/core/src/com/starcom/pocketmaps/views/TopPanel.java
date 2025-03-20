@@ -5,23 +5,30 @@ import org.oscim.map.Map;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.ivkos.gpsd4j.messages.reports.TPVReport;
+import com.starcom.LoggerUtil;
 import com.starcom.gdx.ui.AbsLayout;
 import com.starcom.gdx.ui.Dialogs;
 import com.starcom.gdx.ui.ListSelect;
 import com.starcom.gdx.ui.ToastMsg;
 import com.starcom.gdx.ui.GuiUtil;
 import com.starcom.interfaces.IProgressListener.Type;
+import com.starcom.navigation.Location;
+import com.starcom.pocketmaps.Cfg;
 import com.starcom.pocketmaps.geocoding.Address;
 import com.starcom.pocketmaps.map.MapHandler;
+import com.starcom.pocketmaps.navigator.NaviEngine;
 import com.starcom.pocketmaps.views.MapList.MapAction;
 
 public class TopPanel
 {
 	static TopPanel instance = new TopPanel();
+	private Actor centerButton = GuiUtil.genButton("[O]", 30, 90, (a,x,y) -> onCenterButtonPressed());
 	private Map gdxMap;
 	private AbsLayout al;
 	private boolean visible = false;
 	
+	/** This is also the main panel that keeps the GdxMap. */
 	public static TopPanel getInstance() { return instance; }
 	
 	/** Returns the Map that is used as Canvas. */
@@ -37,12 +44,32 @@ public class TopPanel
 		int x = 0;
 		int y = Gdx.graphics.getHeight() - h;
 		Actor aPan = GuiUtil.genPanel(x, y, w, h);
-		Actor aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 20, "AAA", "Maps...", "Navigate...", "SimpleDialog", "DebugFastNav");
+		Actor aDD = GuiUtil.genDropDown((s) -> doMenuAction(s),30, y + 20, "Maps...", "Navigate...", "Settings...", "Tracking...");
 		al = new AbsLayout(0, 0, 1, 0.1f);
 		al.setMinHeight(30);
 		al.addChild(aPan, 0, 0, 1, 1);
 		al.addChild(aDD, 0.1f, 0.2f, 0.25f, 0.6f);
 		MapHandler.getInstance().createAdditionalMapLayers(gdxMap);
+	}
+	
+	private void onCenterButtonPressed()
+	{
+		Location curLoc = NaviEngine.getNaviEngine().getCurrentLocation();
+		if (curLoc!=null)
+		{
+			log("Using latest gps location");
+			MapHandler.getInstance().centerPointOnMap(new GeoPoint( curLoc.getLatitude(), curLoc.getLongitude()), NaviEngine.BEST_NAVI_ZOOM, 0, 0);
+			return;
+		}
+		log("Polling gps location");
+		NaviEngine.getNaviEngine().getGpsClient().sendPollCommand((posLst) ->
+		{
+			if (posLst==null) { log("Position is null"); return; }
+			if (posLst.getTPVList().isEmpty()) { log("Position list is empty"); return; }
+			TPVReport pos = posLst.getTPVList().get(0);
+			if (pos.getLatitude() == Double.NaN || pos.getLongitude() == Double.NaN) { log("Position is NaN"); return; }
+			MapHandler.getInstance().centerPointOnMap(new GeoPoint( pos.getLatitude(), pos.getLongitude()), NaviEngine.BEST_NAVI_ZOOM, 0, 0);
+		});
 	}
 	
 	public void setVisible(boolean visible)
@@ -51,10 +78,12 @@ public class TopPanel
 		if (visible)
 		{
 			GuiUtil.addActor(al);
+			GuiUtil.addActor(centerButton);
 		}
 		else
 		{
 			al.remove();
+			centerButton.remove();
 		}
 		this.visible = visible;
 	}
@@ -74,19 +103,29 @@ public class TopPanel
 		{
 			NavSelect.getInstance().setVisible(true, true);
 		}
+		else if (action.equals("Settings..."))
+		{
+			SettingsView.getInstance().showSettings();
+		}
 		else if (action.equals("Download Maps"))
 		{
-			String url = "http://vsrv15044.customer.xenway.de/maps/map_url-0.13.0_0.json";
-
-			com.starcom.io.Web.downloadTextfileLater(url, (t,o) ->
+			String mapdataVersion = Cfg.getMapdataVersion();
+			if (mapdataVersion == null)
 			{
-				if (t == Type.ERROR)
+				ToastMsg.getInstance().toastLong("Error getting necessary version for dl maplist");
+				return;
+			}
+			String url = "http://vsrv15044.customer.xenway.de/maps/map_url-" + mapdataVersion + ".json";
+
+			com.starcom.io.Web.downloadTextfileLater(url, (type,txt) ->
+			{
+				if (type == Type.ERROR)
 				{
-					ToastMsg.getInstance().toastLong(o.toString());
+					ToastMsg.getInstance().toastLong(txt + " V=" + mapdataVersion);
 				}
-				else if (t == Type.SUCCESS)
+				else if (type == Type.SUCCESS)
 				{
-					MapList.viewMapsDownload(o.toString());}
+					MapList.viewMapsDownload(txt);}
 				}
 			);
 		}
@@ -98,15 +137,14 @@ public class TopPanel
 		{
 			MapList.getInstance().viewMapsSelect(MapAction.Delete);
 		}
-		else if (action.equals("SimpleDialog"))
+		else if (action.equals("Tracking..."))
 		{
-			Dialogs.showDialog(GuiUtil.getStage(), "Title", "msg", false, (o) -> System.out.println("Pressed " + o));
+			TrackingPanel.getInstance().setVisible(true, true);
 		}
-		else if (action.equals("DebugFastNav"))
-		{
-			MapHandler.getInstance().setStartEndPoint(getInstance().getGdxMap(), Address.fromGeoPoint(new GeoPoint(47.730f,13.417f)), true, false);
-			MapHandler.getInstance().setStartEndPoint(getInstance().getGdxMap(), Address.fromGeoPoint(new GeoPoint(47.734f,13.424f)), false, true);
-			getInstance().setVisible(false);
-		}
+	}
+	
+	void log(String msg)
+	{
+		LoggerUtil.get(TopPanel.class).info(msg);
 	}
 }
