@@ -73,6 +73,7 @@ project(":android") {
 
     dependencies {
         implementation project(":core")
+        implementation project(':routing-engine-gh')
         api "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
@@ -84,7 +85,6 @@ project(":android") {
 //        natives "org.mapsforge:vtm-android:$vtmVersion:natives-x86"
 //        natives "org.mapsforge:vtm-android:$vtmVersion:natives-x86_64"
         api "org.mapsforge:vtm-gdx:$vtmVersion"
-        api "org.mapsforge:vtm-android-gdx:$vtmVersion"
 api "org.mapsforge:vtm-android:$vtmVersion"
         natives "org.mapsforge:vtm-android-gdx:$vtmVersion:natives-armeabi-v7a"
         natives "org.mapsforge:vtm-android-gdx:$vtmVersion:natives-arm64-v8a"
@@ -93,6 +93,7 @@ api "org.mapsforge:vtm-android:$vtmVersion"
     }
 }
 
+/*
 project(":ios") {
     apply plugin: "java-library"
     apply plugin: "robovm"
@@ -108,7 +109,6 @@ project(":ios") {
     }
 }
 
-/*
 project(":html") {
     apply plugin: "java-library"
     apply plugin: "gwt"

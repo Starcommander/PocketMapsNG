@@ -42,7 +42,7 @@ public interface IClient
 			catch (NumberFormatException e) { logger.error("GPSD_PORT NumberFormatException, using default: " + gpsdPort); }
 		}
 		
-    	boolean isWin = System.getProperties().get("os.name").toString().startsWith("Windows"); // Hint: apache commons lang3 -> SystemUtils.java -> IS_OS_WINDOWS
+    	boolean isWin = System.getProperty("os.name", "Linux").startsWith("Windows"); // Hint: apache commons lang3 -> SystemUtils.java -> IS_OS_WINDOWS
     	if (isWin)
     	{
     		return new PsClientImpl();

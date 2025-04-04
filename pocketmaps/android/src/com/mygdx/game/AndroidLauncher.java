@@ -13,9 +13,13 @@ import org.oscim.backend.DateTimeAdapter;
 import org.oscim.backend.DateTime;
 import org.oscim.backend.GLAdapter;
 import org.oscim.gdx.GdxAssets;
-import org.oscim.gdx.AndroidGL;
-import org.oscim.gdx.AndroidGL30;
+import org.oscim.android.gl.AndroidGL;
+import org.oscim.android.gl.AndroidGL30;
 import org.oscim.android.MapView;
+
+import com.starcom.navigation.gps.StaticClientImpl;
+
+import java.util.function.Consumer;
 
 /* Hints from gdx/AndroidApplication as used for LWJGL in DesktopLauncher. */
 public class AndroidLauncher extends AndroidApplication {
@@ -26,6 +30,7 @@ public class AndroidLauncher extends AndroidApplication {
 org.oscim.android.canvas.AndroidGraphics.dpi = 320;
 org.oscim.android.canvas.AndroidGraphics.init();
 		DateTimeAdapter.init(new DateTime());
+		StaticClientImpl.setAvailable();
 	}
 
 	@Override
@@ -43,7 +48,7 @@ System.loadLibrary("vtm-jni");
 				}
 		};
 		initAssets();
-		requestPermissions();
+//		requestPermissions();
 		initialize(gdxGame);
 //        MapView mapView = new MapView(this);
 //        setContentView(mapView);
@@ -55,7 +60,8 @@ System.loadLibrary("vtm-jni");
 //		setContentView(mapView);
 //		new MyGdxGame();
 	}
-	
+
+/*
 	private void requestPermissions()
 	{
 		String fine_loc = android.Manifest.permission.ACCESS_FINE_LOCATION;
@@ -126,7 +132,6 @@ System.loadLibrary("vtm-jni");
       return idCounter;
     }
 
-/*
     protected static Lwjgl3ApplicationConfiguration getConfig() {
         Lwjgl3ApplicationConfiguration cfg = new Lwjgl3ApplicationConfiguration();
         cfg.disableAudio(true);

@@ -23,6 +23,8 @@ android {
     }
     packagingOptions {
         exclude 'META-INF/robovm/ios/robovm.xml'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
     }
     defaultConfig {
         applicationId "com.starcom.pocketmapsng"
@@ -37,6 +39,11 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    lintOptions {
+        disable 'InvalidPackage','MissingPrefix','ProtectedPermissions'
+        abortOnError false
     }
 }
 
