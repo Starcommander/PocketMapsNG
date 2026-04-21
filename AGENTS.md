@@ -20,6 +20,7 @@ cd pocketmaps
 |--------|---------|
 | `core/` | Main app logic, views, navigator, map handling |
 | `desktop/` | LWJGL3 desktop launcher |
+| `android/` | Android backend |
 | `html/` | GWT web client |
 | `ios/` | RoboVM iOS backend |
 | `routing-engine-gh/` | GraphHopper routing implementation |
@@ -31,7 +32,7 @@ cd pocketmaps
 
 ## Notes
 
-- Uses **libGDX 1.12.0**, **VTM 0.19.0** (mapsforge), **GraphHopper** for routing
+- Uses **libGDX 1.12.0**, **VTM 0.21.0** (mapsforge), **GraphHopper** for routing
 - No test directories exist; no test commands available
 - No linter or typechecker configured
 - `scripts/build_maps.sh` - map generation scripts

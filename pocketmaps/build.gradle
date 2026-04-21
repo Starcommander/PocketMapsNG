@@ -79,6 +79,10 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+        // TODO(android): Issue #2 - Ensure gdx natives are loaded in AndroidLauncher before vtm-jni.
+        //   The gradle 'natives' declares natives but they may not be extracted/loaded automatically.
+        //   Consider adding System.loadLibrary("gdx") before loadLibrary("vtm-jni") in AndroidLauncher.
+        //   Also check: https://github.com/libgdx/libgdx/wiki/Native-builds#android
 //        api "org.mapsforge:vtm-android:$vtmVersion"
 //        natives "org.mapsforge:vtm-android:$vtmVersion:natives-armeabi-v7a"
 //        natives "org.mapsforge:vtm-android:$vtmVersion:natives-arm64-v8a"
@@ -90,6 +94,9 @@ api "org.mapsforge:vtm-android:$vtmVersion"
         natives "org.mapsforge:vtm-android-gdx:$vtmVersion:natives-arm64-v8a"
         natives "org.mapsforge:vtm-android-gdx:$vtmVersion:natives-x86"
         natives "org.mapsforge:vtm-android-gdx:$vtmVersion:natives-x86_64"
+        // TODO(android): Issue #3 - Potential native loading conflict.
+        //   Manual .so files exist in android/libs/ and android/vtm-android_natives/.
+        //   Either remove manual .so files OR remove gradle 'natives' declarations.
     }
 }
 

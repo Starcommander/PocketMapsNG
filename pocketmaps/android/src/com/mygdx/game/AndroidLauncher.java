@@ -27,8 +27,9 @@ public class AndroidLauncher extends AndroidApplication {
 
 	public static void initAssets() {
 		GdxAssets.init("assets/");
-org.oscim.android.canvas.AndroidGraphics.dpi = 320;
-org.oscim.android.canvas.AndroidGraphics.init();
+		int dpi = getResources().getDisplayMetrics().densityDpi;
+		org.oscim.android.canvas.AndroidGraphics.dpi = dpi;
+		org.oscim.android.canvas.AndroidGraphics.init();
 		DateTimeAdapter.init(new DateTime());
 		StaticClientImpl.setAvailable();
 	}
