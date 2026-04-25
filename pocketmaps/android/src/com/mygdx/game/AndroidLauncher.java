@@ -25,9 +25,9 @@ import java.util.function.Consumer;
 public class AndroidLauncher extends AndroidApplication {
 //public class AndroidLauncher extends Activity {
 
-	public static void initAssets() {
+	public static void initAssets(Context appContext) {
 		GdxAssets.init("assets/");
-		int dpi = getResources().getDisplayMetrics().densityDpi;
+		int dpi = appContext.getResources().getDisplayMetrics().densityDpi;
 		org.oscim.android.canvas.AndroidGraphics.dpi = dpi;
 		org.oscim.android.canvas.AndroidGraphics.init();
 		DateTimeAdapter.init(new DateTime());
@@ -37,7 +37,7 @@ public class AndroidLauncher extends AndroidApplication {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-System.loadLibrary("vtm-jni");
+		System.loadLibrary("vtm-jni");
 		MyGdxGame gdxGame = new MyGdxGame()
 		{
 			@Override
@@ -48,7 +48,7 @@ System.loadLibrary("vtm-jni");
 					GLAdapter.init(new AndroidGL());
 				}
 		};
-		initAssets();
+		initAssets(this);
 //		requestPermissions();
 		initialize(gdxGame);
 //        MapView mapView = new MapView(this);
