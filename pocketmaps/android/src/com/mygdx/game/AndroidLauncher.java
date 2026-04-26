@@ -28,7 +28,8 @@ public class AndroidLauncher extends AndroidApplication {
 	public static void initAssets(Context appContext) {
 		GdxAssets.init("assets/");
 		int rawDpi = appContext.getResources().getDisplayMetrics().densityDpi;
-		float dpiMultiplier = 1.0f; // Adjust if tiles don't match: try 1.0, 1.5, 2.0
+		// Scale high DPI values down to ~320 reference (matches desktop behavior)
+		float dpiMultiplier = (rawDpi > 400) ? 0.727f : 1.0f;  // 440 * 0.727 ≈ 320
 		int dpi = (int)(rawDpi * dpiMultiplier);
 		android.util.Log.d("PocketMaps", "DPI: raw=" + rawDpi + ", used=" + dpi + ", mult=" + dpiMultiplier);
 		org.oscim.android.canvas.AndroidGraphics.dpi = dpi;
@@ -37,7 +38,7 @@ public class AndroidLauncher extends AndroidApplication {
 		StaticClientImpl.setAvailable();
 	}
 
-	@Override
+@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		System.loadLibrary("vtm-jni");
@@ -45,11 +46,9 @@ public class AndroidLauncher extends AndroidApplication {
 		{
 			@Override
 			protected void initGLAdapter(GLVersion version) {
-				if (version.getMajorVersion() >= 3)
-					GLAdapter.init(new AndroidGL30());
-				else
-					GLAdapter.init(new AndroidGL());
-				}
+				// Force OpenGL ES 2.0 for compatibility
+				GLAdapter.init(new AndroidGL());
+			}
 		};
 		initAssets(this);
 //		requestPermissions();
