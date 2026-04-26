@@ -28,10 +28,14 @@ public class AndroidLauncher extends AndroidApplication {
 	public static void initAssets(Context appContext) {
 		GdxAssets.init("assets/");
 		int rawDpi = appContext.getResources().getDisplayMetrics().densityDpi;
-		// Scale high DPI values down to ~320 reference (matches desktop behavior)
-		float dpiMultiplier = (rawDpi > 400) ? 0.727f : 1.0f;  // 440 * 0.727 ≈ 320
-		int dpi = (int)(rawDpi * dpiMultiplier);
-		android.util.Log.d("PocketMaps", "DPI: raw=" + rawDpi + ", used=" + dpi + ", mult=" + dpiMultiplier);
+		// Log device info for debugging
+		int width = appContext.getResources().getDisplayMetrics().widthPixels;
+		int height = appContext.getResources().getDisplayMetrics().heightPixels;
+		float density = appContext.getResources().getDisplayMetrics().density;
+		android.util.Log.d("PocketMaps", "Device: " + width + "x" + height + " density=" + density + " rawDpi=" + rawDpi);
+		// Use raw DPI - let VTM handle scaling
+		int dpi = rawDpi;
+		android.util.Log.d("PocketMaps", "DPI: raw=" + rawDpi + ", used=" + dpi);
 		org.oscim.android.canvas.AndroidGraphics.dpi = dpi;
 		org.oscim.android.canvas.AndroidGraphics.init();
 		DateTimeAdapter.init(new DateTime());
@@ -46,8 +50,11 @@ public class AndroidLauncher extends AndroidApplication {
 		{
 			@Override
 			protected void initGLAdapter(GLVersion version) {
-				// Force OpenGL ES 2.0 for compatibility
-				GLAdapter.init(new AndroidGL());
+				// Try GL30 first, fallback to GL20 if issues persist
+				if (version.getMajorVersion() >= 3)
+					GLAdapter.init(new AndroidGL30());
+				else
+					GLAdapter.init(new AndroidGL());
 			}
 		};
 		initAssets(this);
