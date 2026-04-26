@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -39,8 +38,6 @@ public class HybridLauncher extends Activity {
     private static final String KEY_LAST_MAP = "lastMapPath";
     
     private MapView mapView;
-    private AssetManager assetManager;
-    private File externalFilesDir;
     private File filesDir;
     private List<String> availableMaps = new ArrayList<>();
 
@@ -48,8 +45,6 @@ public class HybridLauncher extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        assetManager = getAssets();
-        externalFilesDir = getExternalFilesDir(null);
         filesDir = getFilesDir();
         
         initLibGdxFilesystem();
@@ -73,8 +68,14 @@ public class HybridLauncher extends Activity {
     }
     
     private void initLibGdxFilesystem() {
-        DefaultAndroidFiles androidFiles = new DefaultAndroidFiles(getAssets(), this, true);
-        com.badlogic.gdx.Gdx.files = androidFiles;
+        try {
+            DefaultAndroidFiles androidFiles = new DefaultAndroidFiles(getAssets(), this, true);
+            com.badlogic.gdx.Gdx.files = androidFiles;
+        } catch (Exception e) {
+            android.util.Log.w("HybridLauncher", "Using fallback Gdx.files: " + e.getMessage());
+            DefaultAndroidFiles fallback = new DefaultAndroidFiles(getAssets(), this, false);
+            com.badlogic.gdx.Gdx.files = fallback;
+        }
     }
     
     private void initVtmAssets() {
@@ -94,7 +95,6 @@ public class HybridLauncher extends Activity {
         String[] searchPaths = {
             "/storage/emulated/0/Android/data/com.starcom.pocketmapsng/files/maps/",
             "/storage/emulated/0/Download/pocketmaps/maps/",
-            externalFilesDir != null ? externalFilesDir.getAbsolutePath() + "/maps/" : "",
             filesDir.getAbsolutePath() + "/maps/"
         };
         
@@ -138,7 +138,7 @@ public class HybridLauncher extends Activity {
     private void downloadDefaultMap() {
         String mapName = "europe_austria";
         String downloadUrl = "http://vsrv15044.customer.xenway.de/maps/maps/20240623/" + mapName + ".ghz";
-        String mapsDir = externalFilesDir != null ? externalFilesDir.getAbsolutePath() + "/maps/" : filesDir.getAbsolutePath() + "/maps/";
+        String mapsDir = filesDir.getAbsolutePath() + "/maps/";
         
         ProgressDialog progress = ProgressDialog.show(this, "Downloading", "Downloading " + mapName + "...", true);
         
