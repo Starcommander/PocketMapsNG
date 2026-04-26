@@ -27,15 +27,9 @@ public class AndroidLauncher extends AndroidApplication {
 
 	public static void initAssets(Context appContext) {
 		GdxAssets.init("assets/");
-		int rawDpi = appContext.getResources().getDisplayMetrics().densityDpi;
-		// Log device info for debugging
-		int width = appContext.getResources().getDisplayMetrics().widthPixels;
-		int height = appContext.getResources().getDisplayMetrics().heightPixels;
-		float density = appContext.getResources().getDisplayMetrics().density;
-		android.util.Log.d("PocketMaps", "Device: " + width + "x" + height + " density=" + density + " rawDpi=" + rawDpi);
-		// Use raw DPI - let VTM handle scaling
-		int dpi = rawDpi;
-		android.util.Log.d("PocketMaps", "DPI: raw=" + rawDpi + ", used=" + dpi);
+		// Use raw device DPI - VTM 0.12.0 handles scaling internally
+		int dpi = appContext.getResources().getDisplayMetrics().densityDpi;
+		android.util.Log.d("PocketMaps", "DPI: using=" + dpi);
 		org.oscim.android.canvas.AndroidGraphics.dpi = dpi;
 		org.oscim.android.canvas.AndroidGraphics.init();
 		DateTimeAdapter.init(new DateTime());
