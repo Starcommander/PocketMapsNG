@@ -70,8 +70,10 @@ public class HybridLauncher extends Activity {
     }
     
     private void initVtmAssets() {
+        android.util.Log.d("HybridLauncher", "Initializing GdxAssets...");
         GdxAssets.init("assets/");
         int dpi = getResources().getDisplayMetrics().densityDpi;
+        android.util.Log.d("HybridLauncher", "Setting DPI: " + dpi);
         AndroidGraphics.dpi = dpi;
         AndroidGraphics.init();
         DateTimeAdapter.init(new DateTime());
@@ -156,11 +158,18 @@ public class HybridLauncher extends Activity {
     
     private void loadMap(String mapPath) {
         try {
+            android.util.Log.d("HybridLauncher", "Setting up tile source...");
             MapFileTileSource source = new MapFileTileSource();
             source.setMapFile(mapPath);
+            android.util.Log.d("HybridLauncher", "Setting base map...");
             mapView.map().setBaseMap(source);
+            android.util.Log.d("HybridLauncher", "Setting theme...");
             mapView.map().setTheme(VtmThemes.DEFAULT);
-            android.util.Log.d("HybridLauncher", "Loaded map: " + mapPath);
+            
+            // Set initial position to Austria (Vienna area)
+            mapView.map().setMapPosition(48.2, 16.4, 1 << 10);
+            
+            android.util.Log.d("HybridLauncher", "Map setup complete - center: 48.2, 16.4");
         } catch (Exception e) {
             android.util.Log.e("HybridLauncher", "Error: " + e.getMessage());
             e.printStackTrace();
