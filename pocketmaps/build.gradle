@@ -42,12 +42,6 @@ allprojects {
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
         maven { url "https://jitpack.io" }
     }
-
-    configurations.all {
-        resolutionStrategy {
-            force 'org.apache.commons:commons-compress:1.22'
-        }
-    }
 }
 
 project(":desktop") {
