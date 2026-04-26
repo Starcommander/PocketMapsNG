@@ -50,11 +50,8 @@ public class AndroidLauncher extends AndroidApplication {
 		{
 			@Override
 			protected void initGLAdapter(GLVersion version) {
-				// Try GL30 first, fallback to GL20 if issues persist
-				if (version.getMajorVersion() >= 3)
-					GLAdapter.init(new AndroidGL30());
-				else
-					GLAdapter.init(new AndroidGL());
+				// Force OpenGL ES 2.0 only
+				GLAdapter.init(new AndroidGL());
 			}
 		};
 		initAssets(this);
