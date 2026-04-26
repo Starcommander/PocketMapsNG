@@ -1,9 +1,13 @@
 package com.mygdx.game;
 
 import android.app.Activity;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import com.badlogic.gdx.backends.android.DefaultAndroidFiles;
+
 import org.oscim.android.MapView;
 import org.oscim.backend.DateTimeAdapter;
 import org.oscim.backend.DateTime;
@@ -13,24 +17,31 @@ import org.oscim.theme.VtmThemes;
 import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import com.starcom.navigation.gps.StaticClientImpl;
 
-/**
- * Hybrid launcher using vtm-android MapView for map rendering.
- * Uses plain Activity - no Fragment dependencies needed.
- */
+import java.io.File;
+
 public class HybridLauncher extends Activity {
 
     private MapView mapView;
+    private AssetManager assetManager;
+    private File externalFilesDir;
+    private File filesDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        assetManager = getAssets();
+        externalFilesDir = getExternalFilesDir(null);
+        filesDir = getFilesDir();
+        
+        initLibGdxFilesystem();
+        initVtmAssets();
         
         FrameLayout layout = new FrameLayout(this);
         layout.setLayoutParams(new ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT));
         
-        // Create native Android MapView
         mapView = new MapView(this);
         layout.addView(mapView, new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -38,8 +49,12 @@ public class HybridLauncher extends Activity {
         
         setContentView(layout);
         
-        initVtmAssets();
         loadMapFromStorage();
+    }
+    
+    private void initLibGdxFilesystem() {
+        DefaultAndroidFiles androidFiles = new DefaultAndroidFiles(getAssets(), this, true);
+        com.badlogic.gdx.Gdx.files = androidFiles;
     }
     
     private void initVtmAssets() {
@@ -49,17 +64,17 @@ public class HybridLauncher extends Activity {
         AndroidGraphics.init();
         DateTimeAdapter.init(new DateTime());
         StaticClientImpl.setAvailable();
-        android.util.Log.d("HybridLauncher", "DPI: " + dpi);
     }
     
     private void loadMapFromStorage() {
         String[] searchPaths = {
             "/storage/emulated/0/Android/data/com.starcom.pocketmapsng/files/maps/",
-            getExternalFilesDir(null).getAbsolutePath() + "/maps/",
-            getFilesDir().getAbsolutePath() + "/maps/"
+            externalFilesDir != null ? externalFilesDir.getAbsolutePath() + "/maps/" : "",
+            filesDir.getAbsolutePath() + "/maps/"
         };
         
         for (String basePath : searchPaths) {
+            if (basePath == null || basePath.isEmpty()) continue;
             java.io.File mapsDir = new java.io.File(basePath);
             if (mapsDir.exists() && mapsDir.isDirectory()) {
                 java.io.File[] continents = mapsDir.listFiles();
