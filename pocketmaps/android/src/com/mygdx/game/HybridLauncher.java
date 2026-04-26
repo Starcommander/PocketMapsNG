@@ -71,10 +71,16 @@ public class HybridLauncher extends Activity {
         try {
             DefaultAndroidFiles androidFiles = new DefaultAndroidFiles(getAssets(), this, true);
             com.badlogic.gdx.Gdx.files = androidFiles;
-        } catch (Exception e) {
-            android.util.Log.w("HybridLauncher", "Using fallback Gdx.files: " + e.getMessage());
-            DefaultAndroidFiles fallback = new DefaultAndroidFiles(getAssets(), this, false);
-            com.badlogic.gdx.Gdx.files = fallback;
+            android.util.Log.d("HybridLauncher", "Gdx.files initialized with external storage");
+        } catch (Throwable e) {
+            android.util.Log.w("HybridLauncher", "External storage failed, using fallback: " + e.getMessage());
+            try {
+                DefaultAndroidFiles fallback = new DefaultAndroidFiles(getAssets(), this, false);
+                com.badlogic.gdx.Gdx.files = fallback;
+                android.util.Log.d("HybridLauncher", "Gdx.files initialized with internal storage fallback");
+            } catch (Throwable e2) {
+                android.util.Log.e("HybridLauncher", "Fallback also failed: " + e2.getMessage());
+            }
         }
     }
     
