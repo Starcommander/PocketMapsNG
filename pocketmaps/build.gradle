@@ -24,7 +24,7 @@ allprojects {
     ext {
         appName = "My GDX Game"
         gdxVersion = '1.12.0'
-        vtmVersion = '0.21.0'
+        vtmVersion = '0.20.0'
         ghVersion = '1.0'
         roboVMVersion = '2.3.19'
         box2DLightsVersion = '1.5'
