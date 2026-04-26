@@ -27,7 +27,10 @@ public class AndroidLauncher extends AndroidApplication {
 
 	public static void initAssets(Context appContext) {
 		GdxAssets.init("assets/");
-		int dpi = appContext.getResources().getDisplayMetrics().densityDpi;
+		int rawDpi = appContext.getResources().getDisplayMetrics().densityDpi;
+		float dpiMultiplier = 1.0f; // Adjust if tiles don't match: try 1.0, 1.5, 2.0
+		int dpi = (int)(rawDpi * dpiMultiplier);
+		android.util.Log.d("PocketMaps", "DPI: raw=" + rawDpi + ", used=" + dpi + ", mult=" + dpiMultiplier);
 		org.oscim.android.canvas.AndroidGraphics.dpi = dpi;
 		org.oscim.android.canvas.AndroidGraphics.init();
 		DateTimeAdapter.init(new DateTime());
