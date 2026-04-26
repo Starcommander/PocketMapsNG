@@ -1,0 +1,112 @@
+package com.mygdx.game;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import org.oscim.android.MapView;
+import org.oscim.backend.DateTimeAdapter;
+import org.oscim.backend.DateTime;
+import org.oscim.gdx.GdxAssets;
+import org.oscim.android.canvas.AndroidGraphics;
+import org.oscim.theme.VtmThemes;
+import org.oscim.tiling.source.mapfile.MapFileTileSource;
+import com.starcom.navigation.gps.StaticClientImpl;
+
+/**
+ * Hybrid launcher using vtm-android MapView for map rendering.
+ * Uses plain Activity - no Fragment dependencies needed.
+ */
+public class HybridLauncher extends Activity {
+
+    private MapView mapView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        FrameLayout layout = new FrameLayout(this);
+        layout.setLayoutParams(new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT));
+        
+        // Create native Android MapView
+        mapView = new MapView(this);
+        layout.addView(mapView, new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT));
+        
+        setContentView(layout);
+        
+        initVtmAssets();
+        loadMapFromStorage();
+    }
+    
+    private void initVtmAssets() {
+        GdxAssets.init("assets/");
+        int dpi = getResources().getDisplayMetrics().densityDpi;
+        AndroidGraphics.dpi = dpi;
+        AndroidGraphics.init();
+        DateTimeAdapter.init(new DateTime());
+        StaticClientImpl.setAvailable();
+        android.util.Log.d("HybridLauncher", "DPI: " + dpi);
+    }
+    
+    private void loadMapFromStorage() {
+        String[] searchPaths = {
+            "/storage/emulated/0/Android/data/com.starcom.pocketmapsng/files/maps/",
+            getExternalFilesDir(null).getAbsolutePath() + "/maps/",
+            getFilesDir().getAbsolutePath() + "/maps/"
+        };
+        
+        for (String basePath : searchPaths) {
+            java.io.File mapsDir = new java.io.File(basePath);
+            if (mapsDir.exists() && mapsDir.isDirectory()) {
+                java.io.File[] continents = mapsDir.listFiles();
+                if (continents != null) {
+                    for (java.io.File continent : continents) {
+                        if (continent.isDirectory()) {
+                            String mapFile = continent.getAbsolutePath() + "/" + continent.getName() + ".map";
+                            java.io.File f = new java.io.File(mapFile);
+                            if (f.exists()) {
+                                loadMap(mapFile);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        android.util.Log.w("HybridLauncher", "No map found");
+    }
+    
+    private void loadMap(String mapPath) {
+        try {
+            MapFileTileSource source = new MapFileTileSource();
+            source.setMapFile(mapPath);
+            mapView.map().setBaseMap(source);
+            mapView.map().setTheme(VtmThemes.DEFAULT);
+            android.util.Log.d("HybridLauncher", "Loaded map: " + mapPath);
+        } catch (Exception e) {
+            android.util.Log.e("HybridLauncher", "Error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mapView != null) mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mapView != null) mapView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mapView != null) mapView.onDestroy();
+    }
+}
