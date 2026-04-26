@@ -36,31 +36,8 @@ public class AndroidLauncher extends AndroidApplication {
 		StaticClientImpl.setAvailable();
 	}
 
-@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		System.loadLibrary("vtm-jni");
-		MyGdxGame gdxGame = new MyGdxGame()
-		{
-			@Override
-			protected void initGLAdapter(GLVersion version) {
-				// Force OpenGL ES 2.0 only
-				GLAdapter.init(new AndroidGL());
-			}
-		};
-		initAssets(this);
-//		requestPermissions();
-		initialize(gdxGame);
-//        MapView mapView = new MapView(this);
-//        setContentView(mapView);
-
-//		initialize(gdxGame, androidConfig);
-
-		// Map view
-//		mapView = new MapView(this);
-//		setContentView(mapView);
-//		new MyGdxGame();
-	}
+/* Hybrid approach candidate - WIP */
+/* Keeping current vtm-gdx setup working, with vtm-android available for testing */
 
 /*
 	private void requestPermissions()
