@@ -11,7 +11,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-import com.badlogic.gdx.backends.android.DefaultAndroidFiles;
+import com.badlogic.gdx.Files;
+import com.badlogic.gdx.files.FileHandle;
 
 import org.oscim.android.MapView;
 import org.oscim.backend.DateTimeAdapter;
@@ -69,17 +70,129 @@ public class HybridLauncher extends Activity {
     
     private void initLibGdxFilesystem() {
         try {
-            DefaultAndroidFiles androidFiles = new DefaultAndroidFiles(getAssets(), this, true);
-            com.badlogic.gdx.Gdx.files = androidFiles;
-            android.util.Log.d("HybridLauncher", "Gdx.files initialized with external storage");
-        } catch (Throwable e) {
-            android.util.Log.w("HybridLauncher", "External storage failed, using fallback: " + e.getMessage());
+            File localDir = filesDir;
+            Files files = new Files() {
+                private String externalPath = localDir.getAbsolutePath();
+                
+                @Override
+                public FileHandle getFileHandle(String path, FileType type) {
+                    switch (type) {
+                        case Internal:
+                            return new AndroidFileHandle(getAssets(), "assets/" + path, localDir);
+                        case External:
+                            return new AndroidFileHandle(new File(externalPath, path), localDir);
+                        case Local:
+                            return new AndroidFileHandle(new File(localDir, path), localDir);
+                        case Absolute:
+                            return new AndroidFileHandle(new File(path), localDir);
+                        default:
+                            return new AndroidFileHandle(new File(path), localDir);
+                    }
+                }
+
+                @Override
+                public FileHandle external(String path) {
+                    return new AndroidFileHandle(new File(externalPath, path), localDir);
+                }
+
+                @Override
+                public FileHandle internal(String path) {
+                    return new AndroidFileHandle(getAssets(), "assets/" + path, localDir);
+                }
+
+                @Override
+                public FileHandle classpath(String path) {
+                    return new AndroidFileHandle(new File(path), localDir);
+                }
+
+                @Override
+                public FileHandle absolute(String path) {
+                    return new AndroidFileHandle(new File(path), localDir);
+                }
+
+                @Override
+                public FileHandle local(String path) {
+                    return new AndroidFileHandle(new File(localDir, path), localDir);
+                }
+
+                @Override
+                public String getExternalStoragePath() {
+                    return externalPath;
+                }
+
+                @Override
+                public String getLocalStoragePath() {
+                    return localDir.getAbsolutePath();
+                }
+
+                @Override
+                public boolean isExternalStorageAvailable() {
+                    return false;
+                }
+
+                @Override
+                public boolean isLocalStorageAvailable() {
+                    return true;
+                }
+            };
+            com.badlogic.gdx.Gdx.files = files;
+            android.util.Log.d("HybridLauncher", "Custom Gdx.files initialized");
+        } catch (Exception e) {
+            android.util.Log.e("HybridLauncher", "Failed to init Gdx.files: " + e.getMessage());
+        }
+    }
+    
+    private static class AndroidFileHandle extends FileHandle {
+        private final File file;
+        private final boolean isAsset;
+        private final android.content.res.AssetManager assets;
+        private final File localDir;
+        
+        public AndroidFileHandle(File file, File localDir) {
+            this.file = file;
+            this.isAsset = false;
+            this.assets = null;
+            this.localDir = localDir;
+        }
+        
+        public AndroidFileHandle(android.content.res.AssetManager assets, String path, File localDir) {
+            this.file = new File(path);
+            this.isAsset = true;
+            this.assets = assets;
+            this.localDir = localDir;
+        }
+        
+        @Override
+        public File file() {
+            return isAsset ? new File(localDir, path()) : file;
+        }
+        
+        @Override
+        public String path() {
+            return isAsset ? file.getPath() : file.getAbsolutePath();
+        }
+        
+        @Override
+        public boolean exists() {
+            if (isAsset) {
+                try {
+                    return assets.open(file.getPath()) != null;
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+            return file.exists();
+        }
+        
+        @Override
+        public InputStream read() {
             try {
-                DefaultAndroidFiles fallback = new DefaultAndroidFiles(getAssets(), this, false);
-                com.badlogic.gdx.Gdx.files = fallback;
-                android.util.Log.d("HybridLauncher", "Gdx.files initialized with internal storage fallback");
-            } catch (Throwable e2) {
-                android.util.Log.e("HybridLauncher", "Fallback also failed: " + e2.getMessage());
+                if (isAsset) {
+                    return assets.open(file.getPath());
+                }
+                return new java.io.FileInputStream(file);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -172,7 +285,6 @@ public class HybridLauncher extends Activity {
                     fos.write(buffer, 0, len);
                     total += len;
                     final long prog = total;
-                    final long totalSize = size;
                     new Handler(Looper.getMainLooper()).post(() -> {
                         if (progress != null) {
                             progress.setMessage("Downloading " + mapName + "... " + (int)(prog * 100 / size) + "%");
@@ -272,7 +384,6 @@ public class HybridLauncher extends Activity {
             android.util.Log.d("HybridLauncher", "Setting theme...");
             mapView.map().setTheme(VtmThemes.DEFAULT);
             
-            // Set initial position to Austria (Vienna area)
             mapView.map().setMapPosition(48.2, 16.4, 1 << 10);
             
             android.util.Log.d("HybridLauncher", "Map setup complete - center: 48.2, 16.4");
