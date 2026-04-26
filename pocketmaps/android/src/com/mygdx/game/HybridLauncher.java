@@ -1,10 +1,14 @@
 package com.mygdx.game;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.badlogic.gdx.backends.android.DefaultAndroidFiles;
 
@@ -18,13 +22,19 @@ import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import com.starcom.navigation.gps.StaticClientImpl;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HybridLauncher extends Activity {
 
+    private static final String PREFS_NAME = "PocketMapsPrefs";
+    private static final String KEY_LAST_MAP = "lastMapPath";
+    
     private MapView mapView;
     private AssetManager assetManager;
     private File externalFilesDir;
     private File filesDir;
+    private List<String> availableMaps = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +53,15 @@ public class HybridLauncher extends Activity {
             ViewGroup.LayoutParams.MATCH_PARENT));
         
         mapView = new MapView(this);
+        mapView.setClickable(true);
         layout.addView(mapView, new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT));
         
         setContentView(layout);
         
-        loadMapFromStorage();
+        findAvailableMaps();
+        loadSavedMapOrPrompt();
     }
     
     private void initLibGdxFilesystem() {
@@ -64,35 +76,82 @@ public class HybridLauncher extends Activity {
         AndroidGraphics.init();
         DateTimeAdapter.init(new DateTime());
         StaticClientImpl.setAvailable();
+        android.util.Log.d("HybridLauncher", "VTM initialized, DPI: " + dpi);
     }
     
-    private void loadMapFromStorage() {
+    private void findAvailableMaps() {
+        availableMaps.clear();
         String[] searchPaths = {
             "/storage/emulated/0/Android/data/com.starcom.pocketmapsng/files/maps/",
+            "/storage/emulated/0/Download/pocketmaps/maps/",
             externalFilesDir != null ? externalFilesDir.getAbsolutePath() + "/maps/" : "",
             filesDir.getAbsolutePath() + "/maps/"
         };
         
         for (String basePath : searchPaths) {
             if (basePath == null || basePath.isEmpty()) continue;
-            java.io.File mapsDir = new java.io.File(basePath);
+            android.util.Log.d("HybridLauncher", "Scanning: " + basePath);
+            File mapsDir = new File(basePath);
             if (mapsDir.exists() && mapsDir.isDirectory()) {
-                java.io.File[] continents = mapsDir.listFiles();
+                File[] continents = mapsDir.listFiles();
                 if (continents != null) {
-                    for (java.io.File continent : continents) {
+                    for (File continent : continents) {
                         if (continent.isDirectory()) {
                             String mapFile = continent.getAbsolutePath() + "/" + continent.getName() + ".map";
-                            java.io.File f = new java.io.File(mapFile);
+                            File f = new File(mapFile);
                             if (f.exists()) {
-                                loadMap(mapFile);
-                                return;
+                                availableMaps.add(mapFile);
+                                android.util.Log.d("HybridLauncher", "Found map: " + mapFile);
                             }
                         }
                     }
                 }
             }
         }
-        android.util.Log.w("HybridLauncher", "No map found");
+    }
+    
+    private void loadSavedMapOrPrompt() {
+        String savedMap = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(KEY_LAST_MAP, null);
+        
+        if (savedMap != null && new File(savedMap).exists()) {
+            android.util.Log.d("HybridLauncher", "Loading saved map: " + savedMap);
+            loadMap(savedMap);
+        } else if (!availableMaps.isEmpty()) {
+            showMapSelectionDialog();
+        } else {
+            android.util.Log.w("HybridLauncher", "No maps found");
+            Toast.makeText(this, "No maps found! Please download a map.", Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    private void showMapSelectionDialog() {
+        if (availableMaps.isEmpty()) {
+            Toast.makeText(this, "No maps available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String[] mapNames = new String[availableMaps.size()];
+        for (int i = 0; i < availableMaps.size(); i++) {
+            File f = new File(availableMaps.get(i));
+            mapNames[i] = f.getParentFile().getName() + " (" + f.getName() + ")";
+        }
+        
+        new AlertDialog.Builder(this)
+            .setTitle("Select Map")
+            .setItems(mapNames, (dialog, which) -> {
+                String selectedMap = availableMaps.get(which);
+                saveSelectedMap(selectedMap);
+                loadMap(selectedMap);
+            })
+            .setCancelable(false)
+            .show();
+    }
+    
+    private void saveSelectedMap(String mapPath) {
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            .edit()
+            .putString(KEY_LAST_MAP, mapPath)
+            .apply();
     }
     
     private void loadMap(String mapPath) {
@@ -104,6 +163,8 @@ public class HybridLauncher extends Activity {
             android.util.Log.d("HybridLauncher", "Loaded map: " + mapPath);
         } catch (Exception e) {
             android.util.Log.e("HybridLauncher", "Error: " + e.getMessage());
+            e.printStackTrace();
+            Toast.makeText(this, "Error loading map: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
