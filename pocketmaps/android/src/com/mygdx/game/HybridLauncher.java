@@ -1,14 +1,21 @@
 package com.mygdx.game;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.badlogic.gdx.Files;
@@ -17,6 +24,8 @@ import com.badlogic.gdx.files.FileHandle;
 import org.oscim.android.MapView;
 import org.oscim.backend.DateTimeAdapter;
 import org.oscim.backend.DateTime;
+import org.oscim.core.GeoPoint;
+import org.oscim.core.MapPosition;
 import org.oscim.gdx.GdxAssets;
 import org.oscim.android.canvas.AndroidGraphics;
 import org.oscim.theme.VtmThemes;
@@ -24,14 +33,9 @@ import org.oscim.tiling.source.mapfile.MapFileTileSource;
 import com.starcom.navigation.gps.StaticClientImpl;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class HybridLauncher extends Activity {
 
@@ -59,8 +63,10 @@ public class HybridLauncher extends Activity {
         mapView = new MapView(this);
         mapView.setClickable(true);
         layout.addView(mapView, new FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT));
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT));
+        
+        addMapControls(layout);
         
         setContentView(layout);
         
@@ -252,100 +258,8 @@ public class HybridLauncher extends Activity {
             showMapSelectionDialog();
         } else {
             android.util.Log.w("HybridLauncher", "No maps found");
-            Toast.makeText(this, "No maps found! Downloading europe_austria...", Toast.LENGTH_SHORT).show();
-            downloadDefaultMap();
+            Toast.makeText(this, "No maps found! Please download a map via adb.", Toast.LENGTH_LONG).show();
         }
-    }
-    
-    private void downloadDefaultMap() {
-        String mapName = "europe_austria";
-        String downloadUrl = "http://vsrv15044.customer.xenway.de/maps/maps/20240623/" + mapName + ".ghz";
-        // TODO: Cleanup fallback path after better map management is implemented
-        String mapsDir = "/sdcard/Download/pocketmaps/maps/";
-        
-        ProgressDialog progress = ProgressDialog.show(this, "Downloading", "Downloading " + mapName + "...", true);
-        
-        new Thread(() -> {
-            try {
-                android.util.Log.d("HybridLauncher", "Downloading from: " + downloadUrl);
-                
-                URL url = new URL(downloadUrl);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.connect();
-                
-                File mapDir = new File(mapsDir + mapName);
-                mapDir.mkdirs();
-                
-                File zipFile = new File(mapDir, mapName + ".ghz");
-                FileOutputStream fos = new FileOutputStream(zipFile);
-                InputStream is = conn.getInputStream();
-                
-                byte[] buffer = new byte[4096];
-                int len;
-                long total = 0;
-                long size = conn.getContentLength();
-                
-                while ((len = is.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                    total += len;
-                    final long prog = total;
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        if (progress != null) {
-                            progress.setMessage("Downloading " + mapName + "... " + (int)(prog * 100 / size) + "%");
-                        }
-                    });
-                }
-                
-                fos.close();
-                is.close();
-                conn.disconnect();
-                
-                android.util.Log.d("HybridLauncher", "Download complete, unzipping...");
-                
-                unzipMap(zipFile, mapDir);
-                zipFile.delete();
-                
-                final String mapPath = mapDir.getAbsolutePath() + "/" + mapName + ".map";
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    if (progress != null) progress.dismiss();
-                    saveSelectedMap(mapPath);
-                    loadMap(mapPath);
-                    Toast.makeText(HybridLauncher.this, "Map downloaded successfully!", Toast.LENGTH_SHORT).show();
-                });
-                
-            } catch (Exception e) {
-                android.util.Log.e("HybridLauncher", "Download failed: " + e.getMessage());
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    if (progress != null) progress.dismiss();
-                    Toast.makeText(HybridLauncher.this, "Download failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
-            }
-        }).start();
-    }
-    
-    private void unzipMap(File zipFile, File destDir) throws Exception {
-        destDir.mkdirs();
-        ZipInputStream zis = new ZipInputStream(new java.io.FileInputStream(zipFile));
-        byte[] buffer = new byte[4096];
-        ZipEntry entry;
-        
-        while ((entry = zis.getNextEntry()) != null) {
-            File newFile = new File(destDir, entry.getName());
-            
-            if (entry.isDirectory()) {
-                newFile.mkdirs();
-            } else {
-                newFile.getParentFile().mkdirs();
-                FileOutputStream fos = new FileOutputStream(newFile);
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                }
-                fos.close();
-            }
-            zis.closeEntry();
-        }
-        zis.close();
     }
     
     private void showMapSelectionDialog() {
@@ -410,6 +324,98 @@ public class HybridLauncher extends Activity {
         if (mapView != null) mapView.onPause();
     }
 
+    private void addMapControls(FrameLayout parent) {
+        int btnSize = (int)(56 * getResources().getDisplayMetrics().density);
+        int margin = (int)(16 * getResources().getDisplayMetrics().density);
+        
+        ImageButton zoomIn = createZoomButton(true);
+        ImageButton zoomOut = createZoomButton(false);
+        ImageButton myLocation = createLocationButton();
+        
+        LinearLayout zoomLayout = new LinearLayout(this);
+        zoomLayout.setOrientation(LinearLayout.VERTICAL);
+        zoomLayout.setLayoutParams(new FrameLayout.LayoutParams(btnSize, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL));
+        zoomLayout.setPadding(margin, margin, margin, margin);
+        
+        FrameLayout.LayoutParams zoomInParams = new FrameLayout.LayoutParams(btnSize, btnSize);
+        zoomInParams.setMargins(0, 0, 0, margin / 2);
+        zoomLayout.addView(zoomIn, zoomInParams);
+        
+        FrameLayout.LayoutParams zoomOutParams = new FrameLayout.LayoutParams(btnSize, btnSize);
+        zoomOutParams.setMargins(0, margin / 2, 0, 0);
+        zoomLayout.addView(zoomOut, zoomOutParams);
+        
+        FrameLayout.LayoutParams locParams = new FrameLayout.LayoutParams(btnSize, btnSize);
+        locParams.gravity = Gravity.RIGHT | Gravity.BOTTOM;
+        locParams.setMargins(margin, margin, margin, margin + btnSize * 2 + margin);
+        
+        parent.addView(zoomLayout);
+        parent.addView(myLocation, locParams);
+    }
+    
+    private ImageButton createZoomButton(boolean zoomIn) {
+        ImageButton btn = new ImageButton(this);
+        btn.setBackgroundResource(android.R.drawable.btn_default);
+        btn.setImageResource(zoomIn ? android.R.drawable.ic_menu_add : android.R.drawable.ic_menu_close_clear_cancel);
+        btn.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+        btn.setOnClickListener(v -> {
+            if (mapView != null) {
+                MapPosition pos = mapView.map().getMapPosition();
+                double currentScale = pos.getScale();
+                double newScale = zoomIn ? currentScale * 2 : currentScale / 2;
+                pos.setScale(newScale);
+                mapView.map().setMapPosition(pos);
+            }
+        });
+        return btn;
+    }
+    
+    private ImageButton createLocationButton() {
+        ImageButton btn = new ImageButton(this);
+        btn.setBackgroundResource(android.R.drawable.btn_default);
+        btn.setImageResource(android.R.drawable.ic_menu_mylocation);
+        btn.setScaleType(android.widget.ImageView.ScaleType.CENTER);
+        btn.setOnClickListener(v -> requestLocation());
+        return btn;
+    }
+    
+    private void requestLocation() {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Location permission required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        try {
+            Location bestLocation = null;
+            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                bestLocation = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            }
+            if (bestLocation == null && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                bestLocation = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            }
+            
+            if (bestLocation != null) {
+                MapPosition pos = mapView.map().getMapPosition();
+                mapView.map().setMapPosition(bestLocation.getLatitude(), bestLocation.getLongitude(), pos.getScale());
+            } else {
+                lm.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, new LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        MapPosition pos = mapView.map().getMapPosition();
+                        mapView.map().setMapPosition(location.getLatitude(), location.getLongitude(), pos.getScale());
+                        lm.removeUpdates(this);
+                    }
+                    @Override public void onStatusChanged(String p, int s, Bundle b) {}
+                    @Override public void onProviderEnabled(String p) {}
+                    @Override public void onProviderDisabled(String p) {}
+                }, null);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Location error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
