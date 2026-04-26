@@ -211,10 +211,13 @@ public class HybridLauncher extends Activity {
     
     private void findAvailableMaps() {
         availableMaps.clear();
+        // TODO: Cleanup fallback path after better map management is implemented
+        // Fallback to /sdcard/Download if internal storage maps not found
         String[] searchPaths = {
+            filesDir.getAbsolutePath() + "/maps/",
             "/storage/emulated/0/Android/data/com.starcom.pocketmapsng/files/maps/",
-            "/storage/emulated/0/Download/pocketmaps/maps/",
-            filesDir.getAbsolutePath() + "/maps/"
+            "/sdcard/Download/pocketmaps/maps/",
+            "/storage/emulated/0/Download/pocketmaps/maps/"
         };
         
         for (String basePath : searchPaths) {
@@ -257,7 +260,8 @@ public class HybridLauncher extends Activity {
     private void downloadDefaultMap() {
         String mapName = "europe_austria";
         String downloadUrl = "http://vsrv15044.customer.xenway.de/maps/maps/20240623/" + mapName + ".ghz";
-        String mapsDir = filesDir.getAbsolutePath() + "/maps/";
+        // TODO: Cleanup fallback path after better map management is implemented
+        String mapsDir = "/sdcard/Download/pocketmaps/maps/";
         
         ProgressDialog progress = ProgressDialog.show(this, "Downloading", "Downloading " + mapName + "...", true);
         
