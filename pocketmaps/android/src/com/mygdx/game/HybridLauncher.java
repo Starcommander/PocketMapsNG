@@ -217,8 +217,9 @@ public class HybridLauncher extends Activity {
     
     private void findAvailableMaps() {
         availableMaps.clear();
-        // TODO: Cleanup fallback path after better map management is implemented
-        // Fallback to /sdcard/Download if internal storage maps not found
+        android.util.Log.d("HybridLauncher", "=== findAvailableMaps start ===");
+        android.util.Log.d("HybridLauncher", "filesDir: " + filesDir.getAbsolutePath());
+        
         String[] searchPaths = {
             filesDir.getAbsolutePath() + "/maps/",
             "/storage/emulated/0/Android/data/com.starcom.pocketmapsng/files/maps/",
@@ -228,24 +229,34 @@ public class HybridLauncher extends Activity {
         
         for (String basePath : searchPaths) {
             if (basePath == null || basePath.isEmpty()) continue;
-            android.util.Log.d("HybridLauncher", "Scanning: " + basePath);
+            android.util.Log.d("HybridLauncher", "Scanning path: " + basePath);
             File mapsDir = new File(basePath);
+            String dirExists = mapsDir.exists() ? "exists" : "NOT exists";
+            String isDir = mapsDir.isDirectory() ? "is dir" : "NOT dir";
+            android.util.Log.d("HybridLauncher", basePath + " -> " + dirExists + ", " + isDir);
+            
             if (mapsDir.exists() && mapsDir.isDirectory()) {
                 File[] continents = mapsDir.listFiles();
                 if (continents != null) {
+                    android.util.Log.d("HybridLauncher", "Found " + continents.length + " items in " + basePath);
                     for (File continent : continents) {
                         if (continent.isDirectory()) {
                             String mapFile = continent.getAbsolutePath() + "/" + continent.getName() + ".map";
                             File f = new File(mapFile);
                             if (f.exists()) {
                                 availableMaps.add(mapFile);
-                                android.util.Log.d("HybridLauncher", "Found map: " + mapFile);
+                                android.util.Log.d("HybridLauncher", "FOUND MAP: " + mapFile);
+                            } else {
+                                android.util.Log.d("HybridLauncher", "No .map file in: " + continent.getAbsolutePath());
                             }
                         }
                     }
                 }
             }
         }
+        
+        android.util.Log.d("HybridLauncher", "Total maps found: " + availableMaps.size());
+        android.util.Log.d("HybridLauncher", "=== findAvailableMaps end ===");
     }
     
     private void loadSavedMapOrPrompt() {
@@ -293,8 +304,11 @@ public class HybridLauncher extends Activity {
     }
     
     private void loadMap(String mapPath) {
+        android.util.Log.d("HybridLauncher", "=== loadMap start ===");
+        android.util.Log.d("HybridLauncher", "Map path: " + mapPath);
+        android.util.Log.d("HybridLauncher", "File exists: " + new File(mapPath).exists());
         try {
-            android.util.Log.d("HybridLauncher", "Setting up tile source...");
+            android.util.Log.d("HybridLauncher", "Creating MapFileTileSource...");
             MapFileTileSource source = new MapFileTileSource();
             source.setMapFile(mapPath);
             android.util.Log.d("HybridLauncher", "Setting base map...");
@@ -305,6 +319,7 @@ public class HybridLauncher extends Activity {
             mapView.map().setMapPosition(48.2, 16.4, 1 << 10);
             
             android.util.Log.d("HybridLauncher", "Map setup complete - center: 48.2, 16.4");
+            android.util.Log.d("HybridLauncher", "=== loadMap end ===");
         } catch (Exception e) {
             android.util.Log.e("HybridLauncher", "Error: " + e.getMessage());
             e.printStackTrace();
