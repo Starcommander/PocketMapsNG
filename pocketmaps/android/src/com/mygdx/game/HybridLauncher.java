@@ -52,7 +52,8 @@ public class HybridLauncher extends Activity {
         
         filesDir = getFilesDir();
         
-        initLibGdxFilesystem();
+        android.util.Log.d("HybridLauncher", "=== onCreate start ===");
+        
         initVtmAssets();
         
         FrameLayout layout = new FrameLayout(this);
@@ -61,6 +62,8 @@ public class HybridLauncher extends Activity {
             ViewGroup.LayoutParams.MATCH_PARENT));
         
         mapView = new MapView(this);
+        android.util.Log.d("HybridLauncher", "MapView created");
+        
         mapView.setClickable(true);
         layout.addView(mapView, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
@@ -69,9 +72,11 @@ public class HybridLauncher extends Activity {
         addMapControls(layout);
         
         setContentView(layout);
+        android.util.Log.d("HybridLauncher", "ContentView set");
         
         findAvailableMaps();
         loadSavedMapOrPrompt();
+        android.util.Log.d("HybridLauncher", "=== onCreate end ===");
     }
     
     private void initLibGdxFilesystem() {
@@ -204,15 +209,28 @@ public class HybridLauncher extends Activity {
     }
     
     private void initVtmAssets() {
-        android.util.Log.d("HybridLauncher", "Initializing GdxAssets...");
-        GdxAssets.init("assets/");
+        android.util.Log.d("HybridLauncher", "=== initVtmAssets start ===");
+        
+        File internalDir = getFilesDir();
+        File assetDir = new File(internalDir, "assets");
+        
+        android.util.Log.d("HybridLauncher", "assetDir exists: " + assetDir.exists() + " path: " + assetDir.getAbsolutePath());
+        
+        try {
+            GdxAssets.init("");
+            android.util.Log.d("HybridLauncher", "GdxAssets.init done");
+        } catch (Exception e) {
+            android.util.Log.e("HybridLauncher", "GdxAssets init error: " + e.getMessage());
+        }
+        
         int dpi = getResources().getDisplayMetrics().densityDpi;
-        android.util.Log.d("HybridLauncher", "Setting DPI: " + dpi);
+        android.util.Log.d("HybridLauncher", "DPI: " + dpi);
         AndroidGraphics.dpi = dpi;
         AndroidGraphics.init();
         DateTimeAdapter.init(new DateTime());
         StaticClientImpl.setAvailable();
-        android.util.Log.d("HybridLauncher", "VTM initialized, DPI: " + dpi);
+        android.util.Log.d("HybridLauncher", "VTM init complete, DPI: " + dpi);
+        android.util.Log.d("HybridLauncher", "=== initVtmAssets end ===");
     }
     
     private void findAvailableMaps() {
